@@ -3,7 +3,7 @@ A pipeline ..... for managing your pipelines
 
 The purpose of this project is to automagically manage CodePipeline templates within an organization across multiple accounts.
 
-#Setting up the Master cross-account pipeline
+# Setting up the Master cross-account pipeline
 You will need 3 AWS accounts:
    - cicd
    - dev
