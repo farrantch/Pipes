@@ -11,7 +11,7 @@ You will need 3 AWS accounts:
 Within the cicd account, run the Master.template through CloudFormation.
    - Name the stack 'master' or something similar (lowercase).
    - Input Id's for each account
-   - Set AllEnvironmentsCreated = True
+   - Set AllEnvironmentsCreated = False
    - Leave SourceCodeCommitRepo empty
    
 Copy down the KmsCmkArn and S3BucketName from the CloudFormation outputs section.
@@ -21,3 +21,8 @@ With the cicd, dev, and prod accounts, run Master-Environment.template through C
    - Set environment (lowercase)
    - Set AccountId of cicd account
    - Pass in name of master stack (lowercase).
+
+After SDLC stacks have been created, update the Master stack.
+   - Set AllEnvironmentsCreated = True
+   
+Edit your pipelines file. Enjoy!
