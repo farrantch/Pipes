@@ -33,7 +33,7 @@ Copy this repo into the empty CodeCommit repo created by the master stack.
 ## Child Pipelines
 Edit your Pipelines.json file as needed. Enjoy!
 
-## TO-DO
+## To-Do
    - Environments.template to define environments instead of defaults
    - Ability to pull pipeline source repos from github
    - Add optional deploy to ECS step
