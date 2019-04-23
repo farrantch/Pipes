@@ -11,7 +11,7 @@ By default, this uses 3 AWS environments (ideally seperated accounts):
 
 Within the cicd account, run Master.template through CloudFormation.
    - Name the stack "master" or something similar (lowercase)
-   - Input Id's for each account
+   - Input Id's for each environment's account
    - Set AllEnvironmentsCreated = False
    - Leave SourceCodeCommitRepo empty
    
