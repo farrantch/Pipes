@@ -4,7 +4,7 @@ A pipeline ..... for managing your pipelines.
 The purpose of this project is to manage many CodePipeline's within an organization across multiple accounts. Each pipeline belongs to a Scope that logically separates the permissions of each pipeline. 
 
 ## Set up the master pipeline
-You will need 3 AWS accounts:
+By default, this uses 3 AWS environments (ideally seperated accounts):
    - cicd
    - dev
    - prod
