@@ -28,8 +28,7 @@ After SDLC stacks have been created, update the master stack within the cicd acc
    - Set AllEnvironmentsCreated = True
    
 Copy this repo into the empty CodeCommit repo created by the master stack.
-
-Update the cfvars/Master.template file with your account ids.
+   - Update the cfvars/Master.template file with your account ids.
 
 ## Child Pipelines
 Edit your Pipelines.json file as needed. Enjoy!
