@@ -20,7 +20,7 @@ With the cicd, dev, and prod accounts, run Master-Environment.template through C
    - Pass in the KmsCmkArn and S3BucketName as parameters
    - Set environment (lowercase)
    - Set AccountId of cicd account
-   - Pass in name of master stack (lowercase).
+   - Pass in name of master stack (lowercase)
 
 After SDLC stacks have been created, update the Master stack.
    - Set AllEnvironmentsCreated = True
