@@ -1,0 +1,11 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo Entered the install phase...
+      - pip install boto3
+  build:
+    commands:
+      - echo Entered the build phase...
+      - python buildspec/update-stacks.py

@@ -1,0 +1,38 @@
+{
+    "Statements": [
+        {
+            "Sid": "IamCreateRole",
+            "Effect": "Allow",
+            "Action": [
+                "iam:CreateRole",
+                "iam:AttachRolePolicy",
+                "iam:DetachRolePolicy"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${Environment}-${Scope}-*"
+                }
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "iam:PermissionsBoundary": {
+                        "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:policy/${Environment}-${MasterPipeline}-infra-${Scope}-IamPolicyBaseline"
+                    }
+                }
+            }
+        },
+        {
+            "Sid": "IamUpdateRole",
+            "Effect": "Allow",
+            "Action": [
+                "iam:GetRole",
+                "iam:DeleteRole"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${Environment}-${Scope}-*"
+                }
+            ]
+        }
+    ]
+}

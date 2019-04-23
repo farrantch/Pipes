@@ -1,0 +1,74 @@
+{
+    "Network": {
+        "PolicyStatements": [
+            "Baseline"
+        ],
+        "Pipelines": [
+            {
+                "Name": "Vpc",
+                "PipelineTemplate": "Default"
+            }
+        ]
+    },
+    "Catalog": {
+        "PolicyStatements": [
+            "Baseline",
+            "IamCreateRole"
+        ],
+        "Pipelines": [
+            {
+                "Name": "Db",
+                "PipelineTemplate": "Default",
+                "ParameterOverrides": {
+                    "IncludeEnvCfTemplateConfigs": "True",
+                    "CfContainsLambda": "True"
+                }
+            }
+        ]
+    },
+    "Frontend": {
+        "PolicyStatements": [
+            "Baseline",
+            "Frontend",
+            "IamCreateRole"
+        ],
+        "Pipelines": [
+            {
+                "Name": "Infra",
+                "PipelineTemplate": "Default",
+                "ParameterOverrides": {
+                    "IncludeEnvCfTemplateConfigs": "True"
+                }
+            }
+        ]
+    },
+    "Domain": {
+        "PolicyStatements": [
+            "Baseline",
+            "IamCreateRole"
+        ],
+        "Pipelines": [
+            {
+                "Name": "Api",
+                "PipelineTemplate": "Default"
+            }
+        ]
+    },
+    "Ui": {
+        "PolicyStatements": [
+            "Baseline",
+            "IamCreateRole"
+        ],
+        "Pipelines": [
+            {
+                "Name": "React",
+                "PipelineTemplate": "Default",
+                "ParameterOverrides": {
+                    "IncludeEnvCfTemplateConfigs": "False",
+                    "SdlcCloudFormation": "False",
+                    "SdlcCodeBuildPre": "True"
+                }
+            }
+        ]
+    }
+}

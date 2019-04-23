@@ -1,0 +1,104 @@
+{
+    "Statements": [
+        {
+            "Sid": "AllActionsWildcard",
+            "Effect": "Allow",
+            "Action": [
+                "cloudformation:*",
+                "s3:*",
+                "codecommit:*",
+                "iam:*",
+                "kms:*",
+                "logs:*",
+                "dynamodb:*",
+                "sns:*",
+                "sqs:*",
+                "cloudwatch:*",
+                "lambda:*",
+                "codebuild:*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:cloudformation:*:${AWS::AccountId}:stack/${Environment}-${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:cloudformation:*:${AWS::AccountId}:changeSet/${Environment}-${Scope}-*:*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:cloudformation:*:aws:transform/*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:s3:::${Environment}-${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:codecommit:*:${AWS::AccountId}:${Environment}-${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:policy/${Environment}-${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:kms:*:${AWS::AccountId}:alias/${Environment}-${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:${Environment}-${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:/aws/codebuild/${Environment}-${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:dynamodb:*:${AWS::AccountId}:table/${Environment}-${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:sns:*:${AWS::AccountId}:${Environment}-${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:sqs:*:${AWS::AccountId}:${Environment}-${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:cloudwatch:*:${AWS::AccountId}:alarm:${Environment}-${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:cloudwatch::${AWS::AccountId}:dashboard/${Environment}-${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:lambda:*:${AWS::AccountId}:function:${Environment}-${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:codebuild:*:${AWS::AccountId}:project/${Environment}-${Scope}-*"
+                }
+            ]
+        },
+        {
+            "Sid": "AllResourcesWildcard",
+            "Effect": "Allow",
+            "Action": [
+                "cloudformation:DescribeStacks",
+                "cloudformation:List*",
+                "cloudformation:ValidateTemplate",
+                "cloudformation:EstimateTemplateCost",
+                "cloudformation:Get*",
+                "codecommit:ListRepositories",
+                "kms:CreateKey",
+                "kms:CreateAlias",
+                "kms:ListAliases",
+                "route53:CreateHostedZone"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "LambdaEventSourceMapping",
+            "Effect": "Allow",
+            "Action": [
+                "lambda:*"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "StringLike": {
+                    "lambda:FunctionArn": {
+                        "Fn::Sub": "arn:aws:lambda:*:${AWS::AccountId}:function:${Environment}-${Scope}-*"
+                    }
+                }
+            }
+        }
+    ]
+}

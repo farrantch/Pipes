@@ -1,0 +1,20 @@
+{
+    "Statements": [
+        {
+            "Sid": "Public",
+            "Effect": "Allow",
+            "Action": [
+                "route53:*",
+                "acm:*",
+                "cognito-idp:*",
+                "cognito-identity:*",
+                "apigateway:*",
+                "cloudfront:*",
+                "mobileanalytics:*",
+                "cognito-sync:*",
+                "execute-api:*"
+            ],
+            "Resource": "*"
+        }
+    ]
+}

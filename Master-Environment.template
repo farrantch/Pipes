@@ -1,0 +1,146 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Role to be assumed by CodePipeline service cross account",
+    "Parameters": {
+        "S3BucketName": {
+            "Description": "S3 Bucket in CICD Account, which holds the CodePipeline artifacts.",
+            "Type": "String"
+        },
+        "CicdAccount": {
+            "Description": "AWS AccountNumber for CICD Account.",
+            "Type": "Number"
+        },
+        "KmsCmkArn": {
+            "Description": "ARN of the KMS CMK creates in CICD account.",
+            "Type": "String"
+        },
+        "Environment": {
+            "Description": "Environment",
+            "Type": "String"
+        }
+    },
+    "Resources": {
+        "IamRoleCodeBuild": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "RoleName": {
+                    "Fn::Sub": "${AWS::StackName}-CodeBuildRole"
+                },
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": "codebuild.amazonaws.com"
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        },
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "AWS": [
+                                    {
+                                        "Ref": "CicdAccount"
+                                    }
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "Path": "/",
+                "ManagedPolicyArns": [
+                    {
+                        "Ref": "IamPolicyBaseline"
+                    }
+                ]
+            }
+        },
+        "IamRoleCodePipeline": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "RoleName": {
+                    "Fn::Sub": "${AWS::StackName}-CodePipelineRole"
+                },
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "AWS": [
+                                    {
+                                        "Ref": "CicdAccount"
+                                    }
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "Path": "/",
+                "ManagedPolicyArns": [
+                    {
+                        "Ref": "IamPolicyBaseline"
+                    }
+                ]
+            }
+        },
+        "IamRoleCloudFormation": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "RoleName": {
+                    "Fn::Sub": "${AWS::StackName}-CloudFormationRole"
+                },
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "cloudformation.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "Path": "/",
+                "ManagedPolicyArns": [
+                    {
+                        "Ref": "IamPolicyBaseline"
+                    }
+                ]
+            }
+        },
+        "IamPolicyBaseline": {
+            "Type": "AWS::IAM::ManagedPolicy",
+            "Properties": {.
+                "ManagedPolicyName": {
+                    "Fn::Sub": "${AWS::StackName}-IamPolicyBaseline"
+                }
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Sid": "Admin",
+                            "Effect": "Allow",
+                            "Action": "*",
+                            "Resource": "*"
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}

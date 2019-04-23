@@ -1,0 +1,414 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Creates the build account's infrastructure that allows for cross-account CodePipelines.",
+    "Parameters": {
+        "DevAccount": {
+            "Description": "AWS account number for dev.",
+            "Type": "Number"
+        },
+        "ProdAccount": {
+            "Description": "AWS account number for production.",
+            "Type": "Number"
+        },
+        "AllEnvironmentsCreated": {
+            "Description": "Must be false for initial creation of stacks. Afterwards it must be switched to true when all environments have been created.",
+            "Type": "String",
+            "AllowedValues": [
+                "True",
+                "False"
+            ]
+        },
+        "Scope": {
+            "Type": "String"
+        },
+        "MasterPipeline": {
+            "Type": "String"
+        },
+        "Environment": {
+            "Type": "String"
+        },
+        "MasterS3BucketName": {
+            "Type": "String"
+        }
+    },
+    "Conditions": {
+        "NotInitialCreation": {
+            "Fn::Equals": [{
+                    "Ref": "AllEnvironmentsCreated"
+                },
+                "True"
+            ]
+        }
+    },
+    "Resources": {
+        "PolicyCodePipeline": {
+            "Type": "AWS::IAM::ManagedPolicy",
+            "DependsOn": "S3Bucket",
+            "Properties": {
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [{
+                            "Sid": "AccessToS3ArtifactsBucket",
+                            "Effect": "Allow",
+                            "Action": [
+                                "s3:PutObject",
+                                "s3:GetBucketPolicy",
+                                "s3:GetObject",
+                                "s3:ListBucket"
+                            ],
+                            "Resource": [{
+                                    "Fn::Sub": [
+                                        "${S3BucketArn}/*",
+                                        {
+                                            "S3BucketArn": {
+                                                "Fn::GetAtt": [
+                                                    "S3Bucket",
+                                                    "Arn"
+                                                ]
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Fn::GetAtt": [
+                                        "S3Bucket",
+                                        "Arn"
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "Fn::If": [
+                                "NotInitialCreation",
+                                {
+                                    "Sid": "AllowAssumeEnvironmentRoles",
+                                    "Effect": "Allow",
+                                    "Action": "sts:AssumeRole",
+                                    "Resource": [{
+                                            "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${MasterPipeline}-infra-${Scope}-CloudFormationRole"
+                                        },
+                                        {
+                                            "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${MasterPipeline}-infra-${Scope}-CodePipelineRole"
+                                        },
+                                        {
+                                            "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${MasterPipeline}-infra-${Scope}-CodeBuildRole"
+                                        },
+                                        {
+                                            "Fn::Sub": "arn:aws:iam::${ProdAccount}:role/prod-${MasterPipeline}-infra-${Scope}-CloudFormationRole"
+                                        },
+                                        {
+                                            "Fn::Sub": "arn:aws:iam::${ProdAccount}:role/prod-${MasterPipeline}-infra-${Scope}-CodePipelineRole"
+                                        },
+                                        {
+                                            "Fn::Sub": "arn:aws:iam::${ProdAccount}:role/prod-${MasterPipeline}-infra-${Scope}-CodeBuildRole"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Ref": "AWS::NoValue"
+                                }
+                            ]
+                        },
+                        {
+                            "Sid": "UseKmsKey",
+                            "Effect": "Allow",
+                            "Action": [
+                                "kms:DescribeKey",
+                                "kms:GenerateDataKey*",
+                                "kms:Encrypt",
+                                "kms:ReEncrypt*",
+                                "kms:Decrypt"
+                            ],
+                            "Resource": [{
+                                "Fn::GetAtt": [
+                                    "KmsKey",
+                                    "Arn"
+                                ]
+                            }]
+                        },
+                        {
+                            "Sid": "CodeCommitRepos",
+                            "Effect": "Allow",
+                            "Action": [
+                                "codecommit:List*",
+                                "codecommit:Get*",
+                                "codecommit:GitPull",
+                                "codecommit:UploadArchive",
+                                "codecommit:CancelUploadArchive"
+                            ],
+                            "Resource": "*"
+                        },
+                        {
+                            "Sid": "CreateLogs",
+                            "Effect": "Allow",
+                            "Action": [
+                                "logs:CreateLogStream",
+                                "logs:CreateLogGroup",
+                                "logs:PutLogEvents"
+                            ],
+                            "Resource": "*"
+                        },
+                        {
+                            "Sid": "DescribeCloudFormationStacks",
+                            "Effect": "Allow",
+                            "Action": [
+                                "cloudformation:Describe*",
+                                "cloudformation:ExecuteChangeSet"
+                            ],
+                            "Resource": "*"
+                        },
+                        {
+                            "Sid": "RunCodeBuild",
+                            "Effect": "Allow",
+                            "Action": [
+                                "codebuild:StartBuild",
+                                "codebuild:BatchGetBuilds"
+                            ],
+                            "Resource": {
+                                "Fn::Sub": "arn:aws:codebuild:*:${AWS::AccountId}:project/${Environment}-${MasterPipeline}-infra-${Scope}*"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "RoleCodePipeline": {
+            "Type": "AWS::IAM::Role",
+            "DependsOn": "PolicyCodePipeline",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [{
+                        "Effect": "Allow",
+                        "Principal": {
+                            "Service": [
+                                "codepipeline.amazonaws.com"
+                            ]
+                        },
+                        "Action": "sts:AssumeRole"
+                    }]
+                },
+                "ManagedPolicyArns": [{
+                    "Ref": "PolicyCodePipeline"
+                }],
+                "RoleName": {
+                    "Fn::Sub": "${Environment}-${MasterPipeline}-infra-${Scope}-CodePipelineRole"
+                }
+            }
+        },
+        "KmsKey": {
+            "Type": "AWS::KMS::Key",
+            "Properties": {
+                "Description": "Key used for cross-account codepipline deployments",
+                "EnableKeyRotation": true,
+                "KeyPolicy": {
+                    "Version": "2012-10-17",
+                    "Id": {
+                        "Fn::Sub": "${Environment}-${MasterPipeline}-infra-${Scope}"
+                    },
+                    "Statement": [{
+                            "Sid": "Allows admin of the key",
+                            "Effect": "Allow",
+                            "Principal": {
+                                "AWS": [{
+                                        "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:root"
+                                    },
+                                    {
+                                        "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${Environment}-${MasterPipeline}-CloudFormationRole"
+                                    }
+                                ]
+                            },
+                            "Action": [
+                                "kms:*"
+                            ],
+                            "Resource": "*"
+                        },
+                        {
+                            "Fn::If": [
+                                "NotInitialCreation",
+                                {
+                                    "Sid": "Allow other accounts to use the key.",
+                                    "Effect": "Allow",
+                                    "Principal": {
+                                        "AWS": [{
+                                                "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${MasterPipeline}-infra-${Scope}-CloudFormationRole"
+                                            },
+                                            {
+                                                "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${MasterPipeline}-infra-${Scope}-CodePipelineRole"
+                                            },
+                                            {
+                                                "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${MasterPipeline}-infra-${Scope}-CodeBuildRole"
+                                            },
+                                            {
+                                                "Fn::Sub": "arn:aws:iam::${ProdAccount}:role/prod-${MasterPipeline}-infra-${Scope}-CloudFormationRole"
+                                            },
+                                            {
+                                                "Fn::Sub": "arn:aws:iam::${ProdAccount}:role/prod-${MasterPipeline}-infra-${Scope}-CodePipelineRole"
+                                            },
+                                            {
+                                                "Fn::Sub": "arn:aws:iam::${ProdAccount}:role/prod-${MasterPipeline}-infra-${Scope}-CodeBuildRole"
+                                            }
+                                        ]
+                                    },
+                                    "Action": [
+                                        "kms:DescribeKey",
+                                        "kms:Encrypt",
+                                        "kms:Decrypt",
+                                        "kms:ReEncrypt",
+                                        "kms:GenerateDataKey"
+                                    ],
+                                    "Resource": "*"
+                                },
+                                {
+                                    "Ref": "AWS::NoValue"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        "KmsAlias": {
+            "Type": "AWS::KMS::Alias",
+            "DependsOn": "KmsKey",
+            "Properties": {
+                "AliasName": {
+                    "Fn::Sub": "alias/${Environment}-${MasterPipeline}-infra-${Scope}"
+                },
+                "TargetKeyId": {
+                    "Ref": "KmsKey"
+                }
+            }
+        },
+        "S3Bucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+                "AccessControl": "Private"
+            }
+        },
+        "S3BucketPolicy": {
+            "Type": "AWS::S3::BucketPolicy",
+            "Properties": {
+                "Bucket": {
+                    "Ref": "S3Bucket"
+                },
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Id": "SSEAndSSLPolicy",
+                    "Statement": [{
+                            "Sid": "DenyInsecureConnections",
+                            "Effect": "Deny",
+                            "Principal": "*",
+                            "Action": "s3:*",
+                            "Resource": {
+                                "Fn::Sub": [
+                                    "${S3BucketArn}/*",
+                                    {
+                                        "S3BucketArn": {
+                                            "Fn::GetAtt": [
+                                                "S3Bucket",
+                                                "Arn"
+                                            ]
+                                        }
+                                    }
+                                ]
+                            },
+                            "Condition": {
+                                "Bool": {
+                                    "aws:SecureTransport": false
+                                }
+                            }
+                        },
+                        {
+                            "Fn::If": [
+                                "NotInitialCreation",
+                                {
+                                    "Sid": "AccountsAllowedToS3Bucket",
+                                    "Effect": "Allow",
+                                    "Principal": {
+                                        "AWS": [{
+                                                "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${MasterPipeline}-infra-${Scope}-CloudFormationRole"
+                                            },
+                                            {
+                                                "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${MasterPipeline}-infra-${Scope}-CodePipelineRole"
+                                            },
+                                            {
+                                                "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${MasterPipeline}-infra-${Scope}-CodeBuildRole"
+                                            },
+                                            {
+                                                "Fn::Sub": "arn:aws:iam::${ProdAccount}:role/prod-${MasterPipeline}-infra-${Scope}-CloudFormationRole"
+                                            },
+                                            {
+                                                "Fn::Sub": "arn:aws:iam::${ProdAccount}:role/prod-${MasterPipeline}-infra-${Scope}-CodePipelineRole"
+                                            },
+                                            {
+                                                "Fn::Sub": "arn:aws:iam::${ProdAccount}:role/prod-${MasterPipeline}-infra-${Scope}-CodeBuildRole"
+                                            },
+                                            {
+                                                "Fn::GetAtt": [
+                                                    "RoleCodePipeline",
+                                                    "Arn"
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    "Action": [
+                                        "s3:Get*",
+                                        "s3:Put*",
+                                        "s3:ListBucket"
+                                    ],
+                                    "Resource": [{
+                                            "Fn::Sub": [
+                                                "${S3BucketArn}/*",
+                                                {
+                                                    "S3BucketArn": {
+                                                        "Fn::GetAtt": [
+                                                            "S3Bucket",
+                                                            "Arn"
+                                                        ]
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "Fn::GetAtt": [
+                                                "S3Bucket",
+                                                "Arn"
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Ref": "AWS::NoValue"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    "Outputs": {
+        "KmsCmkArn": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "KmsKey",
+                    "Arn"
+                ]
+            }
+        },
+        "S3BucketName": {
+            "Value": {
+                "Ref": "S3Bucket"
+            }
+        },
+        "CodePipelineRoleArn": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "RoleCodePipeline",
+                    "Arn"
+                ]
+            }
+        }
+    }
+}

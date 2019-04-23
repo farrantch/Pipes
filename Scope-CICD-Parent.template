@@ -1,0 +1,23 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Creates the account's infrastructure that allows for cross-account CodePipelines.",
+    "Parameters": {
+        "S3BucketName": {
+            "Type": "String"
+        },
+        "DevAccount": {
+            "Type": "String"
+        },
+        "ProdAccount": {
+            "Type": "String"
+        },
+        "Environment": {
+            "Type": "String"
+        },
+        "MasterPipeline": {
+            "Type": "String"
+        }
+    },
+    "Resources": {
+    }
+}

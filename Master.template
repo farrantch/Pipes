@@ -1,0 +1,1048 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Creates the build account's infrastructure that allows for cross-account CodePipelines.",
+    "Parameters": {
+        "CicdAccount": {
+            "Description": "AWS account number for cicd.",
+            "Type": "String"
+        },
+        "DevAccount": {
+            "Description": "AWS account number for dev.",
+            "Type": "Number"
+        },
+        "ProdAccount": {
+            "Description": "AWS account number for production.",
+            "Type": "Number"
+        },
+        "SourceCodeCommitRepoName": {
+            "Description": "(Optional). Source CodeCommit repository. If not specified, one will be created.",
+            "Type": "String"
+        },
+        "AllEnvironmentsCreated": {
+            "Description": "Must be false for initial creation of stacks. Afterwards it must be switched to true when all environments have been created.",
+            "Type": "String",
+            "Default": "False",
+            "AllowedValues": [
+                "True",
+                "False"
+            ]
+        }
+    },
+    "Conditions": {
+        "CreateCodeCommitRepo": {
+            "Fn::Equals": [
+                "",
+                {
+                    "Ref": "SourceCodeCommitRepoName"
+                }
+            ]
+        },
+        "NotInitialCreation": {
+            "Fn::Equals": [
+                {
+                    "Ref": "AllEnvironmentsCreated"
+                },
+                "True"
+            ]
+        }
+    },
+    "Resources": {
+        "CodeCommit": {
+            "Type": "AWS::CodeCommit::Repository",
+            "Condition": "CreateCodeCommitRepo",
+            "Properties": {
+                "RepositoryDescription": "Repository created by CodePipeline",
+                "RepositoryName": {
+                    "Ref": "AWS::StackName"
+                }
+            }
+        },
+        "CodeBuildGenerateCICDTemplates": {
+          "Type": "AWS::CodeBuild::Project",
+          "Properties": {
+            "Artifacts": {
+              "Type": "CODEPIPELINE",
+              "OverrideArtifactName": true
+            },
+            "EncryptionKey": {
+                "Fn::GetAtt": [
+                    "KmsKey",
+                    "Arn"
+                ]
+            },
+            "Environment": {
+              "ComputeType": "BUILD_GENERAL1_SMALL",
+              "Image": "aws/codebuild/standard:1.0",
+              "EnvironmentVariables": [
+                {
+                    "Name": "Environment",
+                    "Type": "PLAINTEXT",
+                    "Value": "cicd"
+                },
+                {
+                    "Name": "MasterInfraStack",
+                    "Type": "PLAINTEXT",
+                    "Value": {
+                        "Fn::Sub": "cicd-${AWS::StackName}-infra"
+                    }
+                },
+                {
+                    "Name": "S3Bucket",
+                    "Type": "PLAINTEXT",
+                    "Value": {
+                        "Ref": "S3Bucket"
+                    }
+                }
+              ],
+              "PrivilegedMode": false,
+              "Type": "LINUX_CONTAINER"
+            },
+            "Name": {
+              "Fn::Sub": "${AWS::StackName}-generate-cicd-templates"
+            },
+            "ServiceRole": {
+                "Fn::GetAtt": [
+                    "RoleCodeBuild",
+                    "Arn"
+                ]
+            },
+            "Source": {
+              "Type": "CODEPIPELINE",
+              "BuildSpec": "buildspec/generate-cicd-templates.yml"
+            },
+            "TimeoutInMinutes": "5"
+          }
+        },
+        "CodeBuildGenerateSDLCTemplates": {
+          "Type": "AWS::CodeBuild::Project",
+          "Properties": {
+            "Artifacts": {
+              "Type": "CODEPIPELINE",
+              "OverrideArtifactName": true
+            },
+            "EncryptionKey": {
+                "Fn::GetAtt": [
+                    "KmsKey",
+                    "Arn"
+                ]
+            },
+            "Environment": {
+              "ComputeType": "BUILD_GENERAL1_SMALL",
+              "Image": "aws/codebuild/standard:1.0",
+              "EnvironmentVariables": [
+                {
+                    "Name": "Environment",
+                    "Type": "PLAINTEXT",
+                    "Value": "cicd"
+                },
+                {
+                    "Name": "MasterInfraStack",
+                    "Type": "PLAINTEXT",
+                    "Value": {
+                        "Fn::Sub": "cicd-${AWS::StackName}-infra"
+                    }
+                },
+                {
+                    "Name": "S3Bucket",
+                    "Type": "PLAINTEXT",
+                    "Value": {
+                        "Ref": "S3Bucket"
+                    }
+                }
+              ],
+              "PrivilegedMode": false,
+              "Type": "LINUX_CONTAINER"
+            },
+            "Name": {
+              "Fn::Sub": "${AWS::StackName}-generate-sdlc-templates"
+            },
+            "ServiceRole": {
+                "Fn::GetAtt": [
+                    "RoleCodeBuild",
+                    "Arn"
+                ]
+            },
+            "Source": {
+              "Type": "CODEPIPELINE",
+              "BuildSpec": "buildspec/generate-sdlc-templates.yml"
+            },
+            "TimeoutInMinutes": "5"
+          }
+        },
+        "CodeBuildUpdateStacks": {
+          "Type": "AWS::CodeBuild::Project",
+          "Properties": {
+            "Artifacts": {
+              "Type": "CODEPIPELINE",
+              "OverrideArtifactName": true
+            },
+            "EncryptionKey": {
+                "Fn::GetAtt": [
+                    "KmsKey",
+                    "Arn"
+                ]
+            },
+            "Environment": {
+              "ComputeType": "BUILD_GENERAL1_SMALL",
+              "Image": "aws/codebuild/standard:1.0",
+              "EnvironmentVariables": [
+                {
+                    "Name": "Environment",
+                    "Type": "PLAINTEXT",
+                    "Value": "cicd"
+                },
+                {
+                    "Name": "MasterInfraStack",
+                    "Type": "PLAINTEXT",
+                    "Value": {
+                        "Fn::Sub": "cicd-${AWS::StackName}-infra"
+                    }
+                }
+              ],
+              "PrivilegedMode": false,
+              "Type": "LINUX_CONTAINER"
+            },
+            "Name": {
+              "Fn::Sub": "${AWS::StackName}-update-stacks"
+            },
+            "ServiceRole": {
+                "Fn::GetAtt": [
+                    "RoleCodeBuild",
+                    "Arn"
+                ]
+            },
+            "Source": {
+              "Type": "CODEPIPELINE",
+              "BuildSpec": "buildspec/update-stacks.yml"
+            },
+            "TimeoutInMinutes": "5"
+          }
+        },
+        "PolicyDeprecated": {
+            "Type": "AWS::IAM::ManagedPolicy",
+            "DependsOn": "S3Bucket",
+            "Properties": {
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Sid": "AccessToS3ArtifactsBucket",
+                            "Effect": "Allow",
+                            "Action": [
+                                "s3:PutObject",
+                                "s3:GetBucketPolicy",
+                                "s3:GetObject",
+                                "s3:ListBucket"
+                            ],
+                            "Resource": [
+                                {
+                                    "Fn::Sub": [
+                                        "${S3BucketArn}/*",
+                                        {
+                                            "S3BucketArn": {
+                                                "Fn::GetAtt": [
+                                                    "S3Bucket",
+                                                    "Arn"
+                                                ]
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Fn::GetAtt": [
+                                        "S3Bucket",
+                                        "Arn"
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "Fn::If": [
+                                "NotInitialCreation",
+                                {
+                                    "Sid": "AllowAssumeEnvironmentRoles",
+                                    "Effect": "Allow",
+                                    "Action": "sts:AssumeRole",
+                                    "Resource": [
+                                        {
+                                            "Fn::Sub": "arn:aws:iam::${CicdAccount}:role/cicd-${AWS::StackName}-CloudFormationRole"
+                                        },
+                                        {
+                                            "Fn::Sub": "arn:aws:iam::${CicdAccount}:role/cicd-${AWS::StackName}-CodePipelineRole"
+                                        },
+                                        {
+                                            "Fn::Sub": "arn:aws:iam::${CicdAccount}:role/cicd-${AWS::StackName}-CodeBuildRole"
+                                        },
+                                        {
+                                            "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${AWS::StackName}-CloudFormationRole"
+                                        },
+                                        {
+                                            "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${AWS::StackName}-CodePipelineRole"
+                                        },
+                                        {
+                                            "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${AWS::StackName}-CodeBuildRole"
+                                        },
+                                        {
+                                            "Fn::Sub": "arn:aws:iam::${ProdAccount}:role/prod-${AWS::StackName}-CloudFormationRole"
+                                        },
+                                        {
+                                            "Fn::Sub": "arn:aws:iam::${ProdAccount}:role/prod-${AWS::StackName}-CodePipelineRole"
+                                        },
+                                        {
+                                            "Fn::Sub": "arn:aws:iam::${ProdAccount}:role/prod-${AWS::StackName}-CodeBuildRole"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Ref": "AWS::NoValue"
+                                }
+                            ]
+                        },
+                        {
+                            "Sid": "UseKmsKey",
+                            "Effect": "Allow",
+                            "Action": [
+                                "kms:DescribeKey",
+                                "kms:GenerateDataKey*",
+                                "kms:Encrypt",
+                                "kms:ReEncrypt*",
+                                "kms:Decrypt"
+                            ],
+                            "Resource": [
+                                {
+                                    "Fn::GetAtt": [
+                                        "KmsKey",
+                                        "Arn"
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                          "Sid": "CodeCommitRepos",
+                          "Effect": "Allow",
+                          "Action": [
+                            "codecommit:List*",
+                            "codecommit:Get*",
+                            "codecommit:GitPull",
+                            "codecommit:UploadArchive",
+                            "codecommit:CancelUploadArchive"
+                          ],
+                          "Resource": "*"
+                        },
+                        {
+                            "Sid": "CreateLogs",
+                            "Effect": "Allow",
+                            "Action": [
+                                "logs:CreateLogStream",
+                                "logs:CreateLogGroup",
+                                "logs:PutLogEvents"
+                            ],
+                            "Resource": "*"
+                        },
+                        {
+                            "Sid": "DescribeCloudFormationStacks",
+                            "Effect": "Allow",
+                            "Action": [
+                                "cloudformation:Describe*",
+                                "cloudformation:ExecuteChangeSet"
+                            ],
+                            "Resource": "*"
+                        },
+                        {
+                            "Sid": "RunCodeBuild",
+                            "Effect": "Allow",
+                            "Action": [
+                                "codebuild:StartBuild",
+                                "codebuild:BatchGetBuilds"
+                            ],
+                            "Resource": {
+                                "Fn::Sub": "arn:aws:codebuild:*:${AWS::AccountId}:project/cicd-${AWS::StackName}*"
+                            }
+                        },
+                        {
+                            "Sid": "SelfUpdateStack",
+                            "Effect": "Allow",
+                            "Action": [
+                                "sts:AssumeRole",
+                                "iam:PassRole",
+                                "iam:GetRole",
+                                "iam:DeletePolicyVersion",
+                                "cloudformation:UpdateStack",
+                                "iam:ListPolicyVersions",
+                                "iam:CreatePolicyVersion",
+                                "iam:ListPolicyVersions",
+                                "codepipeline:StartPipelineExecution"
+                            ],
+                            "Resource":
+                            [
+                                {
+                                    "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${AWS::StackName}-CodePipelineRole*"
+                                },
+                                {
+                                    "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:policy/${AWS::StackName}-PolicyCodePipeline*"
+                                },
+                                {
+                                    "Fn::Sub": "arn:aws:cloudformation:*:${AWS::AccountId}:stack/${AWS::StackName}"
+                                },
+                                {
+                                    "Fn::Sub": "arn:aws:cloudformation:*:${AWS::AccountId}:stack/${AWS::StackName}/*"
+                                },
+                                {
+                                    "Fn::Sub": "arn:aws:codepipeline:*:${AWS::AccountId}:${AWS::StackName}"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        "PolicyBaseline": {
+            "Type": "AWS::IAM::ManagedPolicy",
+            "DependsOn": "S3Bucket",
+            "Properties": {
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Sid": "AdminAccess",
+                            "Effect": "Allow",
+                            "Action": "*",
+                            "Resource": "*"
+                        }
+                    ]
+                }
+            }
+        },
+        "RoleCodePipeline": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "codepipeline.amazonaws.com"
+                                ]
+                            },
+                            "Action": "sts:AssumeRole"
+                        }
+                    ]
+                },
+                "ManagedPolicyArns": [
+                    {
+                        "Ref": "PolicyBaseline"
+                    }
+                ],
+                "RoleName": {
+                    "Fn::Sub": "${AWS::StackName}-CodePipelineRole"
+                }
+            }
+        },
+        "RoleCloudFormation": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "cloudformation.amazonaws.com"
+                                ]
+                            },
+                            "Action": "sts:AssumeRole"
+                        }
+                    ]
+                },
+                "ManagedPolicyArns": [
+                    {
+                        "Ref": "PolicyBaseline"
+                    }
+                ],
+                "RoleName": {
+                    "Fn::Sub": "${AWS::StackName}-CloudFormationRole"
+                }
+            }
+        },
+        "RoleCodeBuild": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "codebuild.amazonaws.com",
+                                    "codepipeline.amazonaws.com"
+                                ]
+                            },
+                            "Action": "sts:AssumeRole"
+                        }
+                    ]
+                },
+                "ManagedPolicyArns": [
+                    {
+                        "Ref": "PolicyBaseline"
+                    }
+                ],
+                "RoleName": {
+                    "Fn::Sub": "${AWS::StackName}-CodeBuildRole"
+                }
+            }
+        },
+        "KmsKey": {
+            "Type": "AWS::KMS::Key",
+            "Properties": {
+                "Description": "Key used for cross-account codepipline deployments",
+                "EnableKeyRotation": true,
+                "KeyPolicy": {
+                    "Version": "2012-10-17",
+                    "Id": {
+                        "Fn::Sub": "${AWS::StackName}"
+                    },
+                    "Statement": [
+                        {
+                            "Sid": "Allows admin of the key",
+                            "Effect": "Allow",
+                            "Principal": {
+                                "AWS": {
+                                    "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:root"
+                                }
+                            },
+                            "Action": [
+                                "kms:*"
+                            ],
+                            "Resource": "*"
+                        },
+                        {
+                            "Fn::If": [
+                                "NotInitialCreation",
+                                {
+                                    "Sid": "Allow other accounts to use the key.",
+                                    "Effect": "Allow",
+                                    "Principal": {
+                                        "AWS": [
+                                            {
+                                                "Fn::Sub": "arn:aws:iam::${CicdAccount}:role/cicd-${AWS::StackName}-CloudFormationRole"
+                                            },
+                                            {
+                                                "Fn::Sub": "arn:aws:iam::${CicdAccount}:role/cicd-${AWS::StackName}-CodePipelineRole"
+                                            },
+                                            {
+                                                "Fn::Sub": "arn:aws:iam::${CicdAccount}:role/cicd-${AWS::StackName}-CodeBuildRole"
+                                            },
+                                            {
+                                                "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${AWS::StackName}-CloudFormationRole"
+                                            },
+                                            {
+                                                "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${AWS::StackName}-CodePipelineRole"
+                                            },
+                                            {
+                                                "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${AWS::StackName}-CodeBuildRole"
+                                            },
+                                            {
+                                                "Fn::Sub": "arn:aws:iam::${ProdAccount}:role/prod-${AWS::StackName}-CloudFormationRole"
+                                            },
+                                            {
+                                                "Fn::Sub": "arn:aws:iam::${ProdAccount}:role/prod-${AWS::StackName}-CodePipelineRole"
+                                            },
+                                            {
+                                                "Fn::Sub": "arn:aws:iam::${ProdAccount}:role/prod-${AWS::StackName}-CodeBuildRole"
+                                            }
+                                        ]
+                                    },
+                                    "Action": [
+                                        "kms:DescribeKey",
+                                        "kms:Encrypt",
+                                        "kms:Decrypt",
+                                        "kms:ReEncrypt",
+                                        "kms:GenerateDataKey"
+                                    ],
+                                    "Resource": "*"
+                                },
+                                {
+                                    "Ref": "AWS::NoValue"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        "KmsAlias": {
+            "Type": "AWS::KMS::Alias",
+            "DependsOn": "KmsKey",
+            "Properties": {
+                "AliasName": {
+                    "Fn::Sub": "alias/${AWS::StackName}"
+                },
+                "TargetKeyId": {
+                    "Ref": "KmsKey"
+                }
+            }
+        },
+        "S3Bucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+                "AccessControl": "Private"
+            }
+        },
+        "S3BucketPolicy": {
+            "Type": "AWS::S3::BucketPolicy",
+            "Properties": {
+                "Bucket": {
+                    "Ref": "S3Bucket"
+                },
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Id": "SSEAndSSLPolicy",
+                    "Statement": [
+                        {
+                            "Sid": "DenyInsecureConnections",
+                            "Effect": "Deny",
+                            "Principal": "*",
+                            "Action": "s3:*",
+                            "Resource": {
+                                "Fn::Sub": [
+                                    "${S3BucketArn}/*",
+                                    {
+                                        "S3BucketArn": {
+                                            "Fn::GetAtt": [
+                                                "S3Bucket",
+                                                "Arn"
+                                            ]
+                                        }
+                                    }
+                                ]
+                            },
+                            "Condition": {
+                                "Bool": {
+                                    "aws:SecureTransport": false
+                                }
+                            }
+                        },
+                        {
+                            "Fn::If": [
+                                "NotInitialCreation",
+                                {
+                                    "Sid": "AccountsAllowedToS3Bucket",
+                                    "Effect": "Allow",
+                                    "Principal": {
+                                        "AWS": [
+                                            {
+                                                "Fn::Sub": "arn:aws:iam::${CicdAccount}:role/cicd-${AWS::StackName}-CloudFormationRole"
+                                            },
+                                            {
+                                                "Fn::Sub": "arn:aws:iam::${CicdAccount}:role/cicd-${AWS::StackName}-CodePipelineRole"
+                                            },
+                                            {
+                                                "Fn::Sub": "arn:aws:iam::${CicdAccount}:role/cicd-${AWS::StackName}-CodeBuildRole"
+                                            },
+                                            {
+                                                "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${AWS::StackName}-CloudFormationRole"
+                                            },
+                                            {
+                                                "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${AWS::StackName}-CodePipelineRole"
+                                            },
+                                            {
+                                                "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${AWS::StackName}-CodeBuildRole"
+                                            },
+                                            {
+                                                "Fn::Sub": "arn:aws:iam::${ProdAccount}:role/prod-${AWS::StackName}-CloudFormationRole"
+                                            },
+                                            {
+                                                "Fn::Sub": "arn:aws:iam::${ProdAccount}:role/prod-${AWS::StackName}-CodePipelineRole"
+                                            },
+                                            {
+                                                "Fn::Sub": "arn:aws:iam::${ProdAccount}:role/prod-${AWS::StackName}-CodeBuildRole"
+                                            },
+                                            {
+                                                "Fn::GetAtt": [
+                                                    "RoleCodePipeline",
+                                                    "Arn"
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    "Action": [
+                                        "s3:Get*",
+                                        "s3:Put*",
+                                        "s3:ListBucket"
+                                    ],
+                                    "Resource": [
+                                        {
+                                            "Fn::Sub": [
+                                                "${S3BucketArn}/*",
+                                                {
+                                                    "S3BucketArn": {
+                                                        "Fn::GetAtt": [
+                                                            "S3Bucket",
+                                                            "Arn"
+                                                        ]
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "Fn::GetAtt": [
+                                                "S3Bucket",
+                                                "Arn"
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Ref": "AWS::NoValue"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        "CodePipeline": {
+            "Type": "AWS::CodePipeline::Pipeline",
+            "Condition": "NotInitialCreation",
+            "Properties": {
+                "ArtifactStores": [
+                    {
+                        "ArtifactStore": {
+                            "Type": "S3",
+                            "Location": {
+                                "Ref": "S3Bucket"
+                            },
+                            "EncryptionKey": {
+                                "Id": {
+                                    "Ref": "KmsKey"
+                                },
+                                "Type": "KMS"
+                            }
+                        },
+                        "Region": {
+                            "Ref": "AWS::Region"
+                        }
+                    }
+                ],
+                "RestartExecutionOnUpdate": "True",
+                "RoleArn": {
+                    "Fn::GetAtt" : ["RoleCodePipeline", "Arn"]
+                },
+                "Name": {
+                    "Ref": "AWS::StackName"
+                },
+                "Stages": [
+                    {
+                        "Name": "Source",
+                        "Actions": [
+                            {
+                                "ActionTypeId": {
+                                    "Category": "Source",
+                                    "Owner": "AWS",
+                                    "Provider": "CodeCommit",
+                                    "Version": "1"
+                                },
+                                "Configuration": {
+                                    "RepositoryName": {
+                                        "Fn::If": [
+                                            "CreateCodeCommitRepo",
+                                            {
+                                                "Fn::GetAtt": [
+                                                    "CodeCommit",
+                                                    "Name"
+                                                ]
+                                            },
+                                            {
+                                                "Ref": "SourceCodeCommitRepoName"
+                                            }
+                                        ]
+                                    },
+                                    "BranchName": "master"
+                                },
+                                "Name": "CodeCommit",
+                                "OutputArtifacts": [
+                                    {
+                                        "Name": "SourceOutput"
+                                    }
+                                ],
+                                "RunOrder": 1
+                            }
+                        ]
+                    },
+                    {
+                        "Name": "SelfStackUpdate",
+                        "Actions": [
+                            {
+                                "ActionTypeId": {
+                                    "Category": "Deploy",
+                                    "Owner": "AWS",
+                                    "Provider": "CloudFormation",
+                                    "Version": "1"
+                                },
+                                "Configuration": {
+                                    "ActionMode": "CREATE_UPDATE",
+                                    "Capabilities": "CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND",
+                                    "RoleArn": {
+                                        "Fn::GetAtt" : ["RoleCloudFormation", "Arn"]
+                                    },
+                                    "StackName": {
+                                        "Fn::Sub": "${AWS::StackName}"
+                                    },
+                                    "TemplatePath": "SourceOutput::Master.template",
+                                    "TemplateConfiguration": "SourceOutput::cfvars/Master.template"
+                                },
+                                "Name": "UpdateCloudFormation",
+                                "InputArtifacts": [
+                                    {
+                                        "Name": "SourceOutput"
+                                    }
+                                ],
+                                "RunOrder": 1,
+                                "RoleArn": {
+                                        "Fn::GetAtt" : ["RoleCodePipeline", "Arn"]
+                                }
+                            }
+                        ]
+                    },
+                    {
+                      "Name": "GenerateCICDTemplates",
+                      "Actions": [
+                        {
+                          "ActionTypeId": {
+                            "Category": "Build",
+                            "Owner": "AWS",
+                            "Provider": "CodeBuild",
+                            "Version": "1"
+                          },
+                          "Configuration": {
+                            "ProjectName": {
+                              "Ref": "CodeBuildGenerateCICDTemplates"
+                            }
+                          },
+                          "Name": "GenerateCICDTemplates",
+                          "InputArtifacts": [
+                            {
+                                "Name": "SourceOutput"
+                            }
+                          ],
+                          "RunOrder": 1,
+                          "OutputArtifacts": [
+                              {
+                                  "Name": "CICDTemplates"
+                              }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                        "Name": "Cicd",
+                        "Actions": [
+                            {
+                                "ActionTypeId": {
+                                    "Category": "Deploy",
+                                    "Owner": "AWS",
+                                    "Provider": "CloudFormation",
+                                    "Version": "1"
+                                },
+                                "Configuration": {
+                                    "ActionMode": "CREATE_UPDATE",
+                                    "Capabilities": "CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND",
+                                    "RoleArn": {
+                                        "Fn::Sub": "arn:aws:iam::${CicdAccount}:role/cicd-${AWS::StackName}-CloudFormationRole"
+                                    },
+                                    "StackName": {
+                                        "Fn::Sub": "cicd-${AWS::StackName}-infra"
+                                    },
+                                    "TemplatePath": "CICDTemplates::Scope-CICD-Parent.template",
+                                    "TemplateConfiguration": "SourceOutput::cfvars/Cicd.template",
+                                    "ParameterOverrides": {
+                                        "Fn::Sub": "{ \"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"DevAccount\" : \"${DevAccount}\", \"ProdAccount\" : \"${ProdAccount}\", \"MasterPipeline\" : \"${AWS::StackName}\"}"  
+                                    }
+                                },
+                                "Name": "DeployCloudFormationCicd",
+                                "InputArtifacts": [
+                                    {
+                                        "Name": "SourceOutput"
+                                    },
+                                    {
+                                        "Name": "CICDTemplates"
+                                    }
+                                ],
+                                "RunOrder": 1,
+                                "RoleArn": {
+                                    "Fn::Sub": "arn:aws:iam::${CicdAccount}:role/cicd-${AWS::StackName}-CodePipelineRole"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                      "Name": "GenerateSDLCTemplates",
+                      "Actions": [
+                        {
+                          "ActionTypeId": {
+                            "Category": "Build",
+                            "Owner": "AWS",
+                            "Provider": "CodeBuild",
+                            "Version": "1"
+                          },
+                          "Configuration": {
+                            "ProjectName": {
+                              "Ref": "CodeBuildGenerateSDLCTemplates"
+                            }
+                          },
+                          "Name": "GenerateSDLCTemplates",
+                          "InputArtifacts": [
+                            {
+                                "Name": "SourceOutput"
+                            }
+                          ],
+                          "RunOrder": 1,
+                          "OutputArtifacts": [
+                              {
+                                  "Name": "SDLCTemplates"
+                              }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                        "Name": "Dev",
+                        "Actions": [
+                            {
+                                "ActionTypeId": {
+                                    "Category": "Deploy",
+                                    "Owner": "AWS",
+                                    "Provider": "CloudFormation",
+                                    "Version": "1"
+                                },
+                                "Configuration": {
+                                    "ActionMode": "CREATE_UPDATE",
+                                    "Capabilities": "CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND",
+                                    "RoleArn": {
+                                        "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${AWS::StackName}-CloudFormationRole"
+                                    },
+                                    "StackName": {
+                                        "Fn::Sub": "dev-${AWS::StackName}-infra"
+                                    },
+                                    "TemplatePath": "SDLCTemplates::Scope-SDLC-Parent.template",
+                                    "TemplateConfiguration": "SourceOutput::cfvars/Dev.template",
+                                    "ParameterOverrides": {
+                                        "Fn::Sub": "{ \"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"CicdAccount\" : \"${CicdAccount}\", \"MasterPipeline\" : \"${AWS::StackName}\"}"
+                                    }
+                                },
+                                "Name": "DeployCloudFormationDev",
+                                "InputArtifacts": [
+                                    {
+                                        "Name": "SourceOutput"
+                                    },
+                                    {
+                                        "Name": "SDLCTemplates"
+                                    }
+                                ],
+                                "RunOrder": 1,
+                                "RoleArn": {
+                                    "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${AWS::StackName}-CodePipelineRole"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "Name": "Prod",
+                        "Actions": [
+                            {
+                                "ActionTypeId": {
+                                    "Category": "Deploy",
+                                    "Owner": "AWS",
+                                    "Provider": "CloudFormation",
+                                    "Version": "1"
+                                },
+                                "Configuration": {
+                                    "ActionMode": "CREATE_UPDATE",
+                                    "Capabilities": "CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND",
+                                    "RoleArn": {
+                                        "Fn::Sub": "arn:aws:iam::${ProdAccount}:role/prod-${AWS::StackName}-CloudFormationRole"
+                                    },
+                                    "StackName": {
+                                        "Fn::Sub": "prod-${AWS::StackName}-infra"
+                                    },
+                                    "TemplatePath": "SDLCTemplates::Scope-SDLC-Parent.template",
+                                    "TemplateConfiguration": "SourceOutput::cfvars/Prod.template",
+                                    "ParameterOverrides": {
+                                        "Fn::Sub": "{ \"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"CicdAccount\" : \"${CicdAccount}\", \"MasterPipeline\" : \"${AWS::StackName}\"}"
+                                    }
+                                },
+                                "Name": "DeployCloudFormationProd",
+                                "InputArtifacts": [
+                                    {
+                                        "Name": "SourceOutput"
+                                    },
+                                    {
+                                        "Name": "SDLCTemplates"
+                                    }
+                                ],
+                                "RunOrder": 1,
+                                "RoleArn": {
+                                    "Fn::Sub": "arn:aws:iam::${ProdAccount}:role/prod-${AWS::StackName}-CodePipelineRole"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                      "Name": "SetAllEnvironmentsCreatedTrue",
+                      "Actions": [
+                        {
+                          "ActionTypeId": {
+                            "Category": "Build",
+                            "Owner": "AWS",
+                            "Provider": "CodeBuild",
+                            "Version": "1"
+                          },
+                          "Configuration": {
+                            "ProjectName": {
+                              "Ref": "CodeBuildUpdateStacks"
+                            }
+                          },
+                          "Name": "UpdateStacks",
+                          "InputArtifacts": [
+                            {
+                                "Name": "SourceOutput"
+                            }
+                          ],
+                          "RunOrder": 1
+                        }
+                      ]
+                    }
+                ]
+            }
+        }
+    },
+    "Outputs": {
+        "KmsCmkArn": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "KmsKey",
+                    "Arn"
+                ]
+            },
+            "Export": {
+                "Name": {
+                    "Fn::Sub": "${AWS::StackName}-KmsKeyArn"
+                }
+            }
+        },
+        "S3BucketName": {
+            "Value": {
+                "Ref": "S3Bucket"
+            },
+            "Export": {
+                "Name": {
+                    "Fn::Sub": "${AWS::StackName}-S3BucketName"
+                }
+            }
+        }
+    }
+}

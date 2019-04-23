@@ -1,0 +1,20 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo Entered the install phase...
+      - pip install boto3
+  build:
+    commands:
+      - echo Entered the build phase...
+      - mkdir -p generated-sdlc-templates
+      - python buildspec/generate-sdlc-templates.py
+  post_build:
+    commands:
+      - aws s3 sync generated-sdlc-templates s3://${S3Bucket}/generated-sdlc-templates/ --delete
+artifacts:
+  files:
+    - '**/*'
+  base-directory: 'generated-sdlc-templates'
+  discard-paths: yes

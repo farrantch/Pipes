@@ -1,0 +1,434 @@
+{
+    "AWSTemplateFormatVersion":"2010-09-09",
+    "Description":"Creates a pipeline.",
+    "Parameters":{
+        "MasterPipeline": {
+            "Type": "String"
+        },
+        "Scope": {
+            "Type": "String"
+        },
+        "SubScope": {
+            "Type": "String"
+        },
+        "SourceCodeCommitRepoName":{
+            "Description":"(Optional). Source CodeCommit repository. If not specified, one will be created.",
+            "Type":"String",
+            "Default": ""
+        },
+        "IncludeEnvCfTemplateConfigs":{
+            "Description":"Include CloudFormation environment config files?",
+            "Type":"String",
+            "Default":"False",
+            "AllowedValues":[
+                "False",
+                "True"
+            ]
+        },
+        "CfContainsLambda":{
+            "Description":"Does the cloudformation template contain a Lambda function?",
+            "Type":"String",
+            "Default":"False",
+            "AllowedValues":[
+                "False",
+                "True"
+            ]
+        },
+        "ProdAccount": {
+            "Type": "String"
+        },
+        "DevAccount": {
+            "Type": "String"
+        },
+        "Environment": {
+            "Type": "String"
+        },
+        "KmsCmkArn": {
+            "Type": "String"
+        },
+        "S3BucketName": {
+            "Type": "String"
+        },
+        "RoleArn": {
+            "Type": "String"
+        },
+        "ProdManualApproval": {
+            "Type": "String",
+            "Default": "True"
+        },
+        "SdlcCloudFormation": {
+            "Type": "String",
+            "Default": "True"
+        },
+        "SdlcCodeBuildPre": {
+            "Type": "String",
+            "Default": "False"
+        }
+    },
+    "Conditions":{
+        "CreateCodeCommitRepo":{
+            "Fn::Equals":[
+                "",
+                {
+                    "Ref":"SourceCodeCommitRepoName"
+                }
+            ]
+        },
+        "IncludeEnvCfTemplateConfigs":{
+            "Fn::Equals":[
+                "True",
+                {
+                    "Ref":"IncludeEnvCfTemplateConfigs"
+                }
+            ]
+        },
+        "CfContainsLambda":{
+            "Fn::Equals":[
+                "True",
+                {
+                    "Ref":"CfContainsLambda"
+                }
+            ]
+        },
+        "ProdManualApproval": {
+            "Fn::Equals":[
+                "True",
+                {
+                    "Ref":"ProdManualApproval"
+                }
+            ]
+        },
+        "SdlcCloudFormation": {
+            "Fn::Equals":[
+                "True",
+                {
+                    "Ref":"SdlcCloudFormation"
+                }
+            ]
+        },
+        "SdlcCodeBuildPre": {
+            "Fn::Equals":[
+                "True",
+                {
+                    "Ref":"SdlcCodeBuildPre"
+                }
+            ]
+        }
+    },
+    "Resources":{
+        "CodeCommit":{
+            "Type":"AWS::CodeCommit::Repository",
+            "Condition":"CreateCodeCommitRepo",
+            "Properties":{
+                "RepositoryDescription":"Repository created by CodePipeline",
+                "RepositoryName":{
+                    "Fn::Sub":"${Scope}-${SubScope}"
+                }
+            }
+        },
+        "CodePipeline":{
+            "Type":"AWS::CodePipeline::Pipeline",
+            "Properties":{
+                "ArtifactStore":{
+                    "Type":"S3",
+                    "Location":{
+                        "Ref": "S3BucketName"
+                    },
+                    "EncryptionKey": {
+                        "Id":{
+                            "Ref": "KmsCmkArn"
+                        },
+                        "Type":"KMS"
+                    }
+                },
+                "RestartExecutionOnUpdate":"false",
+                "RoleArn": {
+                    "Ref": "RoleArn"
+                },
+                "Name": {
+                    "Fn::Sub":"${Scope}-${SubScope}"
+                },
+                "Stages": [
+                    {
+                        "Name":"Source",
+                        "Actions":[
+                            {
+                                "ActionTypeId":{
+                                    "Category":"Source",
+                                    "Owner":"AWS",
+                                    "Provider":"CodeCommit",
+                                    "Version":"1"
+                                },
+                                "Configuration":{
+                                    "RepositoryName":{
+                                        "Fn::If":[
+                                            "CreateCodeCommitRepo",
+                                            {
+                                                "Fn::GetAtt":[
+                                                    "CodeCommit",
+                                                    "Name"
+                                                ]
+                                            },
+                                            {
+                                                "Ref":"SourceCodeCommitRepoName"
+                                            }
+                                        ]
+                                    },
+                                    "BranchName":"master"
+                                },
+                                "Name":"CodeCommit",
+                                "OutputArtifacts":[
+                                    {
+                                        "Name":"SourceOutput"
+                                    }
+                                ],
+                                "RunOrder": 1
+                            }
+                        ]
+                    },
+                    {
+                        "Name":"Dev",
+                        "Actions":[
+                            {
+                                "Fn::If": [
+                                    "SdlcCodeBuildPre",
+                                    {
+                                      "ActionTypeId": {
+                                        "Category": "Build",
+                                        "Owner": "AWS",
+                                        "Provider": "CodeBuild",
+                                        "Version": "1"
+                                      },
+                                      "Configuration": {
+                                        "ProjectName": {
+                                          "Fn::Sub": "dev-${MasterPipeline}-infra-${Scope}-CodeBuildPre"
+                                        }
+                                      },
+                                      "Name": "RunCodeBuild",
+                                      "InputArtifacts": [
+                                        {
+                                          "Name": "SourceOutput"
+                                        }
+                                      ],
+                                      "RunOrder": 1,
+                                      "RoleArn": {
+                                          "Fn::Sub":"arn:aws:iam::${DevAccount}:role/dev-${MasterPipeline}-infra-${Scope}-CodeBuildRole"
+                                      }
+                                    },
+                                    {
+                                        "Ref": "AWS::NoValue"
+                                    }
+                                ]
+                            },
+                            {
+                                "Fn::If": [
+                                    "SdlcCloudFormation",
+                                    {
+                                        "ActionTypeId":{
+                                            "Category":"Deploy",
+                                            "Owner":"AWS",
+                                            "Provider":"CloudFormation",
+                                            "Version":"1"
+                                        },
+                                        "Configuration":{
+                                            "ActionMode":"REPLACE_ON_FAILURE",
+                                            "Capabilities":"CAPABILITY_IAM",
+                                            "RoleArn":{
+                                                "Fn::Sub":"arn:aws:iam::${DevAccount}:role/dev-${MasterPipeline}-infra-${Scope}-CloudFormationRole"
+                                            },
+                                            "StackName":{
+                                                "Fn::Sub":"dev-${Scope}-${SubScope}"
+                                            },
+                                            "TemplatePath":"SourceOutput::CloudFormation.template",
+                                            "TemplateConfiguration":{
+                                                "Fn::If":[
+                                                    "IncludeEnvCfTemplateConfigs",
+                                                    "SourceOutput::cfvars/Dev.template",
+                                                    {
+                                                        "Ref":"AWS::NoValue"
+                                                    }
+                                                ]
+                                            },
+                                            "ParameterOverrides":{
+                                                "Fn::Join": [
+                                                    "",
+                                                    [
+                                                        "{",
+                                                        {
+                                                            "Fn::If":[
+                                                                "CfContainsLambda",
+                                                                "\"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"S3ObjectKey\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"ObjectKey\"]},",
+                                                                {
+                                                                    "Ref":"AWS::NoValue"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "Fn::Sub": "\"Environment\": \"dev\","
+                                                        },
+                                                        {
+                                                            "Fn::Sub": "\"MasterPipeline\": \"${MasterPipeline}\","
+                                                        },
+                                                        {
+                                                            "Fn::Sub": "\"Scope\": \"${Scope}\""
+                                                        },
+                                                        "}"
+                                                    ]
+                                                ]
+                                            }
+                                        },
+                                        "Name":"DeployCloudFormationDev",
+                                        "InputArtifacts":[
+                                            {
+                                                "Name":"SourceOutput"
+                                            }
+                                        ],
+                                        "RunOrder": 2,
+                                        "RoleArn": {
+                                            "Fn::Sub":"arn:aws:iam::${DevAccount}:role/dev-${MasterPipeline}-infra-${Scope}-CodePipelineRole"
+                                        }
+                                    },
+                                    {
+                                        "Ref": "AWS::NoValue"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "Fn::If":[
+                            "ProdManualApproval",
+                            {
+                                "Name":"ManualApproval",
+                                "Actions":[
+                                    {
+                                        "Name":"ManualApproval",
+                                        "ActionTypeId":{
+                                            "Category":"Approval",
+                                            "Owner":"AWS",
+                                            "Version":"1",
+                                            "Provider":"Manual"
+                                        },
+                                        "RunOrder": 1
+                                    }
+                                ]
+                            },
+                            {
+                                "Ref": "AWS::NoValue"
+                            }
+                        ]
+                    },
+                    {
+                        "Name":"Prod",
+                        "Actions":[
+                            {
+                                "Fn::If": [
+                                    "SdlcCodeBuildPre",
+                                    {
+                                      "ActionTypeId": {
+                                        "Category": "Build",
+                                        "Owner": "AWS",
+                                        "Provider": "CodeBuild",
+                                        "Version": "1"
+                                      },
+                                      "Configuration": {
+                                        "ProjectName": {
+                                          "Fn::Sub": "prod-${MasterPipeline}-infra-${Scope}-CodeBuildPre"
+                                        }
+                                      },
+                                      "Name": "RunCodeBuild",
+                                      "InputArtifacts": [
+                                        {
+                                          "Name": "SourceOutput"
+                                        }
+                                      ],
+                                      "RunOrder": 1,
+                                      "RoleArn": {
+                                          "Fn::Sub":"arn:aws:iam::${ProdAccount}:role/prod-${MasterPipeline}-infra-${Scope}-CodeBuildRole"
+                                      }
+                                    },
+                                    {
+                                        "Ref": "AWS::NoValue"
+                                    }
+                                ]
+                            },
+                            {
+                                "Fn::If": [
+                                    "SdlcCloudFormation",
+                                    {
+                                        "ActionTypeId":{
+                                            "Category":"Deploy",
+                                            "Owner":"AWS",
+                                            "Provider":"CloudFormation",
+                                            "Version":"1"
+                                        },
+                                        "Configuration":{
+                                            "ActionMode":"REPLACE_ON_FAILURE",
+                                            "Capabilities":"CAPABILITY_IAM",
+                                            "RoleArn":{
+                                                "Fn::Sub":"arn:aws:iam::${ProdAccount}:role/prod-${MasterPipeline}-infra-${Scope}-CloudFormationRole"
+                                            },
+                                            "StackName":{
+                                                "Fn::Sub":"prod-${Scope}-${SubScope}"
+                                            },
+                                            "TemplatePath":"SourceOutput::CloudFormation.template",
+                                            "TemplateConfiguration":{
+                                                "Fn::If":[
+                                                    "IncludeEnvCfTemplateConfigs",
+                                                    "SourceOutput::cfvars/Prod.template",
+                                                    {
+                                                        "Ref":"AWS::NoValue"
+                                                    }
+                                                ]
+                                            },
+                                            "ParameterOverrides":{
+                                                "Fn::Join": [
+                                                    "",
+                                                    [
+                                                        "{",
+                                                        {
+                                                            "Fn::If":[
+                                                                "CfContainsLambda",
+                                                                "\"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"S3ObjectKey\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"ObjectKey\"]},",
+                                                                {
+                                                                    "Ref":"AWS::NoValue"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "Fn::Sub": "\"Environment\": \"prod\","
+                                                        },
+                                                        {
+                                                            "Fn::Sub": "\"MasterPipeline\": \"${MasterPipeline}\","
+                                                        },
+                                                        {
+                                                            "Fn::Sub": "\"Scope\": \"${Scope}\""
+                                                        },
+                                                        "}"
+                                                    ]
+                                                ]
+                                            }
+                                        },
+                                        "Name": "DeployCloudFormationProd",
+                                        "InputArtifacts": [
+                                            {
+                                                "Name":"SourceOutput"
+                                            }
+                                        ],
+                                        "RunOrder": 2,
+                                        "RoleArn": {
+                                            "Fn::Sub":"arn:aws:iam::${ProdAccount}:role/prod-${MasterPipeline}-infra-${Scope}-CodePipelineRole"
+                                        }
+                                    },
+                                    {
+                                        "Ref": "AWS::NoValue"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}
