@@ -22,7 +22,7 @@ With the cicd, dev, and prod accounts, run Master-Environment.template through C
    - Set AccountId of cicd account
    - Pass in name of master stack (lowercase)
 
-After SDLC stacks have been created, update the Master stack.
+After SDLC stacks have been created, update the master stack within the cicd account.
    - Set AllEnvironmentsCreated = True
    
-Edit your pipelines file. Enjoy!
+Edit your Pipelines.json file as needed. Enjoy!
