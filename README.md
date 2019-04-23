@@ -37,3 +37,4 @@ Edit your Pipelines.template file as needed. Enjoy!
    - Environments.template to define environments instead of defaults
    - Ability to pull pipeline source repos from github
    - Add optional deploy to ECS step
+   - YAML support?
