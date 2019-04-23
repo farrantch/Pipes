@@ -14,7 +14,7 @@ file_cicd_child = 'Scope-CICD-Child'
 # Input Files
 with open(file_pipelines) as pl_file:
     pipelines = json.load(pl_file)
-with open(file_cicd_parent + '.template') as cp_file:
+with open('scope-templates/' + file_cicd_parent + '.template') as cp_file:
     cicd_parent = json.load(cp_file)
     
 client = boto3.client('cloudformation')
@@ -96,7 +96,7 @@ for key, value in pipelines.items():
     }
     
     # Open child template to insert pipelines
-    with open(file_cicd_child + '.template') as cc_file:
+    with open('scope-templates/' + file_cicd_child + '.template') as cc_file:
         cicd_child = json.load(cc_file)
     
     # Loop through pipelines

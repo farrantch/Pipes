@@ -13,12 +13,8 @@ file_sdlc_child = 'Scope-SDLC-Child'
 # Input Files
 with open(file_pipelines) as pl_file:
     pipelines = json.load(pl_file)
-with open(file_sdlc_parent + '.template') as sp_file:
+with open('scope-templates/' + file_sdlc_parent + '.template') as sp_file:
     sdlc_parent = json.load(sp_file)
-    
-    
-with open(file_sdlc_child + '.template') as sc_file:
-    sdlc_child = json.load(sc_file)
     
 client = boto3.client('cloudformation')
 
@@ -122,7 +118,7 @@ for key, value in pipelines.items():
     # }
     
     # Add policy statements to PolicyBaseline
-    with open(file_sdlc_child + '.template') as sc_file:
+    with open('scope-templates/' + file_sdlc_child + '.template') as sc_file:
         sdlc_child = json.load(sc_file)
     for ps in value['PolicyStatements']:
         with open('policy-statements/' + str(ps) + '.template') as json_file:
