@@ -6,13 +6,13 @@ import json
 from botocore.exceptions import ClientError
 
 # Filenames
-file_pipelines = 'Pipelines.json'
+file_pipelines = 'Pipelines'
 file_cicd_parent = 'Scope-CICD-Parent'
 file_cicd_child = 'Scope-CICD-Child'
 
 # Open Files
 # Input Files
-with open(file_pipelines) as pl_file:
+with open(file_pipelines + '.template') as pl_file:
     pipelines = json.load(pl_file)
 with open('scope-templates/' + file_cicd_parent + '.template') as cp_file:
     cicd_parent = json.load(cp_file)

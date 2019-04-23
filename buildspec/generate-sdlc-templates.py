@@ -5,13 +5,13 @@ import os
 import json
 
 # Filenames
-file_pipelines = 'Pipelines.json'
+file_pipelines = 'Pipelines'
 file_sdlc_parent = 'Scope-SDLC-Parent'
 file_sdlc_child = 'Scope-SDLC-Child'
 
 # Open Files
 # Input Files
-with open(file_pipelines) as pl_file:
+with open(file_pipelines + '.template') as pl_file:
     pipelines = json.load(pl_file)
 with open('scope-templates/' + file_sdlc_parent + '.template') as sp_file:
     sdlc_parent = json.load(sp_file)

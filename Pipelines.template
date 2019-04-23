@@ -42,18 +42,6 @@
             }
         ]
     },
-    "Domain": {
-        "PolicyStatements": [
-            "Baseline",
-            "IamCreateRole"
-        ],
-        "Pipelines": [
-            {
-                "Name": "Api",
-                "PipelineTemplate": "Default"
-            }
-        ]
-    },
     "Ui": {
         "PolicyStatements": [
             "Baseline",
