@@ -3,6 +3,9 @@ A pipeline ..... for managing your pipelines.
 
 The purpose of this project is to manage many CodePipeline's within an organization across multiple accounts. Each pipeline belongs to a Scope that logically separates the permissions of each pipeline. 
 
+## Architecture Diagram
+![Diagram](farrantch.github.com/farrantch.github.io/pipes.png)
+
 ## Set up the master pipeline
 By default, this uses 3 AWS environments (ideally seperated accounts):
    - cicd
