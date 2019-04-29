@@ -21,7 +21,7 @@ Within the cicd account, run Master.template through CloudFormation.
 Once finished, copy the KmsCmkArn and S3BucketName from the CloudFormation outputs section.
     
 With the cicd, dev, and prod accounts, run Master-Environment.template through CloudFormation.
-   - Name the stack ${Environment}-{MasterStackName} ***important!*** ie: cicd-master 
+   - Name the stack ${Environment}-{MasterStackName} ie: cicd-master 
    - Pass in the KmsCmkArn and S3BucketName as parameters
    - Set environment (lowercase)
    - Set AccountId of cicd account
