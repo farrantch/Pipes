@@ -119,6 +119,7 @@
         "CodeCommit":{
             "Type":"AWS::CodeCommit::Repository",
             "Condition":"CreateCodeCommitRepo",
+            "DeletionPolicy" : "Retain",
             "Properties":{
                 "RepositoryDescription":"Repository created by CodePipeline",
                 "RepositoryName":{
