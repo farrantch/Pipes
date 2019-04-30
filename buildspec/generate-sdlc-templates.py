@@ -120,8 +120,8 @@ for key, value in pipelines.items():
     # Add policy statements to PolicyBaseline
     with open('scope-templates/' + file_sdlc_child + '.template') as sc_file:
         sdlc_child = json.load(sc_file)
-    for ps in value['PolicyStatements']:
-        with open('policy-statements/' + str(ps) + '.template') as json_file:
+    for ps in value['Policies']:
+        with open('policies/' + str(ps) + '.template') as json_file:
             data = json.load(json_file)
         for statement in data['Statements']:
             sdlc_child['Resources']['IamPolicyBaseline']['Properties']['PolicyDocument']['Statement'].append(statement)
