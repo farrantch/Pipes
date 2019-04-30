@@ -1,0 +1,16 @@
+{
+    "Statements": [
+        {
+            "Sid": "ParameterStore",
+            "Effect": "Allow",
+            "Action": [
+                "ssm:*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:ssm:*:${AWS::AccountId}:parameter/${Environment}/${Scope}/*"
+                }
+            ]
+        }
+    ]
+}
