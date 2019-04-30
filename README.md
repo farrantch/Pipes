@@ -1,7 +1,10 @@
 # Pipes
 A pipeline ..... for managing your pipelines.
 
-The purpose of this project is to manage many CodePipeline's within an organization across multiple accounts. Each pipeline belongs to a Scope that logically separates the permissions of each pipeline. 
+The purpose of this project is to manage many CodePipeline's within an organization across multiple accounts. Each pipeline belongs to an infrastructure "Scope" that logically separates the permissions of each pipeline via seperate S3 buckets and KMS keys. 
+
+## Architecture Diagram
+![Diagram](https://farrantch.github.io/pipes.png)
 
 ## Set up the master pipeline
 By default, this uses 3 AWS environments (ideally seperated accounts):
@@ -18,7 +21,7 @@ Within the cicd account, run Master.template through CloudFormation.
 Once finished, copy the KmsCmkArn and S3BucketName from the CloudFormation outputs section.
     
 With the cicd, dev, and prod accounts, run Master-Environment.template through CloudFormation.
-   - Name the stack ${Environment}-{MasterStackName} (**important!**) ie: cicd-master 
+   - Name the stack ${Environment}-{MasterStackName} ie: cicd-master 
    - Pass in the KmsCmkArn and S3BucketName as parameters
    - Set environment (lowercase)
    - Set AccountId of cicd account
