@@ -207,36 +207,110 @@
                         "Name":"Source",
                         "Actions":[
                             {
-                                "ActionTypeId":{
-                                    "Category":"Source",
-                                    "Owner":"AWS",
-                                    "Provider":"CodeCommit",
-                                    "Version":"1"
-                                },
-                                "Configuration":{
-                                    "RepositoryName":{
-                                        "Fn::If":[
-                                            "CreateCodeCommitRepo",
-                                            {
-                                                "Fn::GetAtt":[
-                                                    "CodeCommit",
-                                                    "Name"
+                                "Fn::If": [
+                                    "UseCodeCommitRepo",
+                                    {
+                                        "ActionTypeId":{
+                                            "Category":"Source",
+                                            "Owner":"AWS",
+                                            "Provider":"CodeCommit",
+                                            "Version":"1"
+                                        },
+                                        "Configuration":{
+                                            "RepositoryName":{
+                                                "Fn::If":[
+                                                    "CreateCodeCommitRepo",
+                                                    {
+                                                        "Fn::GetAtt":[
+                                                            "CodeCommit",
+                                                            "Name"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "Ref":"SourceRepo"
+                                                    }
                                                 ]
                                             },
+                                            "BranchName":"master"
+                                        },
+                                        "Name":"CodeCommit",
+                                        "OutputArtifacts":[
                                             {
-                                                "Ref":"SourceRepo"
+                                                "Name":"SourceOutput"
                                             }
-                                        ]
+                                        ],
+                                        "RunOrder": 1
                                     },
-                                    "BranchName":"master"
-                                },
-                                "Name":"CodeCommit",
-                                "OutputArtifacts":[
                                     {
-                                        "Name":"SourceOutput"
+                                        "Ref": "AWS::NoValue"
                                     }
-                                ],
-                                "RunOrder": 1
+                                ]
+                            },
+                            {
+                                "Fn::If": [
+                                    "UseGithubRepo",
+                                    {
+                                        "ActionTypeId":{
+                                            "Category":"Source",
+                                            "Owner":"ThirdParty",
+                                            "Provider":"GitHub",
+                                            "Version":"1"
+                                        },
+                                        "Configuration":{
+                                            "Branch":"master",
+                                            "Owner": {
+                                                "Fn::Select": [
+                                                    "1",
+                                                    {
+                                                        "Fn::Split": [
+                                                            ":",
+                                                            {
+                                                                "Ref": "SourceRepo"
+                                                            }
+                                                        ]
+                                                    }
+                                                ]
+                                            },
+                                            "Repo": {
+                                                "Fn::Select": [
+                                                    "2",
+                                                    {
+                                                        "Fn::Split": [
+                                                            ":",
+                                                            {
+                                                                "Ref": "SourceRepo"
+                                                            }
+                                                        ]
+                                                    }
+                                                ]
+                                            },
+                                            "OAuthToken": {
+                                                "Fn::Select": [
+                                                    "3",
+                                                    {
+                                                        "Fn::Split": [
+                                                            ":",
+                                                            {
+                                                                "Ref": "SourceRepo"
+                                                            }
+                                                        ]
+                                                    }
+                                                ]
+                                            },
+                                            "PollForSourceChanges": "True"
+                                        },
+                                        "Name":"GitHub",
+                                        "OutputArtifacts":[
+                                            {
+                                                "Name":"SourceOutput"
+                                            }
+                                        ],
+                                        "RunOrder": 1
+                                    },
+                                    {
+                                        "Ref": "AWS::NoValue"
+                                    }
+                                ]
                             }
                         ]
                     },
