@@ -11,10 +11,10 @@
         "SubScope": {
             "Type": "String"
         },
-        "SourceCodeCommitRepoName":{
-            "Description":"(Optional). Source CodeCommit repository. If not specified, one will be created.",
+        "SourceRepo":{
+            "Description":"(Optional). Source repository. If not specified, one will be created.",
             "Type":"String",
-            "Default": ""
+            "Default": "codecommit:"
         },
         "IncludeEnvCfTemplateConfigs":{
             "Description":"Include CloudFormation environment config files?",
@@ -67,10 +67,63 @@
     },
     "Conditions":{
         "CreateCodeCommitRepo":{
-            "Fn::Equals":[
-                "",
+            "Fn::And": [
                 {
-                    "Ref":"SourceCodeCommitRepoName"
+                    "Condition": "UseCodeCommitRepo"
+                },
+                {
+                    "Fn::Equals":[
+                        "",
+                        {
+                            "Fn::Select": [
+                                "1",
+                                {
+                                    "Fn::Split": [
+                                        ":",
+                                        {
+                                            "Ref":"SourceRepo"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ] 
+                }
+            ]
+        },
+        "UseCodeCommitRepo":{
+            "Fn::Equals":[
+                "codecommit",
+                {
+                    "Fn::Select": [
+                        "0",
+                        {
+                            "Fn::Split": [
+                                ":",
+                                {
+                                    "Ref":"SourceRepo"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        "UseGithubRepo":{
+            "Fn::Equals":[
+                "github",
+                {
+                    "Fn::Select": [
+                        "0",
+                        {
+                            "Fn::Split": [
+                                ":",
+                                {
+                                    "Ref":"SourceRepo"
+                                }
+                            ]
+                        }
+                    ]
                 }
             ]
         },
@@ -171,7 +224,7 @@
                                                 ]
                                             },
                                             {
-                                                "Ref":"SourceCodeCommitRepoName"
+                                                "Ref":"SourceRepo"
                                             }
                                         ]
                                     },
