@@ -1,0 +1,25 @@
+{
+    "LegacyMicroserviceFoo": {
+        "Policies": [
+            "aws/Dynamodb",
+            "aws/Lamda",
+            "IamCreateRole",
+            "services/LegacyMicroserviceFoo"
+        ],
+        "Pipelines": [
+            {
+                "Name": "Db",
+                "Parameters": {
+                    "IncludeEnvCfTemplateConfigs": "True",
+                    "CfContainsLambda": "True"
+                }
+            }
+        ]
+    },
+    "Frontend": {
+        "Policies": [
+            "services/Frontend",
+            "IamCreateRole"
+        ]
+    }
+}
