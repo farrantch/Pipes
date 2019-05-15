@@ -33,7 +33,8 @@
     },
     "Conditions": {
         "NotInitialCreation": {
-            "Fn::Equals": [{
+            "Fn::Equals": [
+                {
                     "Ref": "AllEnvironmentsCreated"
                 },
                 "True"
@@ -41,7 +42,7 @@
         }
     },
     "Resources": {
-        "PolicyCodePipeline": {
+        "IamPolicyBaseline": {
             "Type": "AWS::IAM::ManagedPolicy",
             "DependsOn": "S3Bucket",
             "Properties": {
@@ -84,7 +85,8 @@
                                     "Sid": "AllowAssumeEnvironmentRoles",
                                     "Effect": "Allow",
                                     "Action": "sts:AssumeRole",
-                                    "Resource": [{
+                                    "Resource": [
+                                        {
                                             "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${MasterPipeline}-infra-${Scope}-CloudFormationRole"
                                         },
                                         {
@@ -174,7 +176,6 @@
         },
         "RoleCodePipeline": {
             "Type": "AWS::IAM::Role",
-            "DependsOn": "PolicyCodePipeline",
             "Properties": {
                 "AssumeRolePolicyDocument": {
                     "Version": "2012-10-17",
@@ -189,10 +190,33 @@
                     }]
                 },
                 "ManagedPolicyArns": [{
-                    "Ref": "PolicyCodePipeline"
+                    "Ref": "IamPolicyBaseline"
                 }],
                 "RoleName": {
                     "Fn::Sub": "${Environment}-${MasterPipeline}-infra-${Scope}-CodePipelineRole"
+                }
+            }
+        },
+        "RoleCodeBuild": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [{
+                        "Effect": "Allow",
+                        "Principal": {
+                            "Service": [
+                                "codebuild.amazonaws.com"
+                            ]
+                        },
+                        "Action": "sts:AssumeRole"
+                    }]
+                },
+                "ManagedPolicyArns": [{
+                    "Ref": "IamPolicyBaseline"
+                }],
+                "RoleName": {
+                    "Fn::Sub": "${Environment}-${MasterPipeline}-infra-${Scope}-CodeBuildRole"
                 }
             }
         },

@@ -15,7 +15,8 @@
                 "sqs:*",
                 "cloudwatch:*",
                 "lambda:*",
-                "codebuild:*"
+                "codebuild:*",
+                "ssm:*"
             ],
             "Resource": [
                 {
@@ -65,6 +66,12 @@
                 },
                 {
                     "Fn::Sub": "arn:aws:codebuild:*:${AWS::AccountId}:project/${Environment}-${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:ssm:*:${AWS::AccountId}:parameter/${Environment}-${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:ssm:*:${AWS::AccountId}:parameter/${Environment}/${Scope}/*"
                 }
             ]
         },

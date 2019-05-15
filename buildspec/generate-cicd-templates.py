@@ -6,14 +6,14 @@ import json
 from botocore.exceptions import ClientError
 
 # Filenames
-file_pipelines = 'Pipelines'
+file_scopes = 'Scopes'
 file_cicd_parent = 'Scope-CICD-Parent'
 file_cicd_child = 'Scope-CICD-Child'
 
 # Open Files
 # Input Files
-with open(file_pipelines + '.template') as pl_file:
-    pipelines = json.load(pl_file)
+with open(file_scopes + '.template') as s_file:
+    scopes = json.load(s_file)
 with open('scope-templates/' + file_cicd_parent + '.template') as cp_file:
     cicd_parent = json.load(cp_file)
     
@@ -50,7 +50,7 @@ if aec:
             )['Stacks'][0]['Parameters']
 
 # Loop through infra scopes within pipeline file
-for key, value in pipelines.items():
+for key, value in scopes.items():
     scope = key.lower()
     # Determine AllEnvironmentsCreated value
     if scope not in child_stack_parameters:
@@ -100,57 +100,67 @@ for key, value in pipelines.items():
         cicd_child = json.load(cc_file)
     
     # Loop through pipelines
-    for pipeline in value['Pipelines']:
-        name = pipeline['Name'].lower()
-        cicd_child['Resources']['Pipeline' + pipeline['Name']] = {
-            "Type": "AWS::CloudFormation::Stack",
-            "Condition": "NotInitialCreation",
-            "Properties": {
-                "Parameters": {
-                    "DevAccount": {
-                        "Ref": "DevAccount"
+    if 'Pipelines' in value:
+        for pipeline in value['Pipelines']:
+            name = pipeline['Name'].lower()
+            cicd_child['Resources'][pipeline['Name']] = {
+                "Type": "AWS::CloudFormation::Stack",
+                "Condition": "NotInitialCreation",
+                "DependsOn": ["RoleCodePipeline", "RoleCodeBuild"],
+                "Properties": {
+                    "Parameters": {
+                        "DevAccount": {
+                            "Ref": "DevAccount"
+                        },
+                        "ProdAccount": {
+                            "Ref": "ProdAccount"
+                        },
+                        "MasterPipeline": {
+                            "Ref": "MasterPipeline"
+                        },
+                        "Scope": scope,
+                        "SubScope": name,
+                        "Environment": "cicd",
+                        "S3BucketName": {
+                            "Ref": "S3Bucket"
+                        },
+                        "KmsCmkArn": {
+                            "Fn::GetAtt": [
+                                "KmsKey",
+                                "Arn"
+                            ]
+                        },
+                        "IamRoleArnCodePipeline": {
+                            "Fn::GetAtt": [
+                                "RoleCodePipeline",
+                                "Arn"
+                            ]
+                        },
+                        "IamRoleArnCodeBuild": {
+                            "Fn::GetAtt": [
+                                "RoleCodeBuild",
+                                "Arn"
+                            ]
+                        }
                     },
-                    "ProdAccount": {
-                        "Ref": "ProdAccount"
-                    },
-                    "MasterPipeline": {
-                        "Ref": "MasterPipeline"
-                    },
-                    "Scope": scope,
-                    "SubScope": name,
-                    "Environment": "cicd",
-                    "S3BucketName": {
-                        "Ref": "S3Bucket"
-                    },
-                    "KmsCmkArn": {
-                        "Fn::GetAtt": [
-                            "KmsKey",
-                            "Arn"
-                        ]
-                    },
-                    "RoleArn": {
-                        "Fn::GetAtt": [
-                            "RoleCodePipeline",
-                            "Arn"
-                        ]
+                    "Tags": [{
+                        "Key": "Environment",
+                        "Value": {
+                            "Fn::Sub": "${Environment}"
+                        }
+                    }],
+                    "TemplateURL": {
+                        "Fn::Sub": "https://s3.amazonaws.com/${MasterS3BucketName}/infra-templates/CICD.template"
                     }
-                },
-                "Tags": [{
-                    "Key": "Environment",
-                    "Value": {
-                        "Fn::Sub": "${Environment}"
-                    }
-                }],
-                "TemplateURL": {
-                    "Fn::Sub": "https://s3.amazonaws.com/${MasterS3BucketName}/pipeline-templates/" + pipeline['PipelineTemplate'] + '.template'
                 }
             }
-        }
-        
-        # Add Parameter Overrides
-        if 'ParameterOverrides' in pipeline:
-            for po, po_value in pipeline['ParameterOverrides'].items():
-                cicd_child['Resources']['Pipeline' + pipeline['Name']]['Properties']['Parameters'][po] = po_value
+            
+            # Add Parameter Overrides
+            if 'Parameters' in pipeline:
+                for po, po_value in pipeline['Parameters'].items():
+                    # Filter to parameters only applicable to CICD stack
+                    if po == 'SdlcCodeBuildPre' or po == 'SdlcCodeBuildPost' or po == 'SdlcCloudFormation' or po == 'CfContainsLambda' or po == 'CicdCodeBuild' or po == 'CicdCodeBuildImage' or po == 'IncludeEnvCfTemplateConfigs':
+                        cicd_child['Resources'][pipeline['Name']]['Properties']['Parameters'][po] = po_value
         
     with open('generated-cicd-templates/' + file_cicd_child + '-' + scope + '.template', 'w') as cc_file_output:
         json.dump(cicd_child, cc_file_output, indent=4)

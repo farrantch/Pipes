@@ -5,14 +5,14 @@ import os
 import json
 
 # Filenames
-file_pipelines = 'Pipelines'
+file_scopes = 'Scopes'
 file_sdlc_parent = 'Scope-SDLC-Parent'
 file_sdlc_child = 'Scope-SDLC-Child'
 
 # Open Files
 # Input Files
-with open(file_pipelines + '.template') as pl_file:
-    pipelines = json.load(pl_file)
+with open(file_scopes + '.template') as s_file:
+    scopes = json.load(s_file)
 with open('scope-templates/' + file_sdlc_parent + '.template') as sp_file:
     sdlc_parent = json.load(sp_file)
     
@@ -41,7 +41,7 @@ for rs in resource_summaries:
         )['Stacks'][0]['Outputs']
 
 # Loop through infra scopes within pipeline file
-for key, value in pipelines.items():
+for key, value in scopes.items():
     scope = key.lower()
     
     # Determine stack output values
@@ -82,44 +82,59 @@ for key, value in pipelines.items():
         }
     }
     
-    # Insert Scope CICD Stacks
-    # cicd_parent['Resources']['Pipeline' + key] = {
-    #     "Type": "AWS::CloudFormation::Stack",
-    #     "Condition": "NotInitialCreation",
-    #     "Properties": {
-    #         "Parameters": {
-    #             "DevAccount": {
-    #                 "Ref": "DevAccount"
-    #             },
-    #             "ProdAccount": {
-    #                 "Ref": "ProdAccount"
-    #             },
-    #             "MasterPipeline": {
-    #                 "Ref": "MasterPipeline"
-    #             },
-    #             "Environment": {
-    #                 "Ref": "Environment"
-    #             },
-    #             "Scope": {
-    #                 "Fn::Sub": "${Scope}"
-    #             },
-    #             "AllEnvironmentsCreated": "False"
-    #         },
-    #         "Tags": [{
-    #             "Key": "Environment",
-    #             "Value": {
-    #                 "Fn::Sub": "${Environment}"
-    #             }
-    #         }],
-    #         "TemplateURL": {
-    #             "Fn::Sub": "https://s3.amazonaws.com/${S3BucketName}/generated-stacks/${Scope}.template"
-    #         }
-    #     }
-    # }
-    
-    # Add policy statements to PolicyBaseline
+    # Open child template to insert CodeBuildProjects
     with open('scope-templates/' + file_sdlc_child + '.template') as sc_file:
         sdlc_child = json.load(sc_file)
+        
+    # Loop through pipelines
+    if 'Pipelines' in value:
+        for pipeline in value['Pipelines']:
+            name = pipeline['Name'].lower()
+            # Insert Scope CICD CodeBuildPre Projects
+            sdlc_child['Resources'][pipeline['Name']] = {
+                "Type": "AWS::CloudFormation::Stack",
+                "Properties": {
+                    "Parameters": {
+                        "Scope": scope,
+                        "SubScope": name,
+                        "Environment": {
+                            "Ref": "Environment"
+                        },
+                        "KmsCmkArn": {
+                            "Ref": "KmsCmkArn"
+                        },
+                        "RoleArnCodeBuild": {
+                            "Fn::GetAtt": [
+                                "IamRoleCodeBuild",
+                                "Arn"
+                            ]
+                        },
+                        "MasterPipeline": {
+                            "Ref": "MasterPipeline"
+                        }
+                    },
+                    "Tags": [
+                        {
+                            "Key": "Environment",
+                            "Value": {
+                                "Fn::Sub": "${Environment}"
+                            }
+                        }
+                    ],
+                    "TemplateURL": {
+                        "Fn::Sub": "https://s3.amazonaws.com/${MasterS3BucketName}/infra-templates/SDLC.template"
+                    }
+                }
+            }
+            
+            # Add Parameter Overrides
+            if 'Parameters' in pipeline:
+                for po, po_value in pipeline['Parameters'].items():
+                    # Filter to parameters only applicable to SDLC stack
+                    if po == 'SdlcCodeBuildPre' or po == 'SdlcCodeBuildPost' or po == 'SdlcCodeBuildImagePre' or po == 'SdlcCodeBuildImagePost':
+                        sdlc_child['Resources'][pipeline['Name']]['Properties']['Parameters'][po] = po_value
+        
+    # Add policy statements to PolicyBaseline
     for ps in value['Policies']:
         with open('policies/' + str(ps) + '.template') as json_file:
             data = json.load(json_file)

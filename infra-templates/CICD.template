@@ -49,7 +49,10 @@
         "S3BucketName": {
             "Type": "String"
         },
-        "RoleArn": {
+        "IamRoleArnCodePipeline": {
+            "Type": "String"
+        },
+        "IamRoleArnCodeBuild": {
             "Type": "String"
         },
         "ProdManualApproval": {
@@ -63,6 +66,18 @@
         "SdlcCodeBuildPre": {
             "Type": "String",
             "Default": "False"
+        },
+        "SdlcCodeBuildPost": {
+            "Type": "String",
+            "Default": "False"
+        },
+        "CicdCodeBuild": {
+            "Type": "String",
+            "Default": "False"
+        },
+        "CicdCodeBuildImage": {
+            "Type": "String",
+            "Default": "aws/codebuild/nodejs:6.3.1"
         }
     },
     "Conditions":{
@@ -166,21 +181,75 @@
                     "Ref":"SdlcCodeBuildPre"
                 }
             ]
+        },
+        "SdlcCodeBuildPost": {
+            "Fn::Equals":[
+                "True",
+                {
+                    "Ref":"SdlcCodeBuildPre"
+                }
+            ]
+        },
+        "CicdCodeBuild": {
+            "Fn::Equals":[
+                "True",
+                {
+                    "Ref":"CicdCodeBuild"
+                }
+            ]
         }
     },
     "Resources":{
-        "CodeCommit":{
+        "CodeCommit": {
             "Type":"AWS::CodeCommit::Repository",
             "Condition":"CreateCodeCommitRepo",
             "DeletionPolicy" : "Retain",
             "Properties":{
-                "RepositoryDescription":"Repository created by CodePipeline",
+                "RepositoryDescription": "Repository created by CodePipeline",
                 "RepositoryName":{
-                    "Fn::Sub":"${Scope}-${SubScope}"
+                    "Fn::Sub":"${AWS::StackName}"
                 }
             }
         },
-        "CodePipeline":{
+        "CodeBuild": {
+          "Type": "AWS::CodeBuild::Project",
+          "Condition": "CicdCodeBuild",
+          "Properties": {
+            "Artifacts": {
+              "Type": "CODEPIPELINE"
+            },
+            "EncryptionKey": {
+                "Ref": "KmsCmkArn"
+            },
+            "Environment": {
+              "ComputeType": "BUILD_GENERAL1_SMALL",
+              "Image": {
+                "Ref": "CicdCodeBuildImage"
+              },
+              "EnvironmentVariables": [
+                {
+                  "Name": "Environment",
+                  "Type": "PLAINTEXT",
+                  "Value": "dev"
+                }
+              ],
+              "PrivilegedMode": false,
+              "Type": "LINUX_CONTAINER"
+            },
+            "Name": {
+              "Fn::Sub": "${Environment}-${MasterPipeline}-${Scope}-${SubScope}-CodeBuildPre"
+            },
+            "ServiceRole": {
+                "Ref": "IamRoleArnCodeBuild"
+            },
+            "Source": {
+              "Type": "CODEPIPELINE",
+              "BuildSpec": "buildspec/sdlc-pre.yml"
+            },
+            "TimeoutInMinutes": "5"
+          }
+        },
+        "CodePipeline": {
             "Type":"AWS::CodePipeline::Pipeline",
             "Properties":{
                 "ArtifactStore":{
@@ -197,7 +266,7 @@
                 },
                 "RestartExecutionOnUpdate":"false",
                 "RoleArn": {
-                    "Ref": "RoleArn"
+                    "Ref": "IamRoleArnCodePipeline"
                 },
                 "Name": {
                     "Fn::Sub":"${Scope}-${SubScope}"
@@ -315,6 +384,44 @@
                         ]
                     },
                     {
+                        "Fn::If": [
+                            "CicdCodeBuild",
+                            {
+                                "Name":"Build",
+                                "Actions":[
+                                    {
+                                        "ActionTypeId": {
+                                            "Category": "Build",
+                                            "Owner": "AWS",
+                                            "Provider": "CodeBuild",
+                                            "Version": "1"
+                                        },
+                                        "Configuration": {
+                                            "ProjectName": {
+                                              "Fn::Sub": "cicd-${MasterPipeline}-infra-${Scope}-${SubScope}-Build"
+                                            }
+                                        },
+                                        "Name": "RunCodeBuild",
+                                        "InputArtifacts": [
+                                            {
+                                              "Name": "SourceOutput"
+                                            }
+                                        ],
+                                        "RunOrder": 1,
+                                        "OutputArtifacts":[
+                                            {
+                                                "Name":"BuildOutput"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "Ref": "AWS::NoValue"
+                            }
+                        ]
+                    },
+                    {
                         "Name":"Dev",
                         "Actions":[
                             {
@@ -329,10 +436,10 @@
                                       },
                                       "Configuration": {
                                         "ProjectName": {
-                                          "Fn::Sub": "dev-${MasterPipeline}-infra-${Scope}-CodeBuildPre"
+                                          "Fn::Sub": "dev-${MasterPipeline}-infra-${Scope}-${SubScope}-SdlcPre"
                                         }
                                       },
-                                      "Name": "RunCodeBuild",
+                                      "Name": "CodeBuildSdlcPre",
                                       "InputArtifacts": [
                                         {
                                           "Name": "SourceOutput"
@@ -415,6 +522,37 @@
                                         "RoleArn": {
                                             "Fn::Sub":"arn:aws:iam::${DevAccount}:role/dev-${MasterPipeline}-infra-${Scope}-CodePipelineRole"
                                         }
+                                    },
+                                    {
+                                        "Ref": "AWS::NoValue"
+                                    }
+                                ]
+                            },
+                            {
+                                "Fn::If": [
+                                    "SdlcCodeBuildPost",
+                                    {
+                                      "ActionTypeId": {
+                                        "Category": "Build",
+                                        "Owner": "AWS",
+                                        "Provider": "CodeBuild",
+                                        "Version": "1"
+                                      },
+                                      "Configuration": {
+                                        "ProjectName": {
+                                          "Fn::Sub": "dev-${MasterPipeline}-infra-${Scope}-${SubScope}-SdlcPost"
+                                        }
+                                      },
+                                      "Name": "CodeBuildSdlcPost",
+                                      "InputArtifacts": [
+                                        {
+                                          "Name": "SourceOutput"
+                                        }
+                                      ],
+                                      "RunOrder": 3,
+                                      "RoleArn": {
+                                          "Fn::Sub":"arn:aws:iam::${DevAccount}:role/dev-${MasterPipeline}-infra-${Scope}-CodeBuildRole"
+                                      }
                                     },
                                     {
                                         "Ref": "AWS::NoValue"
@@ -547,6 +685,37 @@
                                         "RoleArn": {
                                             "Fn::Sub":"arn:aws:iam::${ProdAccount}:role/prod-${MasterPipeline}-infra-${Scope}-CodePipelineRole"
                                         }
+                                    },
+                                    {
+                                        "Ref": "AWS::NoValue"
+                                    }
+                                ]
+                            },
+                            {
+                                "Fn::If": [
+                                    "SdlcCodeBuildPost",
+                                    {
+                                      "ActionTypeId": {
+                                        "Category": "Build",
+                                        "Owner": "AWS",
+                                        "Provider": "CodeBuild",
+                                        "Version": "1"
+                                      },
+                                      "Configuration": {
+                                        "ProjectName": {
+                                          "Fn::Sub": "prod-${MasterPipeline}-infra-${Scope}-${SubScope}-SdlcPost"
+                                        }
+                                      },
+                                      "Name": "CodeBuildSdlcPost",
+                                      "InputArtifacts": [
+                                        {
+                                          "Name": "SourceOutput"
+                                        }
+                                      ],
+                                      "RunOrder": 3,
+                                      "RoleArn": {
+                                          "Fn::Sub":"arn:aws:iam::${ProdAccount}:role/prod-${MasterPipeline}-infra-${Scope}-CodeBuildRole"
+                                      }
                                     },
                                     {
                                         "Ref": "AWS::NoValue"
