@@ -2,10 +2,6 @@
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "Creates the build account's infrastructure that allows for cross-account CodePipelines.",
     "Parameters": {
-        "CicdAccount": {
-            "Description": "AWS account number for cicd.",
-            "Type": "String"
-        },
         "DevAccount": {
             "Description": "AWS account number for dev.",
             "Type": "Number"
@@ -16,7 +12,8 @@
         },
         "SourceCodeCommitRepoName": {
             "Description": "(Optional). Source CodeCommit repository. If not specified, one will be created.",
-            "Type": "String"
+            "Type": "String",
+            "Default": ""
         },
         "AllEnvironmentsCreated": {
             "Description": "Must be false for initial creation of stacks. Afterwards it must be switched to true when all environments have been created.",
@@ -56,6 +53,55 @@
                     "Ref": "AWS::StackName"
                 }
             }
+        },
+        "CodeBuildGenerateMasterTemplate": {
+          "Type": "AWS::CodeBuild::Project",
+          "Properties": {
+            "Artifacts": {
+              "Type": "CODEPIPELINE",
+              "OverrideArtifactName": true
+            },
+            "EncryptionKey": {
+                "Fn::GetAtt": [
+                    "KmsKey",
+                    "Arn"
+                ]
+            },
+            "Environment": {
+              "ComputeType": "BUILD_GENERAL1_SMALL",
+              "Image": "aws/codebuild/standard:1.0",
+              "EnvironmentVariables": [
+                {
+                    "Name": "Environment",
+                    "Type": "PLAINTEXT",
+                    "Value": "cicd"
+                },
+                {
+                    "Name": "S3Bucket",
+                    "Type": "PLAINTEXT",
+                    "Value": {
+                        "Ref": "S3Bucket"
+                    }
+                }
+              ],
+              "PrivilegedMode": false,
+              "Type": "LINUX_CONTAINER"
+            },
+            "Name": {
+              "Fn::Sub": "${AWS::StackName}-generate-master-template"
+            },
+            "ServiceRole": {
+                "Fn::GetAtt": [
+                    "RoleCodeBuild",
+                    "Arn"
+                ]
+            },
+            "Source": {
+              "Type": "CODEPIPELINE",
+              "BuildSpec": "buildspec/generate-master-template.yml"
+            },
+            "TimeoutInMinutes": "5"
+          }
         },
         "CodeBuildGenerateCICDTemplates": {
           "Type": "AWS::CodeBuild::Project",
@@ -265,13 +311,13 @@
                                     "Action": "sts:AssumeRole",
                                     "Resource": [
                                         {
-                                            "Fn::Sub": "arn:aws:iam::${CicdAccount}:role/cicd-${AWS::StackName}-CloudFormationRole"
+                                            "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${AWS::StackName}-CloudFormationRole"
                                         },
                                         {
-                                            "Fn::Sub": "arn:aws:iam::${CicdAccount}:role/cicd-${AWS::StackName}-CodePipelineRole"
+                                            "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${AWS::StackName}-CodePipelineRole"
                                         },
                                         {
-                                            "Fn::Sub": "arn:aws:iam::${CicdAccount}:role/cicd-${AWS::StackName}-CodeBuildRole"
+                                            "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${AWS::StackName}-CodeBuildRole"
                                         },
                                         {
                                             "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${AWS::StackName}-CloudFormationRole"
@@ -528,13 +574,13 @@
                                     "Principal": {
                                         "AWS": [
                                             {
-                                                "Fn::Sub": "arn:aws:iam::${CicdAccount}:role/cicd-${AWS::StackName}-CloudFormationRole"
+                                                "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${AWS::StackName}-CloudFormationRole"
                                             },
                                             {
-                                                "Fn::Sub": "arn:aws:iam::${CicdAccount}:role/cicd-${AWS::StackName}-CodePipelineRole"
+                                                "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${AWS::StackName}-CodePipelineRole"
                                             },
                                             {
-                                                "Fn::Sub": "arn:aws:iam::${CicdAccount}:role/cicd-${AWS::StackName}-CodeBuildRole"
+                                                "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${AWS::StackName}-CodeBuildRole"
                                             },
                                             {
                                                 "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${AWS::StackName}-CloudFormationRole"
@@ -635,13 +681,13 @@
                                     "Principal": {
                                         "AWS": [
                                             {
-                                                "Fn::Sub": "arn:aws:iam::${CicdAccount}:role/cicd-${AWS::StackName}-CloudFormationRole"
+                                                "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${AWS::StackName}-CloudFormationRole"
                                             },
                                             {
-                                                "Fn::Sub": "arn:aws:iam::${CicdAccount}:role/cicd-${AWS::StackName}-CodePipelineRole"
+                                                "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${AWS::StackName}-CodePipelineRole"
                                             },
                                             {
-                                                "Fn::Sub": "arn:aws:iam::${CicdAccount}:role/cicd-${AWS::StackName}-CodeBuildRole"
+                                                "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${AWS::StackName}-CodeBuildRole"
                                             },
                                             {
                                                 "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${AWS::StackName}-CloudFormationRole"
@@ -777,6 +823,31 @@
                         "Name": "SelfStackUpdate",
                         "Actions": [
                             {
+                              "ActionTypeId": {
+                                "Category": "Build",
+                                "Owner": "AWS",
+                                "Provider": "CodeBuild",
+                                "Version": "1"
+                              },
+                              "Configuration": {
+                                "ProjectName": {
+                                  "Ref": "CodeBuildGenerateMasterTemplate"
+                                }
+                              },
+                              "Name": "GenerateMasterTemplate",
+                              "InputArtifacts": [
+                                {
+                                    "Name": "SourceOutput"
+                                }
+                              ],
+                              "RunOrder": 1,
+                              "OutputArtifacts": [
+                                  {
+                                      "Name": "MasterTemplate"
+                                  }
+                              ]
+                            },
+                            {
                                 "ActionTypeId": {
                                     "Category": "Deploy",
                                     "Owner": "AWS",
@@ -792,16 +863,16 @@
                                     "StackName": {
                                         "Fn::Sub": "${AWS::StackName}"
                                     },
-                                    "TemplatePath": "SourceOutput::Master.template",
-                                    "TemplateConfiguration": "SourceOutput::cfvars/Master.template"
+                                    "TemplatePath": "MasterTemplate::Master.template",
+                                    "TemplateConfiguration": "MasterTemplate::cfvars/Master.template"
                                 },
                                 "Name": "UpdateCloudFormation",
                                 "InputArtifacts": [
                                     {
-                                        "Name": "SourceOutput"
+                                        "Name": "MasterTemplate"
                                     }
                                 ],
-                                "RunOrder": 1,
+                                "RunOrder": 2,
                                 "RoleArn": {
                                         "Fn::GetAtt" : ["RoleCodePipeline", "Arn"]
                                 }
@@ -852,7 +923,7 @@
                                     "ActionMode": "CREATE_UPDATE",
                                     "Capabilities": "CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND",
                                     "RoleArn": {
-                                        "Fn::Sub": "arn:aws:iam::${CicdAccount}:role/cicd-${AWS::StackName}-CloudFormationRole"
+                                        "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${AWS::StackName}-CloudFormationRole"
                                     },
                                     "StackName": {
                                         "Fn::Sub": "cicd-${AWS::StackName}-infra"
@@ -874,7 +945,7 @@
                                 ],
                                 "RunOrder": 1,
                                 "RoleArn": {
-                                    "Fn::Sub": "arn:aws:iam::${CicdAccount}:role/cicd-${AWS::StackName}-CodePipelineRole"
+                                    "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${AWS::StackName}-CodePipelineRole"
                                 }
                             }
                         ]
@@ -931,7 +1002,7 @@
                                     "TemplatePath": "SDLCTemplates::Scope-SDLC-Parent.template",
                                     "TemplateConfiguration": "SourceOutput::cfvars/Dev.template",
                                     "ParameterOverrides": {
-                                        "Fn::Sub": "{ \"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"CicdAccount\" : \"${CicdAccount}\", \"MasterPipeline\" : \"${AWS::StackName}\"}"
+                                        "Fn::Sub": "{ \"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"CicdAccount\" : \"${AWS::AccountId}\", \"MasterPipeline\" : \"${AWS::StackName}\"}"
                                     }
                                 },
                                 "Name": "DeployCloudFormationDev",
@@ -972,7 +1043,7 @@
                                     "TemplatePath": "SDLCTemplates::Scope-SDLC-Parent.template",
                                     "TemplateConfiguration": "SourceOutput::cfvars/Prod.template",
                                     "ParameterOverrides": {
-                                        "Fn::Sub": "{ \"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"CicdAccount\" : \"${CicdAccount}\", \"MasterPipeline\" : \"${AWS::StackName}\"}"
+                                        "Fn::Sub": "{ \"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"CicdAccount\" : \"${AWS::AccountId}\", \"MasterPipeline\" : \"${AWS::StackName}\"}"
                                     }
                                 },
                                 "Name": "DeployCloudFormationProd",

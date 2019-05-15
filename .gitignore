@@ -1,2 +1,4 @@
-/Scopes.template
-/Users.template
+/Config-Scopes.template
+/Config-Users.template
+/Config-Environments.template
+cfvars/Master.template
