@@ -3,10 +3,12 @@ import sys
 import time
 import os
 import json
+from collections import OrderedDict
 from botocore.exceptions import ClientError
 
 # Filenames
 file_scopes = 'Config-Scopes'
+file_environments = 'Config-Environments'
 file_cicd_parent = 'Scope-CICD-Parent'
 file_cicd_child = 'Scope-CICD-Child'
 
@@ -14,6 +16,8 @@ file_cicd_child = 'Scope-CICD-Child'
 # Input Files
 with open(file_scopes + '.template') as s_file:
     scopes = json.load(s_file)
+with open(file_environments + '.template') as e_file:
+    environments = json.load(e_file, object_pairs_hook=OrderedDict)
 with open('scope-templates/' + file_cicd_parent + '.template') as cp_file:
     cicd_parent = json.load(cp_file)
     
@@ -63,12 +67,6 @@ for key, value in scopes.items():
         "Type" : "AWS::CloudFormation::Stack",
         "Properties": {
             "Parameters": {
-                "DevAccount": {
-                    "Ref": "DevAccount"
-                },
-                "ProdAccount": {
-                    "Ref": "ProdAccount"
-                },
                 "MasterPipeline": {
                     "Ref": "MasterPipeline"
                 },
@@ -95,6 +93,10 @@ for key, value in scopes.items():
         }
     }
     
+    # Add Account Parameters
+    for env in environments:
+        cicd_parent['Resources'][scope]['Properties']['Parameters'][env + 'Account'] = { "Ref": env + 'Account' }
+    
     # Open child template to insert pipelines
     with open('scope-templates/' + file_cicd_child + '.template') as cc_file:
         cicd_child = json.load(cc_file)
@@ -109,12 +111,6 @@ for key, value in scopes.items():
                 "DependsOn": ["RoleCodePipeline", "RoleCodeBuild"],
                 "Properties": {
                     "Parameters": {
-                        "DevAccount": {
-                            "Ref": "DevAccount"
-                        },
-                        "ProdAccount": {
-                            "Ref": "ProdAccount"
-                        },
                         "MasterPipeline": {
                             "Ref": "MasterPipeline"
                         },
@@ -154,6 +150,10 @@ for key, value in scopes.items():
                     }
                 }
             }
+            
+            # Add Account Parameters
+            for env in environments:
+                cicd_child['Resources'][pipeline['Name']]['Properties']['Parameters'][env + 'Account'] = { "Ref": env + 'Account' }
             
             # Add Parameter Overrides
             if 'Parameters' in pipeline:
