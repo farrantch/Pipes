@@ -1,0 +1,17 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo Entered the install phase...
+      - pip install boto3
+  build:
+    commands:
+      - echo Entered the build phase...
+      - mkdir -p generated-master-template
+      - python buildspec/generate-master-template.py
+artifacts:
+  files:
+    - '**/*'
+  base-directory: 'generated-master-template'
+  discard-paths: yes

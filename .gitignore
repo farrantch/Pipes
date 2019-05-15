@@ -1,4 +1,5 @@
 /Config-Scopes.template
 /Config-Users.template
 /Config-Environments.template
+/generated*
 cfvars/Master.template
