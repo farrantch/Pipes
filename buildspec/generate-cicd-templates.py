@@ -200,10 +200,6 @@ assume_role_statement['Fn::If'][1]['Resource'] = base_statement
 kms_key_statement['Fn::If'][1]['Principal']['AWS'] = base_statement
 s3_bucket_statement['Fn::If'][1]['Principal']['AWS'] = base_statement
 
-cicd_parent['Resources']['IamPolicyBaseline']['Properties']['PolicyDocument']['Statement'].append(assume_role_statement)
-cicd_parent['Resources']['KmsKey']['Properties']['KeyPolicy']['Statement'].append(kms_key_statement)
-cicd_parent['Resources']['S3BucketPolicy']['Properties']['PolicyDocument']['Statement'].append(s3_bucket_statement)
-
 # Loop through infra scopes within pipeline file
 for key, value in scopes.items():
     scope = key.lower()
@@ -251,6 +247,11 @@ for key, value in scopes.items():
     # Open child template to insert pipelines
     with open('scope-templates/' + file_cicd_child + '.template') as cc_file:
         cicd_child = json.load(cc_file)
+    
+    # Add cross account policies we created above
+    cicd_child['Resources']['IamPolicyBaseline']['Properties']['PolicyDocument']['Statement'].append(assume_role_statement)
+    cicd_child['Resources']['KmsKey']['Properties']['KeyPolicy']['Statement'].append(kms_key_statement)
+    cicd_child['Resources']['S3BucketPolicy']['Properties']['PolicyDocument']['Statement'].append(s3_bucket_statement)
     
     # Loop through pipelines
     if 'Pipelines' in value:
