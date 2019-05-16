@@ -5,12 +5,6 @@
         "S3BucketName": {
             "Type": "String"
         },
-        "DevAccount": {
-            "Type": "String"
-        },
-        "ProdAccount": {
-            "Type": "String"
-        },
         "Environment": {
             "Type": "String"
         },

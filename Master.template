@@ -2,14 +2,6 @@
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "Creates the build account's infrastructure that allows for cross-account CodePipelines.",
     "Parameters": {
-        "DevAccount": {
-            "Description": "AWS account number for dev.",
-            "Type": "Number"
-        },
-        "ProdAccount": {
-            "Description": "AWS account number for production.",
-            "Type": "Number"
-        },
         "SourceCodeCommitRepoName": {
             "Description": "(Optional). Source CodeCommit repository. If not specified, one will be created.",
             "Type": "String",
@@ -442,7 +434,7 @@
                 }
             }
         },
-        "PolicyBaseline": {
+        "IamPolicyBaseline": {
             "Type": "AWS::IAM::ManagedPolicy",
             "DependsOn": "S3Bucket",
             "Properties": {
@@ -478,7 +470,7 @@
                 },
                 "ManagedPolicyArns": [
                     {
-                        "Ref": "PolicyBaseline"
+                        "Ref": "IamPolicyBaseline"
                     }
                 ],
                 "RoleName": {
@@ -505,7 +497,7 @@
                 },
                 "ManagedPolicyArns": [
                     {
-                        "Ref": "PolicyBaseline"
+                        "Ref": "IamPolicyBaseline"
                     }
                 ],
                 "RoleName": {
@@ -533,7 +525,7 @@
                 },
                 "ManagedPolicyArns": [
                     {
-                        "Ref": "PolicyBaseline"
+                        "Ref": "IamPolicyBaseline"
                     }
                 ],
                 "RoleName": {
@@ -931,7 +923,7 @@
                                     "TemplatePath": "CICDTemplates::Scope-CICD-Parent.template",
                                     "TemplateConfiguration": "SourceOutput::cfvars/Cicd.template",
                                     "ParameterOverrides": {
-                                        "Fn::Sub": "{ \"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"DevAccount\" : \"${DevAccount}\", \"ProdAccount\" : \"${ProdAccount}\", \"MasterPipeline\" : \"${AWS::StackName}\"}"  
+                                        "Fn::Sub": "{ \"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"MasterPipeline\" : \"${AWS::StackName}\"}"  
                                     }
                                 },
                                 "Name": "DeployCloudFormationCicd",

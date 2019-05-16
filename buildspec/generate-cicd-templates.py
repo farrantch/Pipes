@@ -54,8 +54,9 @@ if aec:
             )['Stacks'][0]['Parameters']
             
 # Add account parameters to child stack parameters
-for env in environments:
-    cicd_parent['Parameters'][env + 'Account'] = { "Type": "Number" }
+for key, value in environments.items():
+    env = key
+    cicd_parent['Parameters'][env + 'Account'] = { "Type": "Number", "Default": value['AccountId'] }
     
 # Add IamPolicyBaseline permissions to assume role into SDLC accounts
 base_statement = []
