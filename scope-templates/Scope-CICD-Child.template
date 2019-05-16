@@ -2,14 +2,6 @@
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "Creates the build account's infrastructure that allows for cross-account CodePipelines.",
     "Parameters": {
-        "DevAccount": {
-            "Description": "AWS account number for dev.",
-            "Type": "Number"
-        },
-        "ProdAccount": {
-            "Description": "AWS account number for production.",
-            "Type": "Number"
-        },
         "AllEnvironmentsCreated": {
             "Description": "Must be false for initial creation of stacks. Afterwards it must be switched to true when all environments have been created.",
             "Type": "String",
@@ -75,39 +67,6 @@
                                         "S3Bucket",
                                         "Arn"
                                     ]
-                                }
-                            ]
-                        },
-                        {
-                            "Fn::If": [
-                                "NotInitialCreation",
-                                {
-                                    "Sid": "AllowAssumeEnvironmentRoles",
-                                    "Effect": "Allow",
-                                    "Action": "sts:AssumeRole",
-                                    "Resource": [
-                                        {
-                                            "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${MasterPipeline}-infra-${Scope}-CloudFormationRole"
-                                        },
-                                        {
-                                            "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${MasterPipeline}-infra-${Scope}-CodePipelineRole"
-                                        },
-                                        {
-                                            "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${MasterPipeline}-infra-${Scope}-CodeBuildRole"
-                                        },
-                                        {
-                                            "Fn::Sub": "arn:aws:iam::${ProdAccount}:role/prod-${MasterPipeline}-infra-${Scope}-CloudFormationRole"
-                                        },
-                                        {
-                                            "Fn::Sub": "arn:aws:iam::${ProdAccount}:role/prod-${MasterPipeline}-infra-${Scope}-CodePipelineRole"
-                                        },
-                                        {
-                                            "Fn::Sub": "arn:aws:iam::${ProdAccount}:role/prod-${MasterPipeline}-infra-${Scope}-CodeBuildRole"
-                                        }
-                                    ]
-                                },
-                                {
-                                    "Ref": "AWS::NoValue"
                                 }
                             ]
                         },
@@ -246,47 +205,6 @@
                                 "kms:*"
                             ],
                             "Resource": "*"
-                        },
-                        {
-                            "Fn::If": [
-                                "NotInitialCreation",
-                                {
-                                    "Sid": "Allow other accounts to use the key.",
-                                    "Effect": "Allow",
-                                    "Principal": {
-                                        "AWS": [{
-                                                "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${MasterPipeline}-infra-${Scope}-CloudFormationRole"
-                                            },
-                                            {
-                                                "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${MasterPipeline}-infra-${Scope}-CodePipelineRole"
-                                            },
-                                            {
-                                                "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${MasterPipeline}-infra-${Scope}-CodeBuildRole"
-                                            },
-                                            {
-                                                "Fn::Sub": "arn:aws:iam::${ProdAccount}:role/prod-${MasterPipeline}-infra-${Scope}-CloudFormationRole"
-                                            },
-                                            {
-                                                "Fn::Sub": "arn:aws:iam::${ProdAccount}:role/prod-${MasterPipeline}-infra-${Scope}-CodePipelineRole"
-                                            },
-                                            {
-                                                "Fn::Sub": "arn:aws:iam::${ProdAccount}:role/prod-${MasterPipeline}-infra-${Scope}-CodeBuildRole"
-                                            }
-                                        ]
-                                    },
-                                    "Action": [
-                                        "kms:DescribeKey",
-                                        "kms:Encrypt",
-                                        "kms:Decrypt",
-                                        "kms:ReEncrypt",
-                                        "kms:GenerateDataKey"
-                                    ],
-                                    "Resource": "*"
-                                },
-                                {
-                                    "Ref": "AWS::NoValue"
-                                }
-                            ]
                         }
                     ]
                 }
@@ -342,70 +260,6 @@
                                     "aws:SecureTransport": false
                                 }
                             }
-                        },
-                        {
-                            "Fn::If": [
-                                "NotInitialCreation",
-                                {
-                                    "Sid": "AccountsAllowedToS3Bucket",
-                                    "Effect": "Allow",
-                                    "Principal": {
-                                        "AWS": [{
-                                                "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${MasterPipeline}-infra-${Scope}-CloudFormationRole"
-                                            },
-                                            {
-                                                "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${MasterPipeline}-infra-${Scope}-CodePipelineRole"
-                                            },
-                                            {
-                                                "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${MasterPipeline}-infra-${Scope}-CodeBuildRole"
-                                            },
-                                            {
-                                                "Fn::Sub": "arn:aws:iam::${ProdAccount}:role/prod-${MasterPipeline}-infra-${Scope}-CloudFormationRole"
-                                            },
-                                            {
-                                                "Fn::Sub": "arn:aws:iam::${ProdAccount}:role/prod-${MasterPipeline}-infra-${Scope}-CodePipelineRole"
-                                            },
-                                            {
-                                                "Fn::Sub": "arn:aws:iam::${ProdAccount}:role/prod-${MasterPipeline}-infra-${Scope}-CodeBuildRole"
-                                            },
-                                            {
-                                                "Fn::GetAtt": [
-                                                    "RoleCodePipeline",
-                                                    "Arn"
-                                                ]
-                                            }
-                                        ]
-                                    },
-                                    "Action": [
-                                        "s3:Get*",
-                                        "s3:Put*",
-                                        "s3:ListBucket"
-                                    ],
-                                    "Resource": [{
-                                            "Fn::Sub": [
-                                                "${S3BucketArn}/*",
-                                                {
-                                                    "S3BucketArn": {
-                                                        "Fn::GetAtt": [
-                                                            "S3Bucket",
-                                                            "Arn"
-                                                        ]
-                                                    }
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "Fn::GetAtt": [
-                                                "S3Bucket",
-                                                "Arn"
-                                            ]
-                                        }
-                                    ]
-                                },
-                                {
-                                    "Ref": "AWS::NoValue"
-                                }
-                            ]
                         }
                     ]
                 }
