@@ -127,10 +127,7 @@ kms_key_statement['Fn::If'][1]['Principal']['AWS'] = base_statement
 s3_bucket_statement['Fn::If'][1]['Principal']['AWS'] = base_statement
 s3_bucket_statement['Fn::If'][1]['Principal']['AWS'].append(
     {
-        "Fn::GetAtt": [
-            "RoleCodePipeline",
-            "Arn"
-        ]
+        "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${AWS::StackName}-CodePipelineRole"
     }
 )
 
