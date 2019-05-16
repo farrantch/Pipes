@@ -106,17 +106,17 @@ s3_bucket_statement = {
 
 for env in environments:
     env_lower = env.lower()
-    base_statement.insert(
+    base_statement.append(
         {
             "Fn::Sub": "arn:aws:iam::${" + env + "Account}:role/" + env_lower + "-${AWS::StackName}-CloudFormationRole"
         }
     )
-    base_statement.insert(
+    base_statement.append(
         {
             "Fn::Sub": "arn:aws:iam::${" + env + "Account}:role/" + env_lower + "-${AWS::StackName}-CodePipelineRole"
         }
     )
-    base_statement.insert(
+    base_statement.append(
         {
             "Fn::Sub": "arn:aws:iam::${" + env + "Account}:role/" + env_lower + "-${AWS::StackName}-CodeBuildRole"
         }
@@ -125,7 +125,7 @@ for env in environments:
 assume_role_statement['Fn::If'][1]['Resource'] = base_statement
 kms_key_statement['Fn::If'][1]['Principal']['AWS'] = base_statement
 s3_bucket_statement['Fn::If'][1]['Principal']['AWS'] = base_statement
-s3_bucket_statement['Fn::If'][1]['Principal']['AWS'].insert(
+s3_bucket_statement['Fn::If'][1]['Principal']['AWS'].append(
     {
         "Fn::GetAtt": [
             "RoleCodePipeline",
@@ -134,9 +134,9 @@ s3_bucket_statement['Fn::If'][1]['Principal']['AWS'].insert(
     }
 )
 
-master['Resources']['IamPolicyBaseline']['Properties']['PolicyDocument']['Statement'].insert(assume_role_statement)
-master['Resources']['KmsKey']['Properties']['KeyPolicy']['Statement'].insert(kms_key_statement)
-master['Resources']['S3BucketPolicy']['Properties']['PolicyDocument']['Statement'].insert(s3_bucket_statement)
+master['Resources']['IamPolicyBaseline']['Properties']['PolicyDocument']['Statement'].append(assume_role_statement)
+master['Resources']['KmsKey']['Properties']['KeyPolicy']['Statement'].append(kms_key_statement)
+master['Resources']['S3BucketPolicy']['Properties']['PolicyDocument']['Statement'].append(s3_bucket_statement)
 
 # Loop through environments
 for key, value in environments.items():

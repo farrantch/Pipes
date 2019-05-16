@@ -181,17 +181,17 @@ s3_bucket_statement = {
 }
 for env in environments:
     env_lower = env.lower()
-    base_statement.insert(
+    base_statement.append(
         {
             "Fn::Sub": "arn:aws:iam::${" + env + "Account}:role/" + env_lower + "-${MasterPipeline}-infra-${Scope}-CloudFormationRole"
         }
     )
-    base_statement.insert(
+    base_statement.append(
         {
             "Fn::Sub": "arn:aws:iam::${" + env + "Account}:role/" + env_lower + "-${MasterPipeline}-infra-${Scope}-CodePipelineRole"
         }
     )
-    base_statement.insert(
+    base_statement.append(
         {
             "Fn::Sub": "arn:aws:iam::${" + env + "Account}:role/" + env_lower + "-${MasterPipeline}-infra-${Scope}-CodeBuildRole"
         }
@@ -200,9 +200,9 @@ assume_role_statement['Fn::If'][1]['Resource'] = base_statement
 kms_key_statement['Fn::If'][1]['Principal']['AWS'] = base_statement
 s3_bucket_statement['Fn::If'][1]['Principal']['AWS'] = base_statement
 
-cicd_parent['Resources']['IamPolicyBaseline']['Properties']['PolicyDocument']['Statement'].insert(assume_role_statement)
-cicd_parent['Resources']['KmsKey']['Properties']['KeyPolicy']['Statement'].insert(kms_key_statement)
-cicd_parent['Resources']['S3BucketPolicy']['Properties']['PolicyDocument']['Statement'].insert(s3_bucket_statement)
+cicd_parent['Resources']['IamPolicyBaseline']['Properties']['PolicyDocument']['Statement'].append(assume_role_statement)
+cicd_parent['Resources']['KmsKey']['Properties']['KeyPolicy']['Statement'].append(kms_key_statement)
+cicd_parent['Resources']['S3BucketPolicy']['Properties']['PolicyDocument']['Statement'].append(s3_bucket_statement)
 
 # Loop through infra scopes within pipeline file
 for key, value in scopes.items():
