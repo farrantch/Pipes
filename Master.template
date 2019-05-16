@@ -856,12 +856,15 @@
                                         "Fn::Sub": "${AWS::StackName}"
                                     },
                                     "TemplatePath": "MasterTemplate::Master.template",
-                                    "TemplateConfiguration": "MasterTemplate::cfvars/Master.template"
+                                    "TemplateConfiguration": "SourceOutput::cfvars/Master.template"
                                 },
                                 "Name": "UpdateCloudFormation",
                                 "InputArtifacts": [
                                     {
                                         "Name": "MasterTemplate"
+                                    },
+                                    {
+                                        "Name": "SourceOutput"
                                     }
                                 ],
                                 "RunOrder": 2,
