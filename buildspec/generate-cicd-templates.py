@@ -52,11 +52,6 @@ if aec:
             child_stack_parameters[rs['LogicalResourceId']] = client.describe_stacks(
                 StackName = rs['PhysicalResourceId']
             )['Stacks'][0]['Parameters']
-            
-# Add account parameters to child stack parameters
-for key, value in environments.items():
-    env = key
-    cicd_parent['Parameters'][env + 'Account'] = { "Type": "Number", "Default": value['AccountId'] }
     
 # Add IamPolicyBaseline permissions to assume role into SDLC accounts
 base_statement = []
@@ -240,13 +235,18 @@ for key, value in scopes.items():
         }
     }
     
-    # Add Account Parameters to the parent's stack child stack parameters
-    for env in environments:
-        cicd_parent['Resources'][scope]['Properties']['Parameters'][env + 'Account'] = { "Ref": env + 'Account' }
+    # # Add Account Parameters to the parent's stack child stack parameters
+    # for env in environments:
+    #     cicd_parent['Resources'][scope]['Properties']['Parameters'][env + 'Account'] = { "Ref": env + 'Account' }
     
     # Open child template to insert pipelines
     with open('scope-templates/' + file_cicd_child + '.template') as cc_file:
         cicd_child = json.load(cc_file)
+        
+    # Add account parameters to child stack parameters
+    for key, value in environments.items():
+        env = key
+        cicd_child['Parameters'][env + 'Account'] = { "Type": "Number", "Default": value['AccountId'] }
     
     # Add cross account policies we created above
     cicd_child['Resources']['IamPolicyBaseline']['Properties']['PolicyDocument']['Statement'].append(assume_role_statement)
