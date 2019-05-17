@@ -629,7 +629,7 @@
                                         "Name": "CicdTemplates"
                                     }
                                 ],
-                                "RunOrder": 1,
+                                "RunOrder": 2,
                                 "RoleArn": {
                                     "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${AWS::StackName}-CodePipelineRole"
                                 }

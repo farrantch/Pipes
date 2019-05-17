@@ -139,6 +139,7 @@ master['Resources']['S3BucketPolicy']['Properties']['PolicyDocument']['Statement
 for key, value in environments.items():
     env = key
     env_lower = env.lower()
+    run_order = 2
     
     # Add SDLC account to master parameters
     master['Parameters'][env + 'Account'] = {
@@ -179,12 +180,13 @@ for key, value in environments.items():
                     "Name": "SdlcTemplates"
                 }
             ],
-            "RunOrder": 1,
+            "RunOrder": run_order,
             "RoleArn": {
                 "Fn::Sub": "arn:aws:iam::${" + env + "Account}:role/" + env_lower + "-${AWS::StackName}-CodePipelineRole"
             }
         }
     )
+    run_order = run_order + 1
         
 # Save files
 with open('generated-master-template/' + file_master + '.template', 'w') as master_file_output:
