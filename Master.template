@@ -95,7 +95,7 @@
             "TimeoutInMinutes": "5"
           }
         },
-        "CodeBuildGenerateCICDTemplates": {
+        "CodeBuildGenerateCicdTemplates": {
           "Type": "AWS::CodeBuild::Project",
           "Properties": {
             "Artifacts": {
@@ -151,7 +151,7 @@
             "TimeoutInMinutes": "5"
           }
         },
-        "CodeBuildGenerateSDLCTemplates": {
+        "CodeBuildGenerateSdlcTemplates": {
           "Type": "AWS::CodeBuild::Project",
           "Properties": {
             "Artifacts": {
@@ -571,38 +571,33 @@
                         ]
                     },
                     {
-                      "Name": "GenerateCICDTemplates",
-                      "Actions": [
-                        {
-                          "ActionTypeId": {
-                            "Category": "Build",
-                            "Owner": "AWS",
-                            "Provider": "CodeBuild",
-                            "Version": "1"
-                          },
-                          "Configuration": {
-                            "ProjectName": {
-                              "Ref": "CodeBuildGenerateCICDTemplates"
-                            }
-                          },
-                          "Name": "GenerateCICDTemplates",
-                          "InputArtifacts": [
-                            {
-                                "Name": "SourceOutput"
-                            }
-                          ],
-                          "RunOrder": 1,
-                          "OutputArtifacts": [
-                              {
-                                  "Name": "CICDTemplates"
-                              }
-                          ]
-                        }
-                      ]
-                    },
-                    {
                         "Name": "Cicd",
                         "Actions": [
+                            {
+                              "ActionTypeId": {
+                                "Category": "Build",
+                                "Owner": "AWS",
+                                "Provider": "CodeBuild",
+                                "Version": "1"
+                              },
+                              "Configuration": {
+                                "ProjectName": {
+                                  "Ref": "CodeBuildGenerateCicdTemplates"
+                                }
+                              },
+                              "Name": "GenerateCicdTemplates",
+                              "InputArtifacts": [
+                                {
+                                    "Name": "SourceOutput"
+                                }
+                              ],
+                              "RunOrder": 1,
+                              "OutputArtifacts": [
+                                  {
+                                      "Name": "CicdTemplates"
+                                  }
+                              ]
+                            },
                             {
                                 "ActionTypeId": {
                                     "Category": "Deploy",
@@ -619,19 +614,19 @@
                                     "StackName": {
                                         "Fn::Sub": "cicd-${AWS::StackName}-infra"
                                     },
-                                    "TemplatePath": "CICDTemplates::Scope-CICD-Parent.template",
+                                    "TemplatePath": "CicdTemplates::Scope-CICD-Parent.template",
                                     "TemplateConfiguration": "SourceOutput::cfvars/Cicd.template",
                                     "ParameterOverrides": {
                                         "Fn::Sub": "{ \"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"MasterPipeline\" : \"${AWS::StackName}\"}"  
                                     }
                                 },
-                                "Name": "DeployCloudFormationCicd",
+                                "Name": "DeployCicdTemplates",
                                 "InputArtifacts": [
                                     {
                                         "Name": "SourceOutput"
                                     },
                                     {
-                                        "Name": "CICDTemplates"
+                                        "Name": "CicdTemplates"
                                     }
                                 ],
                                 "RunOrder": 1,
@@ -642,7 +637,7 @@
                         ]
                     },
                     {
-                      "Name": "GenerateSDLCTemplates",
+                      "Name": "Sdlc",
                       "Actions": [
                         {
                           "ActionTypeId": {
@@ -653,10 +648,10 @@
                           },
                           "Configuration": {
                             "ProjectName": {
-                              "Ref": "CodeBuildGenerateSDLCTemplates"
+                              "Ref": "CodeBuildGenerateSdlcTemplates"
                             }
                           },
-                          "Name": "GenerateSDLCTemplates",
+                          "Name": "GenerateSdlcTemplates",
                           "InputArtifacts": [
                             {
                                 "Name": "SourceOutput"
@@ -665,7 +660,7 @@
                           "RunOrder": 1,
                           "OutputArtifacts": [
                               {
-                                  "Name": "SDLCTemplates"
+                                  "Name": "SdlcTemplates"
                               }
                           ]
                         }

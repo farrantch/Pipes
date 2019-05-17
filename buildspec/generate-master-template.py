@@ -147,47 +147,42 @@ for key, value in environments.items():
     }
     
     # Add SDLC account to master pipeline
-    master['Resources']['CodePipeline']['Properties']['Stages'].insert(-1,
+    master['Resources']['CodePipeline']['Properties']['Stages'][-1]['Actions'].append(
         {
-            "Name": env,
-            "Actions": [
-                {
-                    "ActionTypeId": {
-                        "Category": "Deploy",
-                        "Owner": "AWS",
-                        "Provider": "CloudFormation",
-                        "Version": "1"
-                    },
-                    "Configuration": {
-                        "ActionMode": "CREATE_UPDATE",
-                        "Capabilities": "CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND",
-                        "RoleArn": {
-                            "Fn::Sub": "arn:aws:iam::${" + env + "Account}:role/" + env_lower + "-${AWS::StackName}-CloudFormationRole"
-                        },
-                        "StackName": {
-                            "Fn::Sub": env_lower + "-${AWS::StackName}-infra"
-                        },
-                        "TemplatePath": "SDLCTemplates::Scope-SDLC-Parent.template",
-                        "TemplateConfiguration": "SourceOutput::cfvars/" + env + ".template",
-                        "ParameterOverrides": {
-                            "Fn::Sub": "{ \"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"CicdAccount\" : \"${AWS::AccountId}\", \"MasterPipeline\" : \"${AWS::StackName}\"}"
-                        }
-                    },
-                    "Name": "DeployCloudFormation" + env,
-                    "InputArtifacts": [
-                        {
-                            "Name": "SourceOutput"
-                        },
-                        {
-                            "Name": "SDLCTemplates"
-                        }
-                    ],
-                    "RunOrder": 1,
-                    "RoleArn": {
-                        "Fn::Sub": "arn:aws:iam::${" + env + "Account}:role/" + env_lower + "-${AWS::StackName}-CodePipelineRole"
-                    }
+            "ActionTypeId": {
+                "Category": "Deploy",
+                "Owner": "AWS",
+                "Provider": "CloudFormation",
+                "Version": "1"
+            },
+            "Configuration": {
+                "ActionMode": "CREATE_UPDATE",
+                "Capabilities": "CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND",
+                "RoleArn": {
+                    "Fn::Sub": "arn:aws:iam::${" + env + "Account}:role/" + env_lower + "-${AWS::StackName}-CloudFormationRole"
+                },
+                "StackName": {
+                    "Fn::Sub": env_lower + "-${AWS::StackName}-infra"
+                },
+                "TemplatePath": "SdlcTemplates::Scope-SDLC-Parent.template",
+                "TemplateConfiguration": "SourceOutput::cfvars/" + env + ".template",
+                "ParameterOverrides": {
+                    "Fn::Sub": "{ \"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"CicdAccount\" : \"${AWS::AccountId}\", \"MasterPipeline\" : \"${AWS::StackName}\"}"
                 }
-            ]
+            },
+            "Name": "Deploy" + env + "Templates",
+            "InputArtifacts": [
+                {
+                    "Name": "SourceOutput"
+                },
+                {
+                    "Name": "SdlcTemplates"
+                }
+            ],
+            "RunOrder": 1,
+            "RoleArn": {
+                "Fn::Sub": "arn:aws:iam::${" + env + "Account}:role/" + env_lower + "-${AWS::StackName}-CodePipelineRole"
+            }
         }
     )
         

@@ -2,7 +2,7 @@
     "LegacyMicroserviceFoo": {
         "Policies": [
             "aws/Dynamodb",
-            "aws/Lamda",
+            "aws/Lambda",
             "IamCreateRole",
             "services/LegacyMicroserviceFoo"
         ],
