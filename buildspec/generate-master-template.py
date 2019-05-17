@@ -135,11 +135,11 @@ master['Resources']['IamPolicyBaseline']['Properties']['PolicyDocument']['Statem
 master['Resources']['KmsKey']['Properties']['KeyPolicy']['Statement'].append(kms_key_statement)
 master['Resources']['S3BucketPolicy']['Properties']['PolicyDocument']['Statement'].append(s3_bucket_statement)
 
+run_order = 2
 # Loop through environments
 for key, value in environments.items():
     env = key
     env_lower = env.lower()
-    run_order = 2
     
     # Add SDLC account to master parameters
     master['Parameters'][env + 'Account'] = {
