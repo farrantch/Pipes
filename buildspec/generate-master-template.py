@@ -148,7 +148,7 @@ for key, value in environments.items():
     }
     
     # Add SDLC account to master pipeline
-    master['Resources']['CodePipeline']['Properties']['Stages'][-1]['Actions'].append(
+    master['Resources']['CodePipeline']['Properties']['Stages'][-2]['Actions'].append(
         {
             "ActionTypeId": {
                 "Category": "Deploy",
