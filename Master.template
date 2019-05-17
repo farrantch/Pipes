@@ -84,7 +84,7 @@
             },
             "ServiceRole": {
                 "Fn::GetAtt": [
-                    "RoleCodeBuild",
+                    "IamRoleCodeBuild",
                     "Arn"
                 ]
             },
@@ -140,7 +140,7 @@
             },
             "ServiceRole": {
                 "Fn::GetAtt": [
-                    "RoleCodeBuild",
+                    "IamRoleCodeBuild",
                     "Arn"
                 ]
             },
@@ -196,7 +196,7 @@
             },
             "ServiceRole": {
                 "Fn::GetAtt": [
-                    "RoleCodeBuild",
+                    "IamRoleCodeBuild",
                     "Arn"
                 ]
             },
@@ -245,7 +245,7 @@
             },
             "ServiceRole": {
                 "Fn::GetAtt": [
-                    "RoleCodeBuild",
+                    "IamRoleCodeBuild",
                     "Arn"
                 ]
             },
@@ -273,7 +273,7 @@
                 }
             }
         },
-        "RoleCodePipeline": {
+        "IamRoleCodePipeline": {
             "Type": "AWS::IAM::Role",
             "Properties": {
                 "AssumeRolePolicyDocument": {
@@ -300,7 +300,7 @@
                 }
             }
         },
-        "RoleCloudFormation": {
+        "IamRoleCloudFormation": {
             "Type": "AWS::IAM::Role",
             "Properties": {
                 "AssumeRolePolicyDocument": {
@@ -327,7 +327,7 @@
                 }
             }
         },
-        "RoleCodeBuild": {
+        "IamRoleCodeBuild": {
             "Type": "AWS::IAM::Role",
             "Properties": {
                 "AssumeRolePolicyDocument": {
@@ -464,7 +464,7 @@
                 ],
                 "RestartExecutionOnUpdate": "True",
                 "RoleArn": {
-                    "Fn::GetAtt" : ["RoleCodePipeline", "Arn"]
+                    "Fn::GetAtt" : ["IamRoleCodePipeline", "Arn"]
                 },
                 "Name": {
                     "Ref": "AWS::StackName"
@@ -546,7 +546,7 @@
                                     "ActionMode": "CREATE_UPDATE",
                                     "Capabilities": "CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND",
                                     "RoleArn": {
-                                        "Fn::GetAtt" : ["RoleCloudFormation", "Arn"]
+                                        "Fn::GetAtt" : ["IamRoleCloudFormation", "Arn"]
                                     },
                                     "StackName": {
                                         "Fn::Sub": "${AWS::StackName}"
@@ -565,7 +565,7 @@
                                 ],
                                 "RunOrder": 2,
                                 "RoleArn": {
-                                        "Fn::GetAtt" : ["RoleCodePipeline", "Arn"]
+                                        "Fn::GetAtt" : ["IamRoleCodePipeline", "Arn"]
                                 }
                             }
                         ]
