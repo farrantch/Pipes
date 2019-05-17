@@ -135,6 +135,7 @@ master['Resources']['IamPolicyBaseline']['Properties']['PolicyDocument']['Statem
 master['Resources']['KmsKey']['Properties']['KeyPolicy']['Statement'].append(kms_key_statement)
 master['Resources']['S3BucketPolicy']['Properties']['PolicyDocument']['Statement'].append(s3_bucket_statement)
 
+run_order = 2
 # Loop through environments
 for key, value in environments.items():
     env = key
@@ -162,7 +163,7 @@ for key, value in environments.items():
                     "Fn::Sub": "arn:aws:iam::${" + env + "Account}:role/" + env_lower + "-${AWS::StackName}-CloudFormationRole"
                 },
                 "StackName": {
-                    "Fn::Sub": env_lower + "-${AWS::StackName}-infra"
+                    "Fn::Sub": env_lower + "-${AWS::StackName}-scopes"
                 },
                 "TemplatePath": "SdlcTemplates::Scope-SDLC-Parent.template",
                 "TemplateConfiguration": "SourceOutput::cfvars/" + env + ".template",
@@ -179,12 +180,13 @@ for key, value in environments.items():
                     "Name": "SdlcTemplates"
                 }
             ],
-            "RunOrder": 2,
+            "RunOrder": run_order,
             "RoleArn": {
                 "Fn::Sub": "arn:aws:iam::${" + env + "Account}:role/" + env_lower + "-${AWS::StackName}-CodePipelineRole"
             }
         }
     )
+    run_order = run_order + 1
         
 # Save files
 with open('generated-master-template/' + file_master + '.template', 'w') as master_file_output:

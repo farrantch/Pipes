@@ -11,7 +11,9 @@
                 "Name": "Db",
                 "Parameters": {
                     "IncludeEnvCfTemplateConfigs": "True",
-                    "CfContainsLambda": "True"
+                    "CfContainsLambda": "True",
+                    "SdlcCodeBuildPost": "True",
+                    "SdlcEcs": "True"
                 }
             }
         ]

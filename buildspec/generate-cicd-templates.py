@@ -23,24 +23,24 @@ with open('scope-templates/' + file_cicd_parent + '.template') as cp_file:
     
 client = boto3.client('cloudformation')
 
-#MASTERINFRASTACK = os.environ['MasterInfraStack']
+#MASTERSCOPESTACK = os.environ['MASTERSCOPESTACK']
 #ENVIRONMENT = os.environ['Environment']
 
-MASTERINFRASTACK = 'cicd-master-infra'
+MASTERSCOPESTACK = 'cicd-master-scopes'
 ENVIRONMENT = 'cicd'
 
 # Get master infra stack resources
 aec = True
 try:
     master_stack = client.describe_stacks(
-        StackName=MASTERINFRASTACK
+        StackName=MASTERSCOPESTACK
     )
 except ClientError:
     aec = False
     
 if aec:
     resource_summaries = client.list_stack_resources(
-        StackName=MASTERINFRASTACK
+        StackName=MASTERSCOPESTACK
     )['StackResourceSummaries']
     # Get existing child stack parameters
     child_stack_parameters = {}
@@ -76,25 +76,7 @@ kms_key_statement = {
             "Sid": "Allow other accounts to use the key.",
             "Effect": "Allow",
             "Principal": {
-                "AWS": [{
-                        "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${MasterPipeline}-infra-${Scope}-CloudFormationRole"
-                    },
-                    {
-                        "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${MasterPipeline}-infra-${Scope}-CodePipelineRole"
-                    },
-                    {
-                        "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${MasterPipeline}-infra-${Scope}-CodeBuildRole"
-                    },
-                    {
-                        "Fn::Sub": "arn:aws:iam::${ProdAccount}:role/prod-${MasterPipeline}-infra-${Scope}-CloudFormationRole"
-                    },
-                    {
-                        "Fn::Sub": "arn:aws:iam::${ProdAccount}:role/prod-${MasterPipeline}-infra-${Scope}-CodePipelineRole"
-                    },
-                    {
-                        "Fn::Sub": "arn:aws:iam::${ProdAccount}:role/prod-${MasterPipeline}-infra-${Scope}-CodeBuildRole"
-                    }
-                ]
+                "AWS": []
             },
             "Action": [
                 "kms:DescribeKey",
@@ -117,31 +99,7 @@ s3_bucket_statement = {
             "Sid": "AccountsAllowedToS3Bucket",
             "Effect": "Allow",
             "Principal": {
-                "AWS": [{
-                        "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${MasterPipeline}-infra-${Scope}-CloudFormationRole"
-                    },
-                    {
-                        "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${MasterPipeline}-infra-${Scope}-CodePipelineRole"
-                    },
-                    {
-                        "Fn::Sub": "arn:aws:iam::${DevAccount}:role/dev-${MasterPipeline}-infra-${Scope}-CodeBuildRole"
-                    },
-                    {
-                        "Fn::Sub": "arn:aws:iam::${ProdAccount}:role/prod-${MasterPipeline}-infra-${Scope}-CloudFormationRole"
-                    },
-                    {
-                        "Fn::Sub": "arn:aws:iam::${ProdAccount}:role/prod-${MasterPipeline}-infra-${Scope}-CodePipelineRole"
-                    },
-                    {
-                        "Fn::Sub": "arn:aws:iam::${ProdAccount}:role/prod-${MasterPipeline}-infra-${Scope}-CodeBuildRole"
-                    },
-                    {
-                        "Fn::GetAtt": [
-                            "RoleCodePipeline",
-                            "Arn"
-                        ]
-                    }
-                ]
+                "AWS": []
             },
             "Action": [
                 "s3:Get*",
@@ -178,34 +136,39 @@ for env in environments:
     env_lower = env.lower()
     base_statement.append(
         {
-            "Fn::Sub": "arn:aws:iam::${" + env + "Account}:role/" + env_lower + "-${MasterPipeline}-infra-${Scope}-CloudFormationRole"
+            "Fn::Sub": "arn:aws:iam::${" + env + "Account}:role/" + env_lower + "-${MasterPipeline}-scopes-${Scope}-CloudFormationRole"
         }
     )
     base_statement.append(
         {
-            "Fn::Sub": "arn:aws:iam::${" + env + "Account}:role/" + env_lower + "-${MasterPipeline}-infra-${Scope}-CodePipelineRole"
+            "Fn::Sub": "arn:aws:iam::${" + env + "Account}:role/" + env_lower + "-${MasterPipeline}-scopes-${Scope}-CodePipelineRole"
         }
     )
     base_statement.append(
         {
-            "Fn::Sub": "arn:aws:iam::${" + env + "Account}:role/" + env_lower + "-${MasterPipeline}-infra-${Scope}-CodeBuildRole"
+            "Fn::Sub": "arn:aws:iam::${" + env + "Account}:role/" + env_lower + "-${MasterPipeline}-scopes-${Scope}-CodeBuildRole"
         }
     )
 assume_role_statement['Fn::If'][1]['Resource'] = base_statement
 kms_key_statement['Fn::If'][1]['Principal']['AWS'] = base_statement
 s3_bucket_statement['Fn::If'][1]['Principal']['AWS'] = base_statement
+s3_bucket_statement['Fn::If'][1]['Principal']['AWS'].append(
+    {
+        "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/" + env_lower + "-${MasterPipeline}-scopes-${Scope}-CodePipelineRole"
+    }
+)
 
 # Loop through infra scopes within pipeline file
-for key, value in scopes.items():
-    scope = key.lower()
+for scope, scope_value in scopes.items():
+    scope_lower = scope.lower()
     # Determine AllEnvironmentsCreated value
-    if scope not in child_stack_parameters:
+    if scope_lower not in child_stack_parameters:
         aec = False
     if aec:
-        aec = list(filter(lambda item: item['ParameterKey'] == 'AllEnvironmentsCreated', child_stack_parameters[scope]))[0]['ParameterValue']
+        aec = list(filter(lambda item: item['ParameterKey'] == 'AllEnvironmentsCreated', child_stack_parameters[scope_lower]))[0]['ParameterValue']
     
     # Insert Scope CICD Stack into Parent
-    cicd_parent['Resources'][scope] = {
+    cicd_parent['Resources'][scope_lower] = {
         "Type" : "AWS::CloudFormation::Stack",
         "Properties": {
             "Parameters": {
@@ -215,7 +178,7 @@ for key, value in scopes.items():
                 "Environment": {
                     "Ref": "Environment"
                 },
-                "Scope": scope,
+                "Scope": scope_lower,
                 "AllEnvironmentsCreated": str(aec),
                 "MasterS3BucketName": {
                     "Fn::Sub": "${S3BucketName}"
@@ -230,7 +193,7 @@ for key, value in scopes.items():
                 }
             ],
             "TemplateURL" : {
-                "Fn::Sub": "https://s3.amazonaws.com/${S3BucketName}/generated-cicd-templates/" + file_cicd_child + "-" + scope + ".template"
+                "Fn::Sub": "https://s3.amazonaws.com/${S3BucketName}/generated-cicd-templates/" + file_cicd_child + "-" + scope_lower + ".template"
             }
         }
     }
@@ -244,20 +207,18 @@ for key, value in scopes.items():
         cicd_child = json.load(cc_file)
         
     # Add account parameters to child stack parameters
-    for key, value in environments.items():
-        env = key
-        cicd_child['Parameters'][env + 'Account'] = { "Type": "Number", "Default": value['AccountId'] }
+    for env, env_value in environments.items():
+        cicd_child['Parameters'][env + 'Account'] = { "Type": "Number", "Default": env_value['AccountId'] }
     
     # Add cross account policies we created above
     cicd_child['Resources']['IamPolicyBaseline']['Properties']['PolicyDocument']['Statement'].append(assume_role_statement)
     cicd_child['Resources']['KmsKey']['Properties']['KeyPolicy']['Statement'].append(kms_key_statement)
     cicd_child['Resources']['S3BucketPolicy']['Properties']['PolicyDocument']['Statement'].append(s3_bucket_statement)
-    
     # Loop through pipelines
-    if 'Pipelines' in value:
-        for pipeline in value['Pipelines']:
+    if 'Pipelines' in scope_value:
+        for pipeline in scope_value['Pipelines']:
             name = pipeline['Name'].lower()
-            cicd_child['Resources'][pipeline['Name']] = {
+            cicd_child['Resources']['Pipeline' + pipeline['Name']] = {
                 "Type": "AWS::CloudFormation::Stack",
                 "Condition": "NotInitialCreation",
                 "DependsOn": ["RoleCodePipeline", "RoleCodeBuild"],
@@ -266,7 +227,7 @@ for key, value in scopes.items():
                         "MasterPipeline": {
                             "Ref": "MasterPipeline"
                         },
-                        "Scope": scope,
+                        "Scope": scope_lower,
                         "SubScope": name,
                         "Environment": "cicd",
                         "S3BucketName": {
@@ -305,16 +266,16 @@ for key, value in scopes.items():
             
             # Add Account Parameters To child stack Stack parameters
             for env in environments:
-                cicd_child['Resources'][pipeline['Name']]['Properties']['Parameters'][env + 'Account'] = { "Ref": env + 'Account' }
+                cicd_child['Resources']['Pipeline' + pipeline['Name']]['Properties']['Parameters'][env + 'Account'] = { "Ref": env + 'Account' }
             
             # Add Parameter Overrides
             if 'Parameters' in pipeline:
                 for po, po_value in pipeline['Parameters'].items():
                     # Filter to parameters only applicable to CICD stack
                     if po == 'SdlcCodeBuildPre' or po == 'SdlcCodeBuildPost' or po == 'SdlcCloudFormation' or po == 'CfContainsLambda' or po == 'CicdCodeBuild' or po == 'CicdCodeBuildImage' or po == 'IncludeEnvCfTemplateConfigs':
-                        cicd_child['Resources'][pipeline['Name']]['Properties']['Parameters'][po] = po_value
+                        cicd_child['Resources']['Pipeline' + pipeline['Name']]['Properties']['Parameters'][po] = po_value
         
-    with open('generated-cicd-templates/' + file_cicd_child + '-' + scope + '.template', 'w') as cc_file_output:
+    with open('generated-cicd-templates/' + file_cicd_child + '-' + scope_lower + '.template', 'w') as cc_file_output:
         json.dump(cicd_child, cc_file_output, indent=4)
         
 # Save files

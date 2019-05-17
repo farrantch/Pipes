@@ -118,10 +118,10 @@
                     "Value": "cicd"
                 },
                 {
-                    "Name": "MasterInfraStack",
+                    "Name": "MasterScopeStack",
                     "Type": "PLAINTEXT",
                     "Value": {
-                        "Fn::Sub": "cicd-${AWS::StackName}-infra"
+                        "Fn::Sub": "cicd-${AWS::StackName}-scopes"
                     }
                 },
                 {
@@ -174,10 +174,10 @@
                     "Value": "cicd"
                 },
                 {
-                    "Name": "MasterInfraStack",
+                    "Name": "MasterScopeStack",
                     "Type": "PLAINTEXT",
                     "Value": {
-                        "Fn::Sub": "cicd-${AWS::StackName}-infra"
+                        "Fn::Sub": "cicd-${AWS::StackName}-scopes"
                     }
                 },
                 {
@@ -230,10 +230,10 @@
                     "Value": "cicd"
                 },
                 {
-                    "Name": "MasterInfraStack",
+                    "Name": "MasterScopeStack",
                     "Type": "PLAINTEXT",
                     "Value": {
-                        "Fn::Sub": "cicd-${AWS::StackName}-infra"
+                        "Fn::Sub": "cicd-${AWS::StackName}-scopes"
                     }
                 }
               ],
@@ -612,7 +612,7 @@
                                         "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${AWS::StackName}-CloudFormationRole"
                                     },
                                     "StackName": {
-                                        "Fn::Sub": "cicd-${AWS::StackName}-infra"
+                                        "Fn::Sub": "cicd-${AWS::StackName}-scopes"
                                     },
                                     "TemplatePath": "CicdTemplates::Scope-CICD-Parent.template",
                                     "TemplateConfiguration": "SourceOutput::cfvars/Cicd.template",

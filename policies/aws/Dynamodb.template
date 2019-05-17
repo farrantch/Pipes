@@ -21,7 +21,9 @@
             "Sid": "Dynamodb",
             "Effect": "Allow",
             "Action": [
-                "dynamodb:*"
+                "dynamodb:PutItem",
+                "dynamodb:GetItem",
+                "dynamodb:DeleteItem"
             ],
             "Resource": [
                 {

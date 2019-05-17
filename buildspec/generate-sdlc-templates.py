@@ -18,15 +18,15 @@ with open('scope-templates/' + file_sdlc_parent + '.template') as sp_file:
     
 client = boto3.client('cloudformation')
 
-#MASTERINFRASTACK = os.environ['MasterInfraStack']
+#MASTERSCOPESTACK = os.environ['MASTERSCOPESTACK']
 #ENVIRONMENT = os.environ['Environment']
 
-MASTERINFRASTACK = 'cicd-master-infra'
+MASTERSCOPESTACK = 'cicd-master-scopes'
 # ENVIRONMENT = 'cicd'
 
 # Get master infra stack resources
 resource_summaries = client.list_stack_resources(
-    StackName=MASTERINFRASTACK
+    StackName=MASTERSCOPESTACK
 )['StackResourceSummaries']
 
 # Get cicd child stack outputs

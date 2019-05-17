@@ -5,12 +5,12 @@ import os
 
 client = boto3.client('cloudformation')
 
-MASTERINFRASTACK = os.environ['MasterInfraStack']
+MASTERSCOPESTACK = os.environ['MasterScopeStack']
 ENVIRONMENT = os.environ['Environment']
 
 # List master infra stack resources
 resource_summaries = client.list_stack_resources(
-    StackName=MASTERINFRASTACK
+    StackName=MASTERSCOPESTACK
 )['StackResourceSummaries']
 
 # Update Stacks
