@@ -31,19 +31,19 @@ ENVIRONMENT = 'cicd'
 
 # Get master infra stack resources
 aec = True
+child_stack_parameters = {}
 try:
     master_stack = client.describe_stacks(
         StackName=MASTERSCOPESTACK
     )
 except ClientError:
     aec = False
-    
+
 if aec:
     resource_summaries = client.list_stack_resources(
         StackName=MASTERSCOPESTACK
     )['StackResourceSummaries']
     # Get existing child stack parameters
-    child_stack_parameters = {}
     # Loop through master infra stack resources
     for rs in resource_summaries:
         # Only look for CloudFormation Stacks

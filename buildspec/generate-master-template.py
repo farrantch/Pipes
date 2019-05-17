@@ -171,7 +171,7 @@ for key, value in environments.items():
                     "Fn::Sub": "{ \"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"CicdAccount\" : \"${AWS::AccountId}\", \"MasterPipeline\" : \"${AWS::StackName}\"}"
                 }
             },
-            "Name": "Deploy" + env + "Templates",
+            "Name": "Deploy" + env + "Scopes",
             "InputArtifacts": [
                 {
                     "Name": "SourceOutput"
