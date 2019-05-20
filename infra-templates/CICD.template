@@ -300,6 +300,15 @@
                                                         ]
                                                     },
                                                     {
+                                                        "Fn::Select": [
+                                                            "1",
+                                                            {
+                                                                "Fn::Split": [
+                                                                    ":",
+                                                                    "SourceRepo"
+                                                                ]
+                                                            }
+                                                        ]
                                                         "Ref":"SourceRepo"
                                                     }
                                                 ]
