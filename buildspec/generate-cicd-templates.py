@@ -410,7 +410,7 @@ for scope, scope_value in scopes.items():
                         }
                     }],
                     "TemplateURL": {
-                        "Fn::Sub": "https://s3.amazonaws.com/${MasterS3BucketName}/generated=cicd-templates/CICD.template"
+                        "Fn::Sub": "https://s3.amazonaws.com/${MasterS3BucketName}/generated-cicd-templates/CICD.template"
                     }
                 }
             }
