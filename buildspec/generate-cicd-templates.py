@@ -156,7 +156,7 @@ for env in environments:
     # Insert env into child pipeline template
     pipeline_sdlc_env = {
         "Name": env,
-        "Actions":[
+        "Actions": [
             {
                 "Fn::If": [
                     "SdlcCodeBuildPre",
@@ -369,7 +369,7 @@ for scope, scope_value in scopes.items():
     if 'Pipelines' in scope_value:
         for pipeline in scope_value['Pipelines']:
             name = pipeline['Name'].lower()
-            cicd_child['Resources']['Pipeline' + pipeline['Name']] = {
+            cicd_child['Resources'][pipeline['Name']] = {
                 "Type": "AWS::CloudFormation::Stack",
                 "Condition": "NotInitialCreation",
                 "DependsOn": ["RoleCodePipeline", "RoleCodeBuild"],
@@ -417,14 +417,14 @@ for scope, scope_value in scopes.items():
             
             # Add Account Parameters To child stack Stack parameters
             for env in environments:
-                cicd_child['Resources']['Pipeline' + pipeline['Name']]['Properties']['Parameters'][env + 'Account'] = { "Ref": env + 'Account' }
+                cicd_child['Resources'][pipeline['Name']]['Properties']['Parameters'][env + 'Account'] = { "Ref": env + 'Account' }
             
             # Add Parameter Overrides
             if 'Parameters' in pipeline:
                 for po, po_value in pipeline['Parameters'].items():
                     # Filter to parameters only applicable to CICD stack
                     if po == 'SdlcCodeBuildPre' or po == 'SdlcCodeBuildPost' or po == 'SdlcCloudFormation' or po == 'CfContainsLambda' or po == 'CicdCodeBuild' or po == 'CicdCodeBuildImage' or po == 'IncludeEnvCfTemplateConfigs' or po == 'SourceRepo':
-                        cicd_child['Resources']['Pipeline' + pipeline['Name']]['Properties']['Parameters'][po] = po_value
+                        cicd_child['Resources'][pipeline['Name']]['Properties']['Parameters'][po] = po_value
     # Save child file
     with open('generated-cicd-templates/' + file_cicd_child + '-' + scope_lower + '.template', 'w') as cc_file_output:
         json.dump(cicd_child, cc_file_output, indent=4)
