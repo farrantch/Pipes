@@ -154,7 +154,7 @@ kms_key_statement['Fn::If'][1]['Principal']['AWS'] = base_statement
 s3_bucket_statement['Fn::If'][1]['Principal']['AWS'] = base_statement
 s3_bucket_statement['Fn::If'][1]['Principal']['AWS'].append(
     {
-        "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/" + env_lower + "-${MasterPipeline}-scopes-${Scope}-CodePipelineRole"
+        "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${MasterPipeline}-scopes-${Scope}-CodePipelineRole"
     }
 )
 
