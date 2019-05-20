@@ -447,5 +447,15 @@
                 ]
             }
         }
+    },
+    "Outputs": {
+        "CodeCommitArn": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "CodePipeline",
+                    "Arn"
+                ]
+            }
+        }
     }
 }
