@@ -125,10 +125,10 @@
         },
         "IamPolicyBaseline": {
             "Type": "AWS::IAM::ManagedPolicy",
-            "Properties": {.
+            "Properties": {
                 "ManagedPolicyName": {
                     "Fn::Sub": "${AWS::StackName}-IamPolicyBaseline"
-                }
+                },
                 "PolicyDocument": {
                     "Version": "2012-10-17",
                     "Statement": [

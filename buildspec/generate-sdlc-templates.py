@@ -5,7 +5,7 @@ import os
 import json
 
 # Filenames
-file_scopes = 'Config-Scopes'
+file_scopes = 'config/Scopes'
 file_sdlc_parent = 'Scope-SDLC-Parent'
 file_sdlc_child = 'Scope-SDLC-Child'
 
