@@ -398,7 +398,7 @@
                                         },
                                         "Configuration": {
                                             "ProjectName": {
-                                              "Fn::Sub": "cicd-${MasterPipeline}-infra-${Scope}-${SubScope}-Build"
+                                              "Fn::Sub": "cicd-${MasterPipeline}-scopes-${Scope}-${SubScope}-Build"
                                             }
                                         },
                                         "Name": "RunCodeBuild",
@@ -436,7 +436,7 @@
                                       },
                                       "Configuration": {
                                         "ProjectName": {
-                                          "Fn::Sub": "dev-${MasterPipeline}-infra-${Scope}-${SubScope}-SdlcPre"
+                                          "Fn::Sub": "dev-${MasterPipeline}-scopes-${Scope}-${SubScope}-SdlcPre"
                                         }
                                       },
                                       "Name": "CodeBuildSdlcPre",
@@ -447,7 +447,7 @@
                                       ],
                                       "RunOrder": 1,
                                       "RoleArn": {
-                                          "Fn::Sub":"arn:aws:iam::${DevAccount}:role/dev-${MasterPipeline}-infra-${Scope}-CodeBuildRole"
+                                          "Fn::Sub":"arn:aws:iam::${DevAccount}:role/dev-${MasterPipeline}-scopes-${Scope}-CodeBuildRole"
                                       }
                                     },
                                     {
@@ -469,7 +469,7 @@
                                             "ActionMode":"REPLACE_ON_FAILURE",
                                             "Capabilities":"CAPABILITY_IAM",
                                             "RoleArn":{
-                                                "Fn::Sub":"arn:aws:iam::${DevAccount}:role/dev-${MasterPipeline}-infra-${Scope}-CloudFormationRole"
+                                                "Fn::Sub":"arn:aws:iam::${DevAccount}:role/dev-${MasterPipeline}-scopes-${Scope}-CloudFormationRole"
                                             },
                                             "StackName":{
                                                 "Fn::Sub":"dev-${Scope}-${SubScope}"
@@ -520,7 +520,7 @@
                                         ],
                                         "RunOrder": 2,
                                         "RoleArn": {
-                                            "Fn::Sub":"arn:aws:iam::${DevAccount}:role/dev-${MasterPipeline}-infra-${Scope}-CodePipelineRole"
+                                            "Fn::Sub":"arn:aws:iam::${DevAccount}:role/dev-${MasterPipeline}-scopes-${Scope}-CodePipelineRole"
                                         }
                                     },
                                     {
@@ -540,7 +540,7 @@
                                       },
                                       "Configuration": {
                                         "ProjectName": {
-                                          "Fn::Sub": "dev-${MasterPipeline}-infra-${Scope}-${SubScope}-SdlcPost"
+                                          "Fn::Sub": "dev-${MasterPipeline}-scopes-${Scope}-${SubScope}-SdlcPost"
                                         }
                                       },
                                       "Name": "CodeBuildSdlcPost",
@@ -551,7 +551,7 @@
                                       ],
                                       "RunOrder": 3,
                                       "RoleArn": {
-                                          "Fn::Sub":"arn:aws:iam::${DevAccount}:role/dev-${MasterPipeline}-infra-${Scope}-CodeBuildRole"
+                                          "Fn::Sub":"arn:aws:iam::${DevAccount}:role/dev-${MasterPipeline}-scopes-${Scope}-CodeBuildRole"
                                       }
                                     },
                                     {
@@ -599,7 +599,7 @@
                                       },
                                       "Configuration": {
                                         "ProjectName": {
-                                          "Fn::Sub": "prod-${MasterPipeline}-infra-${Scope}-CodeBuildPre"
+                                          "Fn::Sub": "prod-${MasterPipeline}-scopes-${Scope}-CodeBuildPre"
                                         }
                                       },
                                       "Name": "RunCodeBuild",
@@ -610,7 +610,7 @@
                                       ],
                                       "RunOrder": 1,
                                       "RoleArn": {
-                                          "Fn::Sub":"arn:aws:iam::${ProdAccount}:role/prod-${MasterPipeline}-infra-${Scope}-CodeBuildRole"
+                                          "Fn::Sub":"arn:aws:iam::${ProdAccount}:role/prod-${MasterPipeline}-scopes-${Scope}-CodeBuildRole"
                                       }
                                     },
                                     {
@@ -632,7 +632,7 @@
                                             "ActionMode":"REPLACE_ON_FAILURE",
                                             "Capabilities":"CAPABILITY_IAM",
                                             "RoleArn":{
-                                                "Fn::Sub":"arn:aws:iam::${ProdAccount}:role/prod-${MasterPipeline}-infra-${Scope}-CloudFormationRole"
+                                                "Fn::Sub":"arn:aws:iam::${ProdAccount}:role/prod-${MasterPipeline}-scopes-${Scope}-CloudFormationRole"
                                             },
                                             "StackName":{
                                                 "Fn::Sub":"prod-${Scope}-${SubScope}"
@@ -683,7 +683,7 @@
                                         ],
                                         "RunOrder": 2,
                                         "RoleArn": {
-                                            "Fn::Sub":"arn:aws:iam::${ProdAccount}:role/prod-${MasterPipeline}-infra-${Scope}-CodePipelineRole"
+                                            "Fn::Sub":"arn:aws:iam::${ProdAccount}:role/prod-${MasterPipeline}-scopes-${Scope}-CodePipelineRole"
                                         }
                                     },
                                     {
@@ -703,7 +703,7 @@
                                       },
                                       "Configuration": {
                                         "ProjectName": {
-                                          "Fn::Sub": "prod-${MasterPipeline}-infra-${Scope}-${SubScope}-SdlcPost"
+                                          "Fn::Sub": "prod-${MasterPipeline}-scopes-${Scope}-${SubScope}-SdlcPost"
                                         }
                                       },
                                       "Name": "CodeBuildSdlcPost",
@@ -714,7 +714,7 @@
                                       ],
                                       "RunOrder": 3,
                                       "RoleArn": {
-                                          "Fn::Sub":"arn:aws:iam::${ProdAccount}:role/prod-${MasterPipeline}-infra-${Scope}-CodeBuildRole"
+                                          "Fn::Sub":"arn:aws:iam::${ProdAccount}:role/prod-${MasterPipeline}-scopes-${Scope}-CodeBuildRole"
                                       }
                                     },
                                     {
