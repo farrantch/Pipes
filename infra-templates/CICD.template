@@ -452,7 +452,7 @@
         "CodeCommitArn": {
             "Value": {
                 "Fn::GetAtt": [
-                    "CodePipeline",
+                    "CodeCommit",
                     "Arn"
                 ]
             }
