@@ -33,7 +33,7 @@
             "Type": "AWS::IAM::Role",
             "Properties": {
                 "RoleName": {
-                    "Fn::Sub": "${Environment}-${MasterPipeline}-infra-${Scope}-CodeBuildRole"
+                    "Fn::Sub": "${Environment}-${MasterPipeline}-scopes-${Scope}-CodeBuildRole"
                 },
                 "AssumeRolePolicyDocument": {
                     "Version": "2012-10-17",
@@ -74,7 +74,7 @@
             "Type": "AWS::IAM::Role",
             "Properties": {
                 "RoleName": {
-                    "Fn::Sub": "${Environment}-${MasterPipeline}-infra-${Scope}-CodePipelineRole"
+                    "Fn::Sub": "${Environment}-${MasterPipeline}-scopes-${Scope}-CodePipelineRole"
                 },
                 "AssumeRolePolicyDocument": {
                     "Version": "2012-10-17",
@@ -106,7 +106,7 @@
             "Type": "AWS::IAM::Role",
             "Properties": {
                 "RoleName": {
-                    "Fn::Sub": "${Environment}-${MasterPipeline}-infra-${Scope}-CloudFormationRole"
+                    "Fn::Sub": "${Environment}-${MasterPipeline}-scopes-${Scope}-CloudFormationRole"
                 },
                 "AssumeRolePolicyDocument": {
                     "Version": "2012-10-17",
@@ -136,7 +136,7 @@
             "Type": "AWS::IAM::ManagedPolicy",
             "Properties": {
                 "ManagedPolicyName": {
-                    "Fn::Sub": "${Environment}-${MasterPipeline}-infra-${Scope}-IamPolicyBaseline"
+                    "Fn::Sub": "${Environment}-${MasterPipeline}-scopes-${Scope}-IamPolicyBaseline"
                 },
                 "PolicyDocument": {
                     "Version": "2012-10-17",
@@ -168,7 +168,7 @@
                                     "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${Environment}-${Scope}-*"
                                 },
                                 {
-                                    "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${Environment}-${MasterPipeline}-infra-${Scope}-*"
+                                    "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${Environment}-${MasterPipeline}-scopes-${Scope}-*"
                                 }
                             ]
                         }

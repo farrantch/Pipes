@@ -126,7 +126,7 @@
                                 "codebuild:BatchGetBuilds"
                             ],
                             "Resource": {
-                                "Fn::Sub": "arn:aws:codebuild:*:${AWS::AccountId}:project/${Environment}-${MasterPipeline}-infra-${Scope}*"
+                                "Fn::Sub": "arn:aws:codebuild:*:${AWS::AccountId}:project/${Environment}-${MasterPipeline}-scopes-${Scope}*"
                             }
                         }
                     ]
@@ -152,7 +152,7 @@
                     "Ref": "IamPolicyBaseline"
                 }],
                 "RoleName": {
-                    "Fn::Sub": "${Environment}-${MasterPipeline}-infra-${Scope}-CodePipelineRole"
+                    "Fn::Sub": "${Environment}-${MasterPipeline}-scopes-${Scope}-CodePipelineRole"
                 }
             }
         },
@@ -175,7 +175,7 @@
                     "Ref": "IamPolicyBaseline"
                 }],
                 "RoleName": {
-                    "Fn::Sub": "${Environment}-${MasterPipeline}-infra-${Scope}-CodeBuildRole"
+                    "Fn::Sub": "${Environment}-${MasterPipeline}-scopes-${Scope}-CodeBuildRole"
                 }
             }
         },
@@ -187,7 +187,7 @@
                 "KeyPolicy": {
                     "Version": "2012-10-17",
                     "Id": {
-                        "Fn::Sub": "${Environment}-${MasterPipeline}-infra-${Scope}"
+                        "Fn::Sub": "${Environment}-${MasterPipeline}-scopes-${Scope}"
                     },
                     "Statement": [{
                             "Sid": "Allows admin of the key",
@@ -215,7 +215,7 @@
             "DependsOn": "KmsKey",
             "Properties": {
                 "AliasName": {
-                    "Fn::Sub": "alias/${Environment}-${MasterPipeline}-infra-${Scope}"
+                    "Fn::Sub": "alias/${Environment}-${MasterPipeline}-scopes-${Scope}"
                 },
                 "TargetKeyId": {
                     "Ref": "KmsKey"
