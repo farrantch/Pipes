@@ -8,7 +8,7 @@ from botocore.exceptions import ClientError
 
 # Filenames
 file_scopes = 'config/Scopes'
-file_cicd_infra = 'infra-templates/CICD'
+file_cicd_infra = 'CICD'
 file_environments = 'config/Environments'
 file_cicd_parent = 'Scope-CICD-Parent'
 file_cicd_child = 'Scope-CICD-Child'
@@ -21,7 +21,7 @@ with open(file_environments + '.template') as e_file:
     environments = json.load(e_file, object_pairs_hook=OrderedDict)
 with open('scope-templates/' + file_cicd_parent + '.template') as cp_file:
     cicd_parent = json.load(cp_file)
-with open(file_cicd_infra + '.template') as ci_file:
+with open('infra-templates/' + file_cicd_infra + '.template') as ci_file:
     cicd_infra = json.load(ci_file)
     
 client = boto3.client('cloudformation')
