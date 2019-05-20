@@ -459,7 +459,8 @@
                     "CodeCommit",
                     "Arn"
                 ]
-            }
+            },
+            "Condition" : "CreateCodeCommitRepo"
         }
     }
 }
