@@ -16,7 +16,7 @@
             "Condition": {
                 "StringEquals": {
                     "iam:PermissionsBoundary": {
-                        "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:policy/${Environment}-${MasterPipeline}-infra-${Scope}-IamPolicyBaseline"
+                        "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:policy/${Environment}-${MasterPipeline}-scopes-${Scope}-IamPolicyBaseline"
                     }
                 }
             }
