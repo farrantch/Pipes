@@ -149,12 +149,12 @@ for env in environments:
             "Fn::Sub": "arn:aws:iam::${" + env + "Account}:role/" + env_lower + "-${MasterPipeline}-scopes-${Scope}-CodeBuildRole"
         }
     )
-assume_role_statement['Fn::If'][1]['Resource'] = base_statement
-kms_key_statement['Fn::If'][1]['Principal']['AWS'] = base_statement
-s3_bucket_statement['Fn::If'][1]['Principal']['AWS'] = base_statement
+assume_role_statement['Fn::If'][1]['Resource'] = base_statement[:]
+kms_key_statement['Fn::If'][1]['Principal']['AWS'] = base_statement[:]
+s3_bucket_statement['Fn::If'][1]['Principal']['AWS'] = base_statement[:]
 s3_bucket_statement['Fn::If'][1]['Principal']['AWS'].append(
     {
-        "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${MasterPipeline}-scopes-${Scope}-CodePipelineRole"
+        "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${Environment}-${MasterPipeline}-scopes-${Scope}-CodePipelineRole"
     }
 )
 
