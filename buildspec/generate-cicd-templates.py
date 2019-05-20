@@ -410,7 +410,7 @@ for scope, scope_value in scopes.items():
                         }
                     }],
                     "TemplateURL": {
-                        "Fn::Sub": "https://s3.amazonaws.com/${MasterS3BucketName}/infra-templates/CICD.template"
+                        "Fn::Sub": "https://s3.amazonaws.com/${MasterS3BucketName}/generated=cicd-templates/CICD.template"
                     }
                 }
             }
@@ -425,10 +425,14 @@ for scope, scope_value in scopes.items():
                     # Filter to parameters only applicable to CICD stack
                     if po == 'SdlcCodeBuildPre' or po == 'SdlcCodeBuildPost' or po == 'SdlcCloudFormation' or po == 'CfContainsLambda' or po == 'CicdCodeBuild' or po == 'CicdCodeBuildImage' or po == 'IncludeEnvCfTemplateConfigs':
                         cicd_child['Resources']['Pipeline' + pipeline['Name']]['Properties']['Parameters'][po] = po_value
-        
+    # Save child file
     with open('generated-cicd-templates/' + file_cicd_child + '-' + scope_lower + '.template', 'w') as cc_file_output:
         json.dump(cicd_child, cc_file_output, indent=4)
-        
-# Save files
+
+# Save parent file
 with open('generated-cicd-templates/' + file_cicd_parent + '.template', 'w') as cp_file_output:
     json.dump(cicd_parent, cp_file_output, indent=4)
+
+# Save parent file
+with open('generated-cicd-templates/' + file_cicd_infra + '.template', 'w') as ci_file_output:
+    json.dump(cicd_infra, ci_file_output, indent=4)
