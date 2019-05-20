@@ -8,6 +8,7 @@ from botocore.exceptions import ClientError
 
 # Filenames
 file_scopes = 'config/Scopes'
+file_cicd_infra = 'infra-templates/CICD'
 file_environments = 'config/Environments'
 file_cicd_parent = 'Scope-CICD-Parent'
 file_cicd_child = 'Scope-CICD-Child'
@@ -20,6 +21,8 @@ with open(file_environments + '.template') as e_file:
     environments = json.load(e_file, object_pairs_hook=OrderedDict)
 with open('scope-templates/' + file_cicd_parent + '.template') as cp_file:
     cicd_parent = json.load(cp_file)
+with open(file_cicd_infra + '.template') as ci_file:
+    cicd_infra = json.load(ci_file)
     
 client = boto3.client('cloudformation')
 
@@ -149,6 +152,154 @@ for env in environments:
             "Fn::Sub": "arn:aws:iam::${" + env + "Account}:role/" + env_lower + "-${MasterPipeline}-scopes-${Scope}-CodeBuildRole"
         }
     )
+
+    # Insert env into child pipeline template
+    pipeline_sdlc_env = {
+        "Name": env,
+        "Actions":[
+            {
+                "Fn::If": [
+                    "SdlcCodeBuildPre",
+                    {
+                        "ActionTypeId": {
+                        "Category": "Build",
+                        "Owner": "AWS",
+                        "Provider": "CodeBuild",
+                        "Version": "1"
+                        },
+                        "Configuration": {
+                            "ProjectName": {
+                                "Fn::Sub": env_lower + "-${MasterPipeline}-scopes-${Scope}-${SubScope}-SdlcPre"
+                            }
+                        },
+                        "Name": "CodeBuildSdlcPre",
+                        "InputArtifacts": [
+                        {
+                            "Name": "SourceOutput"
+                        }
+                        ],
+                        "RunOrder": 1,
+                        "RoleArn": {
+                            "Fn::Sub":"arn:aws:iam::${" + env + "Account}:role/" + env_lower + "-${MasterPipeline}-scopes-${Scope}-CodeBuildRole"
+                        }
+                    },
+                    {
+                        "Ref": "AWS::NoValue"
+                    }
+                ]
+            },
+            {
+                "Fn::If": [
+                    "SdlcCloudFormation",
+                    {
+                        "ActionTypeId":{
+                            "Category":"Deploy",
+                            "Owner":"AWS",
+                            "Provider":"CloudFormation",
+                            "Version":"1"
+                        },
+                        "Configuration":{
+                            "ActionMode":"REPLACE_ON_FAILURE",
+                            "Capabilities":"CAPABILITY_IAM",
+                            "RoleArn":{
+                                "Fn::Sub":"arn:aws:iam::${" + env + "Account}:role/"+ env_lower + "-${MasterPipeline}-scopes-${Scope}-CloudFormationRole"
+                            },
+                            "StackName":{
+                                "Fn::Sub": env_lower + "-${Scope}-${SubScope}"
+                            },
+                            "TemplatePath":"SourceOutput::CloudFormation.template",
+                            "TemplateConfiguration":{
+                                "Fn::If":[
+                                    "IncludeEnvCfTemplateConfigs",
+                                    "SourceOutput::cfvars/" + env + ".template",
+                                    {
+                                        "Ref":"AWS::NoValue"
+                                    }
+                                ]
+                            },
+                            "ParameterOverrides":{
+                                "Fn::Join": [
+                                    "",
+                                    [
+                                        "{",
+                                        {
+                                            "Fn::If":[
+                                                "CfContainsLambda",
+                                                "\"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"S3ObjectKey\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"ObjectKey\"]},",
+                                                {
+                                                    "Ref":"AWS::NoValue"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Sub": "\"Environment\": \"" + env_lower + "\","
+                                        },
+                                        {
+                                            "Fn::Sub": "\"MasterPipeline\": \"${MasterPipeline}\","
+                                        },
+                                        {
+                                            "Fn::Sub": "\"Scope\": \"${Scope}\""
+                                        },
+                                        "}"
+                                    ]
+                                ]
+                            }
+                        },
+                        "Name": "DeployCloudFormation",
+                        "InputArtifacts": [
+                            {
+                                "Name":"SourceOutput"
+                            }
+                        ],
+                        "RunOrder": 2,
+                        "RoleArn": {
+                            "Fn::Sub":"arn:aws:iam::${" + env + "Account}:role/" + env_lower + "-${MasterPipeline}-scopes-${Scope}-CodePipelineRole"
+                        }
+                    },
+                    {
+                        "Ref": "AWS::NoValue"
+                    }
+                ]
+            },
+            {
+                "Fn::If": [
+                    "SdlcCodeBuildPost",
+                    {
+                        "ActionTypeId": {
+                        "Category": "Build",
+                        "Owner": "AWS",
+                        "Provider": "CodeBuild",
+                        "Version": "1"
+                        },
+                        "Configuration": {
+                        "ProjectName": {
+                            "Fn::Sub": env_lower + "-${MasterPipeline}-scopes-${Scope}-${SubScope}-SdlcPost"
+                        }
+                        },
+                        "Name": "CodeBuildSdlcPost",
+                        "InputArtifacts": [
+                        {
+                            "Name": "SourceOutput"
+                        }
+                        ],
+                        "RunOrder": 3,
+                        "RoleArn": {
+                            "Fn::Sub":"arn:aws:iam::${" + env + "Account}:role/" + env_lower + "-${MasterPipeline}-scopes-${Scope}-CodeBuildRole"
+                        }
+                    },
+                    {
+                        "Ref": "AWS::NoValue"
+                    }
+                ]
+            }
+        ]
+    }
+    if env.lower() != 'prod':
+        cicd_infra['Resources']['CodePipeline']['Properties']['Stages'].insert(-2, pipeline_sdlc_env)
+    else:
+        cicd_infra['Resources']['CodePipeline']['Properties']['Stages'].append(pipeline_sdlc_env)
+
+
 assume_role_statement['Fn::If'][1]['Resource'] = base_statement[:]
 kms_key_statement['Fn::If'][1]['Principal']['AWS'] = base_statement[:]
 s3_bucket_statement['Fn::If'][1]['Principal']['AWS'] = base_statement[:]
