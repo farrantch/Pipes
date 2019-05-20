@@ -398,7 +398,10 @@
         "S3Bucket": {
             "Type": "AWS::S3::Bucket",
             "Properties": {
-                "AccessControl": "Private"
+                "AccessControl": "Private",
+                "VersioningConfiguration": {
+                    "Status" : "Enabled"
+                  }
             }
         },
         "S3BucketPolicy": {
