@@ -305,11 +305,12 @@
                                                             {
                                                                 "Fn::Split": [
                                                                     ":",
-                                                                    "SourceRepo"
+                                                                    {
+                                                                        "Ref": "SourceRepo"
+                                                                    }
                                                                 ]
                                                             }
                                                         ]
-                                                        "Ref":"SourceRepo"
                                                     }
                                                 ]
                                             },
