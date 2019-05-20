@@ -71,3 +71,6 @@ for cs in change_sets:
             ChangeSetName = cs['ChangeSetId']
         )['ExecutionStatus']
         time.sleep(1)
+    if execution_status == 'EXECUTE_FAILED':
+        print("Stack Update Unsuccessful.")
+        sys.exit(1)
