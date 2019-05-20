@@ -87,22 +87,26 @@
                     "Condition": "UseCodeCommitRepo"
                 },
                 {
-                    "Fn::Equals":[
-                        "",
+                    "Fn::Not": [
                         {
-                            "Fn::Select": [
-                                "1",
+                            "Fn::Equals":[
+                                "",
                                 {
-                                    "Fn::Split": [
-                                        ":",
+                                    "Fn::Select": [
+                                        "1",
                                         {
-                                            "Ref":"SourceRepo"
+                                            "Fn::Split": [
+                                                ":",
+                                                {
+                                                    "Ref":"SourceRepo"
+                                                }
+                                            ]
                                         }
                                     ]
                                 }
-                            ]
+                            ] 
                         }
-                    ] 
+                    ]
                 }
             ]
         },
