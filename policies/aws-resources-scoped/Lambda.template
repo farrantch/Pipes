@@ -1,0 +1,64 @@
+{
+    "Statements": [
+        {
+            "Sid": "LambdaFunctionScoped",
+            "Effect": "Allow",
+            "Action": [
+                "lambda:*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:lambda:*:${AWS::AccountId}:function:${Environment}-${Scope}-*"
+                }
+            ]
+        },
+        {
+            "Sid": "LambdaEventSourceMappingScoped",
+            "Effect": "Allow",
+            "Action": [
+                "lambda:*"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "StringLike": {
+                    "lambda:FunctionArn": {
+                        "Fn::Sub": "arn:aws:lambda:*:${AWS::AccountId}:function:${Environment}-${Scope}-*"
+                    }
+                }
+            }
+        }
+    ],
+    "UserStatements": [
+        {
+            "Sid": "LambdaFunctionScoped",
+            "Effect": "Allow",
+            "Action": [
+                "lambda:Get*",
+                "lambda:List*",
+                "lambda:InvokeFunction",
+                "lambda:UpdateFunctionConfiguration"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:lambda:*:${AWS::AccountId}:function:${Environment}-${Scope}-*"
+                }
+            ]
+        },
+        {
+            "Sid": "LambdaEventSourceMappingScoped",
+            "Effect": "Allow",
+            "Action": [
+                "lambda:Get*",
+                "lambda:UpdateEventSourceMapping"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "StringLike": {
+                    "lambda:FunctionArn": {
+                        "Fn::Sub": "arn:aws:lambda:*:${AWS::AccountId}:function:${Environment}-${Scope}-*"
+                    }
+                }
+            }
+        }
+    ]
+}

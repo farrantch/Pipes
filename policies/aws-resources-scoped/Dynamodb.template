@@ -1,7 +1,7 @@
 {
     "Statements": [
         {
-            "Sid": "Dynamodb",
+            "Sid": "DynamodbScoped",
             "Effect": "Allow",
             "Action": [
                 "dynamodb:*"
@@ -18,12 +18,14 @@
     ],
     "UserStatements": [
         {
-            "Sid": "Dynamodb",
+            "Sid": "DynamodbScoped",
             "Effect": "Allow",
             "Action": [
-                "dynamodb:PutItem",
-                "dynamodb:GetItem",
-                "dynamodb:DeleteItem"
+                "dynamodb:Get*",
+                "dynamodb:Describe*",
+                "dynamodb:Query",
+                "dynamodb:Scan",
+                "dynadmob:List*"
             ],
             "Resource": [
                 {

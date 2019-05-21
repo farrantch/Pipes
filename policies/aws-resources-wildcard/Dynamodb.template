@@ -1,0 +1,12 @@
+{
+    "Statements": [
+        {
+            "Sid": "DynamodbWildcard",
+            "Effect": "Allow",
+            "Action": [
+                "dynamodb:*"
+            ],
+            "Resource": "*"
+        }
+    ]
+}

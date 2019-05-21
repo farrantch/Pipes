@@ -1,0 +1,30 @@
+{
+    "Statements": [
+        {
+            "Sid": "ParameterStoreScoped",
+            "Effect": "Allow",
+            "Action": [
+                "ssm:*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:ssm:*:${AWS::AccountId}:parameter/${Environment}/${Scope}/*"
+                }
+            ]
+        }
+    ],
+    "UserStatements": [
+        {
+            "Sid": "ParameterStoreScoped",
+            "Effect": "Allow",
+            "Action": [
+                "ssm:*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:ssm:*:${AWS::AccountId}:parameter/${Environment}/${Scope}/*"
+                }
+            ]
+        }
+    ]
+}
