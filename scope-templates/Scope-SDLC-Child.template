@@ -190,7 +190,7 @@
                                     "Fn::Sub": "arn:aws:cloudformation:*:aws:transform/*"
                                 },
                                 {
-                                    "Fn::Sub": "arn:aws:codebuild:*:${AWS::AccountId}:project/${Environment}-${Scope}-*"
+                                    "Fn::Sub": "arn:aws:codebuild:*:${AWS::AccountId}:project/${Environment}-${MasterPipeline}-scopes-${Scope}-*"
                                 }
                             ]
                         }
