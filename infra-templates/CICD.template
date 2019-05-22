@@ -186,7 +186,7 @@
             "Fn::Equals":[
                 "True",
                 {
-                    "Ref":"SdlcCodeBuildPre"
+                    "Ref":"SdlcCodeBuildPost"
                 }
             ]
         },

@@ -295,7 +295,7 @@ for env in environments:
         ]
     }
     if env.lower() != 'prod':
-        cicd_infra['Resources']['CodePipeline']['Properties']['Stages'].insert(-2, pipeline_sdlc_env)
+        cicd_infra['Resources']['CodePipeline']['Properties']['Stages'].insert(-1, pipeline_sdlc_env)
     else:
         cicd_infra['Resources']['CodePipeline']['Properties']['Stages'].append(pipeline_sdlc_env)
 
