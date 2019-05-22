@@ -179,7 +179,7 @@
                                 "cloudformation:*",
                                 "codebuild:*"
                             ],
-                            "Resources": [
+                            "Resource": [
                                 {
                                     "Fn::Sub": "arn:aws:cloudformation:*:${AWS::AccountId}:stack/${Environment}-${Scope}-*"
                                 },
