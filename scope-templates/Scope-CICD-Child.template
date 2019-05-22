@@ -126,7 +126,7 @@
                                 "codebuild:BatchGetBuilds"
                             ],
                             "Resource": {
-                                "Fn::Sub": "arn:aws:codebuild:*:${AWS::AccountId}:project/${Environment}-${MasterPipeline}-${Scope}*"
+                                "Fn::Sub": "arn:aws:codebuild:*:${AWS::AccountId}:project/${Environment}-${MasterPipeline}-${Scope}-*"
                             }
                         }
                     ]
