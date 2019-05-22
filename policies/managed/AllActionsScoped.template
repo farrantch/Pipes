@@ -4,7 +4,6 @@
             "Sid": "AllActionsWildcard",
             "Effect": "Allow",
             "Action": [
-                "cloudformation:*",
                 "s3:*",
                 "codecommit:*",
                 "iam:*",
@@ -15,7 +14,6 @@
                 "sqs:*",
                 "cloudwatch:*",
                 "lambda:*",
-                "codebuild:*",
                 "ssm:*"
             ],
             "Resource": [

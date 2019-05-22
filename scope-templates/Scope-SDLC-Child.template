@@ -171,6 +171,28 @@
                                     "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${Environment}-${MasterPipeline}-scopes-${Scope}-*"
                                 }
                             ]
+                        },
+                        {
+                            "Sid": "BaselineDeployPermissions",
+                            "Effect": "Allow",
+                            "Action": [
+                                "cloudformation:*",
+                                "codebuild:*"
+                            ],
+                            "Resources": [
+                                {
+                                    "Fn::Sub": "arn:aws:cloudformation:*:${AWS::AccountId}:stack/${Environment}-${Scope}-*"
+                                },
+                                {
+                                    "Fn::Sub": "arn:aws:cloudformation:*:${AWS::AccountId}:changeSet/${Environment}-${Scope}-*:*"
+                                },
+                                {
+                                    "Fn::Sub": "arn:aws:cloudformation:*:aws:transform/*"
+                                },
+                                {
+                                    "Fn::Sub": "arn:aws:codebuild:*:${AWS::AccountId}:project/${Environment}-${Scope}-*"
+                                }
+                            ]
                         }
                     ]
                 }
