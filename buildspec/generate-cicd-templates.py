@@ -169,7 +169,7 @@ for env in environments:
                         },
                         "Configuration": {
                             "ProjectName": {
-                                "Fn::Sub": env_lower + "-${MasterPipeline}-scopes-${Scope}-${SubScope}-SdlcPre"
+                                "Fn::Sub": env_lower + "-${MasterPipeline}-${Scope}-${SubScope}-CodeBuildPre"
                             }
                         },
                         "Name": "CodeBuildSdlcPre",
@@ -273,7 +273,7 @@ for env in environments:
                         },
                         "Configuration": {
                         "ProjectName": {
-                            "Fn::Sub": env_lower + "-${MasterPipeline}-scopes-${Scope}-${SubScope}-SdlcPost"
+                            "Fn::Sub": env_lower + "-${MasterPipeline}-${Scope}-${SubScope}-CodeBuildPre"
                         }
                         },
                         "Name": "CodeBuildSdlcPost",
