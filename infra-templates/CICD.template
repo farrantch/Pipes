@@ -408,7 +408,7 @@
                                         },
                                         "Configuration": {
                                             "ProjectName": {
-                                              "Fn::Sub": "cicd-${MasterPipeline}-scopes-${Scope}-${SubScope}-Build"
+                                              "Fn::Sub": "${Environment}-${MasterPipeline}-${Scope}-${SubScope}-CodeBuildPre"
                                             }
                                         },
                                         "Name": "RunCodeBuild",
