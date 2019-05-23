@@ -238,7 +238,7 @@ for env in environments:
                                             "Fn::Sub": "\"MasterPipeline\": \"${MasterPipeline}\","
                                         },
                                         {
-                                            "Fn::Sub": "\"Scope\": \"${Scope}\""
+                                            "Fn::Sub": "\"Scope\": \"${Scope}\","
                                         },
                                         {
                                             "Fn::Sub": "\"SubScope\": \"${SubScope}\""
