@@ -9,6 +9,9 @@
             "Resource": [
                 {
                     "Fn::Sub": "arn:aws:ssm:*:${AWS::AccountId}:parameter/${Environment}/${Scope}/*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:ssm:*:${AWS::AccountId}:parameter/${Environment}/Shared/${Scope}/*"
                 }
             ]
         }
@@ -23,6 +26,9 @@
             "Resource": [
                 {
                     "Fn::Sub": "arn:aws:ssm:*:${AWS::AccountId}:parameter/${Environment}/${Scope}/*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:ssm:*:${AWS::AccountId}:parameter/${Environment}/Shared/${Scope}/*"
                 }
             ]
         }

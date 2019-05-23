@@ -1,0 +1,32 @@
+{
+    "Statements": [
+        {
+            "Sid": "ParameterStoreShared",
+            "Effect": "Allow",
+            "Action": [
+                "ssm:Get*",
+                "ssm:Describe*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:ssm:*:${AWS::AccountId}:parameter/${Environment}/Shared/*"
+                }
+            ]
+        }
+    ],
+    "UserStatements": [
+        {
+            "Sid": "ParameterStoreShared",
+            "Effect": "Allow",
+            "Action": [
+                "ssm:Get*",
+                "ssm:Describe*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:ssm:*:${AWS::AccountId}:parameter/${Environment}/Shared/*"
+                }
+            ]
+        }
+    ]
+}

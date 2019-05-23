@@ -1,10 +1,10 @@
 {
     "LegacyMicroserviceFoo": {
         "Policies": [
-            "aws/Dynamodb",
-            "aws/Lambda",
-            "IamCreateRole",
-            "services/LegacyMicroserviceFoo"
+            "aws-resources-scoped/Dynamodb",
+            "aws-resources-scoped/Lambda",
+            "managed/IamCreateRole",
+            "scopes/LegacyMicroserviceFoo"
         ],
         "Pipelines": [
             {
@@ -20,8 +20,8 @@
     },
     "Frontend": {
         "Policies": [
-            "services/Frontend",
-            "IamCreateRole"
+            "scopes/Frontend",
+            "managed/IamCreateRole"
         ]
     }
 }

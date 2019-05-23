@@ -240,6 +240,9 @@ for env in environments:
                                         {
                                             "Fn::Sub": "\"Scope\": \"${Scope}\""
                                         },
+                                        {
+                                            "Fn::Sub": "\"SubScope\": \"${SubScope}\""
+                                        },
                                         "}"
                                     ]
                                 ]
