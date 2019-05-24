@@ -31,11 +31,11 @@
         },
         "SdlcCodeBuildImagePre": {
             "Type": "String",
-            "Default": "aws/codebuild/nodejs:6.3.1"
+            "Default": "aws/codebuild/standard:2.0"
         },
         "SdlcCodeBuildImagePost": {
             "Type": "String",
-            "Default": "aws/codebuild/nodejs:6.3.1"
+            "Default": "aws/codebuild/standard:2.0"
         }
     },
     "Conditions": {
