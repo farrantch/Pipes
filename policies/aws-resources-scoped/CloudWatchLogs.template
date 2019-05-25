@@ -4,11 +4,17 @@
             "Sid": "CloudWatchLogsScoped",
             "Effect": "Allow",
             "Action": [
-                "s3:*"
+                "logs:*"
             ],
             "Resource": [
                 {
-                    "Fn::Sub": "arn:aws:s3:::${Environment}-${Scope}-*"
+                    "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:${Environment}-${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:${Environment}-${Scope}-*:*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:${Environment}-${Scope}-*:*:*"
                 }
             ]
         }
@@ -18,14 +24,19 @@
             "Sid": "CloudWatchLogsScoped",
             "Effect": "Allow",
             "Action": [
-                "s3:Get*",
-                "s3:List*",
-                "s3:PutObject*",
-                "s3:DeleteObject*"
+                "logs:Get*",
+                "logs:List*",
+                "logs:Describe*"
             ],
             "Resource": [
                 {
-                    "Fn::Sub": "arn:aws:s3:::${Environment}-${Scope}-*"
+                    "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:${Environment}-${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:${Environment}-${Scope}-*:*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:${Environment}-${Scope}-*:*:*"
                 }
             ]
         }

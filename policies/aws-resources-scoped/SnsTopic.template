@@ -1,0 +1,31 @@
+{
+    "Statements": [
+        {
+            "Sid": "S3BucketScoped",
+            "Effect": "Allow",
+            "Action": [
+                "sns:*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:sns:*:${AWS::AccountId}:${Environment}-${Scope}-*"
+                }
+            ]
+        }
+    ],
+    "UserStatements": [
+        {
+            "Sid": "S3BucketScoped",
+            "Effect": "Allow",
+            "Action": [
+                "sns:Get*",
+                "sns:List*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:sns:*:${AWS::AccountId}:${Environment}-${Scope}-*"
+                }
+            ]
+        }
+    ]
+}
