@@ -170,7 +170,8 @@ for env in environments:
                         "Configuration": {
                             "ProjectName": {
                                 "Fn::Sub": env_lower + "-${MasterPipeline}-${Scope}-${SubScope}-CodeBuildPre"
-                            }
+                            },
+                            "PrimarySource": "SourceOutput"
                         },
                         "Name": "CodeBuildSdlcPre",
                         "InputArtifacts": [
@@ -286,9 +287,10 @@ for env in environments:
                         "Version": "1"
                         },
                         "Configuration": {
-                        "ProjectName": {
-                            "Fn::Sub": env_lower + "-${MasterPipeline}-${Scope}-${SubScope}-CodeBuildPre"
-                        }
+                            "ProjectName": {
+                                "Fn::Sub": env_lower + "-${MasterPipeline}-${Scope}-${SubScope}-CodeBuildPre"
+                            },
+                            "PrimarySource": "SourceOutput"
                         },
                         "Name": "CodeBuildSdlcPost",
                         "InputArtifacts": [
