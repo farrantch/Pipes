@@ -174,9 +174,20 @@ for env in environments:
                         },
                         "Name": "CodeBuildSdlcPre",
                         "InputArtifacts": [
-                        {
-                            "Name": "SourceOutput"
-                        }
+                            {
+                                "Name": "SourceOutput"
+                            },
+                            {
+                                "Fn::If": [
+                                    "CicdCodeBuild",
+                                    {
+                                        "Name": "BuildOutput"
+                                    },
+                                    {
+                                        "Ref": "AWS::NoValue"
+                                    }
+                                ]
+                            }
                         ],
                         "RunOrder": 1,
                         "RoleArn": {
@@ -281,9 +292,20 @@ for env in environments:
                         },
                         "Name": "CodeBuildSdlcPost",
                         "InputArtifacts": [
-                        {
-                            "Name": "SourceOutput"
-                        }
+                            {
+                                "Name": "SourceOutput"
+                            },
+                            {
+                                "Fn::If": [
+                                    "CicdCodeBuild",
+                                    {
+                                        "Name": "BuildOutput"
+                                    },
+                                    {
+                                        "Ref": "AWS::NoValue"
+                                    }
+                                ]
+                            }
                         ],
                         "RunOrder": 3,
                         "RoleArn": {
