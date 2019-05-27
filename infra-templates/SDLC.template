@@ -76,7 +76,9 @@
                 {
                   "Name": "Environment",
                   "Type": "PLAINTEXT",
-                  "Value": "dev"
+                  "Value": {
+                    "Ref": "Environment" 
+                  }
                 }
               ],
               "PrivilegedMode": false,
@@ -114,7 +116,9 @@
                 {
                   "Name": "Environment",
                   "Type": "PLAINTEXT",
-                  "Value": "dev"
+                  "Value": {
+                    "Ref": "Environment" 
+                  }
                 }
               ],
               "PrivilegedMode": false,
