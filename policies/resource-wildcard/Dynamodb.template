@@ -1,7 +1,7 @@
 {
     "Statements": [
         {
-            "Sid": "DynamodbWildcard",
+            "Sid": "ResourceWildcardDynamodb",
             "Effect": "Allow",
             "Action": [
                 "dynamodb:*"

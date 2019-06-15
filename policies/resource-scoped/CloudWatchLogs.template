@@ -1,7 +1,7 @@
 {
     "Statements": [
         {
-            "Sid": "CloudWatchLogsScoped",
+            "Sid": "ResourceScopedCloudWatchLogs",
             "Effect": "Allow",
             "Action": [
                 "logs:*"
@@ -21,7 +21,7 @@
     ],
     "UserStatements": [
         {
-            "Sid": "CloudWatchLogsScoped",
+            "Sid": "ResourceScopedCloudWatchLogs",
             "Effect": "Allow",
             "Action": [
                 "logs:Get*",

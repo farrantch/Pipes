@@ -1,31 +1,29 @@
 {
     "Statements": [
         {
-            "Sid": "S3BucketScoped",
+            "Sid": "ResourceScopedSnsTopic",
             "Effect": "Allow",
             "Action": [
-                "s3:*"
+                "sns:*"
             ],
             "Resource": [
                 {
-                    "Fn::Sub": "arn:aws:s3:::${Environment}-${Scope}-*"
+                    "Fn::Sub": "arn:aws:sns:*:${AWS::AccountId}:${Environment}-${Scope}-*"
                 }
             ]
         }
     ],
     "UserStatements": [
         {
-            "Sid": "S3BucketScoped",
+            "Sid": "ResourceScopedSnsTopic",
             "Effect": "Allow",
             "Action": [
-                "s3:Get*",
-                "s3:List*",
-                "s3:PutObject*",
-                "s3:DeleteObject*"
+                "sns:Get*",
+                "sns:List*"
             ],
             "Resource": [
                 {
-                    "Fn::Sub": "arn:aws:s3:::${Environment}-${Scope}-*"
+                    "Fn::Sub": "arn:aws:sns:*:${AWS::AccountId}:${Environment}-${Scope}-*"
                 }
             ]
         }

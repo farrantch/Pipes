@@ -1,7 +1,7 @@
 {
     "Statements": [
         {
-            "Sid": "ParameterStoreShared",
+            "Sid": "ManagedSharedSsmParameter",
             "Effect": "Allow",
             "Action": [
                 "ssm:Get*",
@@ -12,11 +12,19 @@
                     "Fn::Sub": "arn:aws:ssm:*:${AWS::AccountId}:parameter/${Environment}/shared/*"
                 }
             ]
+        },
+        {
+            "Sid": "ManagedSharedResourceWildcard",
+            "Effect": "Allow",
+            "Action": [
+                "cloudformation:List*"
+            ],
+            "Resource": "*"
         }
     ],
     "UserStatements": [
         {
-            "Sid": "ParameterStoreShared",
+            "Sid": "ManagedSharedSsmParameter",
             "Effect": "Allow",
             "Action": [
                 "ssm:Get*",
@@ -27,6 +35,14 @@
                     "Fn::Sub": "arn:aws:ssm:*:${AWS::AccountId}:parameter/${Environment}/shared/*"
                 }
             ]
+        },
+        {
+            "Sid": "ManagedSharedResourceWildcard",
+            "Effect": "Allow",
+            "Action": [
+                "cloudformation:List*"
+            ],
+            "Resource": "*"
         }
     ]
 }

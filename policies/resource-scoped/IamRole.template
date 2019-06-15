@@ -1,7 +1,7 @@
 {
     "Statements": [
         {
-            "Sid": "IamCreateRole",
+            "Sid": "ResourceScopedIamRoleCreate",
             "Effect": "Allow",
             "Action": [
                 "iam:CreateRole",
@@ -22,7 +22,7 @@
             }
         },
         {
-            "Sid": "IamUpdateRole",
+            "Sid": "ResourceScopedIamRoleManage",
             "Effect": "Allow",
             "Action": [
                 "iam:GetRole",

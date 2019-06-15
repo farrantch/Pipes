@@ -1,7 +1,7 @@
 {
     "Statements": [
         {
-            "Sid": "CloudWatchAlarmsScoped",
+            "Sid": "ResourceScopedCloudWatchAlarms",
             "Effect": "Allow",
             "Action": [
                 "cloudwatch:*"
@@ -15,7 +15,7 @@
     ],
     "UserStatements": [
         {
-            "Sid": "CloudWatcAlarmsScoped",
+            "Sid": "ResourceScopedCloudWatchAlarms",
             "Effect": "Allow",
             "Action": [
                 "cloudwatch:Get*",

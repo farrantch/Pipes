@@ -1,7 +1,7 @@
 {
     "Statements": [
         {
-            "Sid": "Frontend",
+            "Sid": "ScopeFrontend",
             "Effect": "Allow",
             "Action": [
                 "route53:*",

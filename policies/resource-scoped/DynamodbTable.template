@@ -1,7 +1,7 @@
 {
     "Statements": [
         {
-            "Sid": "DynamodbScoped",
+            "Sid": "ResourceScopedDynamodbTable",
             "Effect": "Allow",
             "Action": [
                 "dynamodb:*"
@@ -18,7 +18,7 @@
     ],
     "UserStatements": [
         {
-            "Sid": "DynamodbScoped",
+            "Sid": "ResourceScopedDynamodbTable",
             "Effect": "Allow",
             "Action": [
                 "dynamodb:Get*",

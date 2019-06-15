@@ -1,7 +1,7 @@
 {
     "Statements": [
         {
-            "Sid": "AllActionsWildcard",
+            "Sid": "ManagedAllAccessScopedActionWildcard",
             "Effect": "Allow",
             "Action": [
                 "s3:*",
@@ -74,7 +74,7 @@
             ]
         },
         {
-            "Sid": "AllResourcesWildcard",
+            "Sid": "ManagedAllAccessScopedResourceWildcard",
             "Effect": "Allow",
             "Action": [
                 "cloudformation:DescribeStacks",
@@ -91,7 +91,7 @@
             "Resource": "*"
         },
         {
-            "Sid": "LambdaEventSourceMapping",
+            "Sid": "ManagedAllAccessScopedLambdaEventSourceMapping",
             "Effect": "Allow",
             "Action": [
                 "lambda:*"
