@@ -1,42 +1,30 @@
 {
     "Statements": [
         {
-            "Sid": "CloudWatchLogsScoped",
+            "Sid": "CloudWatchAlarmsScoped",
             "Effect": "Allow",
             "Action": [
-                "logs:*"
+                "cloudwatch:*"
             ],
             "Resource": [
                 {
-                    "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:${Environment}-${Scope}-*"
-                },
-                {
-                    "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:${Environment}-${Scope}-*:*"
-                },
-                {
-                    "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:${Environment}-${Scope}-*:*:*"
+                    "Fn::Sub": "arn:aws:cloudwatch:*:${AWS::AccountId}:alarm:${Environment}-${Scope}-*"
                 }
             ]
         }
     ],
     "UserStatements": [
         {
-            "Sid": "CloudWatchLogsScoped",
+            "Sid": "CloudWatcAlarmsScoped",
             "Effect": "Allow",
             "Action": [
-                "logs:Get*",
-                "logs:List*",
-                "logs:Describe*"
+                "cloudwatch:Get*",
+                "cloudwatch:List*",
+                "cloudwatch:Describe*"
             ],
             "Resource": [
                 {
-                    "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:${Environment}-${Scope}-*"
-                },
-                {
-                    "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:${Environment}-${Scope}-*:*"
-                },
-                {
-                    "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:${Environment}-${Scope}-*:*:*"
+                    "Fn::Sub": "arn:aws:cloudwatch:*:${AWS::AccountId}:alarm:${Environment}-${Scope}-*"
                 }
             ]
         }

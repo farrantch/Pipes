@@ -1,0 +1,44 @@
+{
+    "Statements": [
+        {
+            "Sid": "CloudWatchLogsScoped",
+            "Effect": "Allow",
+            "Action": [
+                "logs:*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:${Environment}-${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:${Environment}-${Scope}-*:*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:${Environment}-${Scope}-*:*:*"
+                }
+            ]
+        }
+    ],
+    "UserStatements": [
+        {
+            "Sid": "CloudWatchLogsScoped",
+            "Effect": "Allow",
+            "Action": [
+                "logs:Get*",
+                "logs:List*",
+                "logs:Describe*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:${Environment}-${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:${Environment}-${Scope}-*:*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:${Environment}-${Scope}-*:*:*"
+                }
+            ]
+        }
+    ]
+}
