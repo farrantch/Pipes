@@ -1,7 +1,7 @@
 {
     "Statements": [
         {
-            "Sid": "Public",
+            "Sid": "LegacyMicroserviceFoo",
             "Effect": "Allow",
             "Action": [
                 "route53:*",

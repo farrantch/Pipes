@@ -1,7 +1,7 @@
 {
     "Statements": [
         {
-            "Sid": "Public",
+            "Sid": "Frontend",
             "Effect": "Allow",
             "Action": [
                 "route53:*",
