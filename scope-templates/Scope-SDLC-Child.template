@@ -177,7 +177,8 @@
                             "Effect": "Allow",
                             "Action": [
                                 "cloudformation:*",
-                                "codebuild:*"
+                                "codebuild:*",
+                                "logs:*"
                             ],
                             "Resource": [
                                 {
@@ -191,20 +192,19 @@
                                 },
                                 {
                                     "Fn::Sub": "arn:aws:codebuild:*:${AWS::AccountId}:project/${Environment}-${MasterPipeline}-${Scope}-*"
-                                }
-                            ]
-                        },
-                        {
-                            "Sid": "BaselineLogs",
-                            "Effect": "Allow",
-                            "Action": [
-                                "logs:*"
-                            ],
-                            "Resource": [
+                                },
                                 {
                                     "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:/aws/codebuild/${Environment}-${MasterPipeline}-*"
                                 }
                             ]
+                        },
+                        {
+                            "Sid": "ResourceWildcard",
+                            "Effect": "Allow",
+                            "Action": [
+                                "cloudformation:List*"
+                            ],
+                            "Resource": "*"
                         }
                     ]
                 }
