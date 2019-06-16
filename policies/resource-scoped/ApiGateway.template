@@ -10,7 +10,7 @@
             "Condition": {
                 "StringEquals": {
                   "aws:ResourceTag/Scope": {
-                    "Ref": "${Scope}"
+                    "Fn::Sub": "${Scope}"
                   }
                 }
             }
