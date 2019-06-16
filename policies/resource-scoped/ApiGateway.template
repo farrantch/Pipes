@@ -6,14 +6,7 @@
             "Action": [
                 "apigateway:*"
             ],
-            "Resource": "*",
-            "Condition": {
-                "StringEquals": {
-                  "aws:ResourceTag/Scope": {
-                    "Fn::Sub": "${Scope}"
-                  }
-                }
-            }
+            "Resource": "*"
         }
     ]
 }
