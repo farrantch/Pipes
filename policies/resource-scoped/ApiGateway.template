@@ -1,0 +1,16 @@
+{
+    "Statements": [
+        {
+            "Sid": "ResourceScopedApiGateway",
+            "Effect": "Allow",
+            "Action": [
+                "apigateway:*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:apigateway:*::${Environment}-${Scope}-*"
+                }
+            ]
+        }
+    ]
+}
