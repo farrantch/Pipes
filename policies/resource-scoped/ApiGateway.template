@@ -6,11 +6,14 @@
             "Action": [
                 "apigateway:*"
             ],
-            "Resource": [
-                {
-                    "Fn::Sub": "arn:aws:apigateway:*::${Environment}-${Scope}-*"
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                  "aws:ResourceTag/Scope": {
+                    "Ref": "${Scope}"
+                  }
                 }
-            ]
+            }
         }
     ]
 }
