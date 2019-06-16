@@ -212,7 +212,7 @@ for env in environments:
                         },
                         "Configuration":{
                             "ActionMode":"REPLACE_ON_FAILURE",
-                            "Capabilities":"CAPABILITY_IAM",
+                            "Capabilities":"CAPABILITY_IAM,CAPABILITY_AUTO_EXPAND",
                             "RoleArn":{
                                 "Fn::Sub":"arn:aws:iam::${" + env + "Account}:role/"+ env_lower + "-${MasterPipeline}-scopes-${Scope}-CloudFormationRole"
                             },
