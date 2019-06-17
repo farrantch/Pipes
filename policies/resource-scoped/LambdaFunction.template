@@ -26,6 +26,14 @@
                     }
                 }
             }
+        },
+        {
+            "Sid": "ResourceScopedLambdaFunctionResourceWildcard",
+            "Effect": "Allow",
+            "Action": [
+                "lambda:Get*"
+            ],
+            "Resource": "*"
         }
     ],
     "UserStatements": [
@@ -33,7 +41,6 @@
             "Sid": "ResourceScopedLambdaFunction",
             "Effect": "Allow",
             "Action": [
-                "lambda:Get*",
                 "lambda:List*",
                 "lambda:InvokeFunction",
                 "lambda:UpdateFunctionConfiguration"
@@ -48,7 +55,6 @@
             "Sid": "ResourceScopedLambdaEventSourceMapping",
             "Effect": "Allow",
             "Action": [
-                "lambda:Get*",
                 "lambda:UpdateEventSourceMapping"
             ],
             "Resource": "*",
@@ -59,6 +65,14 @@
                     }
                 }
             }
+        },
+        {
+            "Sid": "ResourceScopedLambdaFunctionResourceWildcard",
+            "Effect": "Allow",
+            "Action": [
+                "lambda:Get*"
+            ],
+            "Resource": "*"
         }
     ]
 }
