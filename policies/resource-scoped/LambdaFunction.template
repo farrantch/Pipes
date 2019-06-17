@@ -32,7 +32,7 @@
             "Effect": "Allow",
             "Action": [
                 "lambda:Get*",
-                "logs:CreateLogGroup",
+                "logs:CreateLogGroup"
             ],
             "Resource": "*"
         },
