@@ -37,7 +37,8 @@
             "Resource": "*"
         },
         {
-            "Effect": "ResourceScopedLambdaFunctionLogging",
+            "Sid": "ResourceScopedLambdaFunctionLogging",
+            "Effect": "Allow",
             "Action": [
                 "logs:CreateLogStream",
                 "logs:PutLogEvents"
@@ -94,7 +95,8 @@
             "Resource": "*"
         },
         {
-            "Effect": "ResourceScopedLambdaFunctionLogging",
+            "Sid": "ResourceScopedLambdaFunctionLogging",
+            "Effect": "Allow",
             "Action": [
                 "logs:Get*",
                 "logs:List*",
