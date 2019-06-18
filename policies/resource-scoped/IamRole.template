@@ -6,7 +6,9 @@
             "Action": [
                 "iam:CreateRole",
                 "iam:AttachRolePolicy",
-                "iam:DetachRolePolicy"
+                "iam:DetachRolePolicy",
+                "iam:PutRolePolicy",
+                "iam:DeleteRolePolicy"
             ],
             "Resource": [
                 {
@@ -31,6 +33,18 @@
             "Resource": [
                 {
                     "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${Environment}-${Scope}-*"
+                }
+            ]
+        },
+        {
+            "Sid": "IamManagePolicy",
+            "Effect": "Allow",
+            "Action": [
+                "iam:*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:policy/${Environment}-${Scope}-*"
                 }
             ]
         }
