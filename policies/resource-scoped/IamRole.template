@@ -28,6 +28,7 @@
             "Effect": "Allow",
             "Action": [
                 "iam:GetRole",
+                "iam:GetRolePolicy",
                 "iam:DeleteRole"
             ],
             "Resource": [
