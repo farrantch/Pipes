@@ -202,7 +202,8 @@
                             "Sid": "ResourceWildcard",
                             "Effect": "Allow",
                             "Action": [
-                                "cloudformation:List*"
+                                "cloudformation:List*",
+                                "cloudformation:ValidateTemplate"
                             ],
                             "Resource": "*"
                         }
