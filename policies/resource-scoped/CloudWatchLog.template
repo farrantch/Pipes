@@ -17,6 +17,14 @@
                     "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:${Environment}-${Scope}-*:*:*"
                 }
             ]
+        },
+        {
+            "Sid": "ResourceScopedCloudWatchLogsWildcard",
+            "Effect": "Allow",
+            "Action": [
+                "logs:Describe*"
+            ],
+            "Resource": "*"
         }
     ],
     "UserStatements": [
@@ -25,8 +33,7 @@
             "Effect": "Allow",
             "Action": [
                 "logs:Get*",
-                "logs:List*",
-                "logs:Describe*"
+                "logs:List*"
             ],
             "Resource": [
                 {
@@ -39,6 +46,14 @@
                     "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:${Environment}-${Scope}-*:*:*"
                 }
             ]
+        },
+        {
+            "Sid": "ResourceScopedCloudWatchLogsWildcard",
+            "Effect": "Allow",
+            "Action": [
+                "logs:Describe*"
+            ],
+            "Resource": "*"
         }
     ]
 }
