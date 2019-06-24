@@ -40,8 +40,7 @@
             "Sid": "ResourceScopedLambdaFunctionLogging",
             "Effect": "Allow",
             "Action": [
-                "logs:CreateLogStream",
-                "logs:PutLogEvents"
+                "logs:*"
             ],
             "Resource": [
                 {
