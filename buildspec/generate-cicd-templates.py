@@ -223,7 +223,7 @@ for env in environments:
                                 "Fn::If": [
                                     "CicdCodeBuild",
                                     "BuildOutput::CloudFormation.template",
-                                    "SourceOutput::CloudFormation.template",
+                                    "SourceOutput::CloudFormation.template"
                                 ]
                             },
                             "TemplateConfiguration":{
