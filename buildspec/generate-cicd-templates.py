@@ -219,11 +219,23 @@ for env in environments:
                             "StackName":{
                                 "Fn::Sub": env_lower + "-${Scope}-${SubScope}"
                             },
-                            "TemplatePath":"SourceOutput::CloudFormation.template",
+                            "TemplatePath": {
+                                "Fn::If": [
+                                    "CicdCodeBuild",
+                                    "BuildOutput::CloudFormation.template",
+                                    "SourceOutput::CloudFormation.template",
+                                ]
+                            },
                             "TemplateConfiguration":{
                                 "Fn::If":[
                                     "IncludeEnvCfTemplateConfigs",
-                                    "SourceOutput::cfvars/" + env + ".template",
+                                    {
+                                        "Fn::If": [
+                                            "CicdCodeBuild",
+                                            "BuildOutput::cfvars/" + env + ".template",
+                                            "SourceOutput::cfvars/" + env + ".template"
+                                        ]
+                                    },
                                     {
                                         "Ref":"AWS::NoValue"
                                     }
@@ -237,7 +249,13 @@ for env in environments:
                                         {
                                             "Fn::If":[
                                                 "CfContainsLambda",
-                                                "\"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"S3ObjectKey\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"ObjectKey\"]},",
+                                                {
+                                                    "Fn::If": [
+                                                        "CicdCodeBuild",
+                                                        "\"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"BuildOutput\", \"BucketName\"]}, \"S3ObjectKey\" : { \"Fn::GetArtifactAtt\" : [\"BuildOutput\", \"ObjectKey\"]},",
+                                                        "\"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"S3ObjectKey\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"ObjectKey\"]},"
+                                                    ]
+                                                },
                                                 {
                                                     "Ref":"AWS::NoValue"
                                                 }
@@ -263,7 +281,18 @@ for env in environments:
                         "Name": "DeployCloudFormation",
                         "InputArtifacts": [
                             {
-                                "Name":"SourceOutput"
+                                "Name": "SourceOutput"
+                            },
+                            {
+                                "Fn::If": [
+                                    "CicdCodeBuild",
+                                    {
+                                        "Name": "BuildOutput"
+                                    },
+                                    {
+                                        "Ref": "AWS::NoValue"
+                                    }
+                                ]
                             }
                         ],
                         "RunOrder": 2,
