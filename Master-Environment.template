@@ -61,6 +61,25 @@
                 ]
             }
         },
+        "IamPolicyBaseline": {
+            "Type": "AWS::IAM::ManagedPolicy",
+            "Properties": {
+                "ManagedPolicyName": {
+                    "Fn::Sub": "${AWS::StackName}-IamPolicyBaseline"
+                },
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Sid": "Admin",
+                            "Effect": "Allow",
+                            "Action": "*",
+                            "Resource": "*"
+                        }
+                    ]
+                }
+            }
+        },
         "IamRoleCodePipeline": {
             "Type": "AWS::IAM::Role",
             "Properties": {
@@ -123,23 +142,41 @@
                 ]
             }
         },
-        "IamPolicyBaseline": {
-            "Type": "AWS::IAM::ManagedPolicy",
+        "IamRoleCloudWatch": {
+            "Type": "AWS::IAM::Role",
             "Properties": {
-                "ManagedPolicyName": {
-                    "Fn::Sub": "${AWS::StackName}-IamPolicyBaseline"
+                "RoleName": {
+                    "Fn::Sub": "${AWS::StackName}-CloudWatchRole"
                 },
-                "PolicyDocument": {
+                "AssumeRolePolicyDocument": {
                     "Version": "2012-10-17",
                     "Statement": [
                         {
-                            "Sid": "Admin",
                             "Effect": "Allow",
-                            "Action": "*",
-                            "Resource": "*"
+                            "Principal": {
+                                "Service": "apigateway.amazonaws.com"
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
                         }
                     ]
-                }
+                },
+                "Path": "/",
+                "ManagedPolicyArns": [
+                    "arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+                ]
+            }
+        },
+        "ApiGatewayAccount": {
+          "Type" : "AWS::ApiGateway::Account",
+          "Properties" : {
+              "CloudWatchRoleArn" : {
+                "Fn::GetAtt": [
+                    "IamRoleCloudWatch",
+                    "Arn"
+                ]
+              }
             }
         }
     }
