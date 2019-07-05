@@ -1,0 +1,32 @@
+{
+    "Statements": [
+        {
+            "Sid": "ResourceScopedEventsRule",
+            "Effect": "Allow",
+            "Action": [
+                "events:*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:events:*:${AWS::AccountId}:rule/${Environment}-${Scope}-*"
+                }
+            ]
+        }
+    ],
+    "UserStatements": [
+        {
+            "Sid": "ResourceScopedEventsRule",
+            "Effect": "Allow",
+            "Action": [
+                "events:Get*",
+                "events:List*",
+                "events:Describe*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:events:*:${AWS::AccountId}:rule/${Environment}-${Scope}-*"
+                }
+            ]
+        }
+    ]
+}
