@@ -1,0 +1,31 @@
+{
+    "Statements": [
+        {
+            "Sid": "ResourceScopedSqsQueue",
+            "Effect": "Allow",
+            "Action": [
+                "sqs:*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:sqs:*:${AWS::AccountId}:${Environment}-${Scope}-*"
+                }
+            ]
+        }
+    ],
+    "UserStatements": [
+        {
+            "Sid": "ResourceScopedSqsQueue",
+            "Effect": "Allow",
+            "Action": [
+                "sqs:Get*",
+                "sqs:List*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:sqs:*:${AWS::AccountId}:${Environment}-${Scope}-*"
+                }
+            ]
+        }
+    ]
+}
