@@ -1,0 +1,12 @@
+{
+    "Statements": [
+        {
+            "Sid": "ResourceWildcardRoute53",
+            "Effect": "Allow",
+            "Action": [
+                "route53:*"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
