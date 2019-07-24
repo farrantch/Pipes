@@ -1,0 +1,32 @@
+{
+    "Statements": [
+        {
+            "Sid": "ResourceScopedCodeBuildProject",
+            "Effect": "Allow",
+            "Action": [
+                "codebuild:*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:codebuild:*:${AWS::AccountId}:project/${Environment}-${Scope}-*"
+                }
+            ]
+        }
+    ],
+    "UserStatements": [
+        {
+            "Sid": "ResourceScopedCodeBuildProject",
+            "Effect": "Allow",
+            "Action": [
+                "codebuild:Get*",
+                "codebuild:List*",
+                "codebuild:Describe*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:codebuild:*:${AWS::AccountId}:project:${Environment}-${Scope}-*"
+                }
+            ]
+        }
+    ]
+}
