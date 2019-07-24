@@ -273,6 +273,9 @@ for env in environments:
                                         {
                                             "Fn::Sub": "\"SubScope\": \"${SubScope}\""
                                         },
+                                        {
+                                            "Fn::Sub": "\"KmsCmkArn\": \"${KmsCmkArn}\""
+                                        },
                                         "}"
                                     ]
                                 ]
