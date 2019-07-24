@@ -271,7 +271,7 @@ for env in environments:
                                             "Fn::Sub": "\"Scope\": \"${Scope}\","
                                         },
                                         {
-                                            "Fn::Sub": "\"SubScope\": \"${SubScope}\""
+                                            "Fn::Sub": "\"SubScope\": \"${SubScope}\","
                                         },
                                         {
                                             "Fn::Sub": "\"KmsCmkArn\": \"${KmsCmkArn}\""
