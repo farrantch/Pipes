@@ -119,15 +119,30 @@
                             "Resource": "*"
                         },
                         {
-                            "Sid": "RunCodeBuild",
+                            "Sid": "BaselineDeployPermissions",
                             "Effect": "Allow",
                             "Action": [
-                                "codebuild:StartBuild",
-                                "codebuild:BatchGetBuilds"
+                                "cloudformation:*",
+                                "codebuild:*",
+                                "logs:*"
                             ],
-                            "Resource": {
-                                "Fn::Sub": "arn:aws:codebuild:*:${AWS::AccountId}:project/${Environment}-${MasterPipeline}-${Scope}-*"
-                            }
+                            "Resource": [
+                                {
+                                    "Fn::Sub": "arn:aws:cloudformation:*:${AWS::AccountId}:stack/${Environment}-${Scope}-*"
+                                },
+                                {
+                                    "Fn::Sub": "arn:aws:cloudformation:*:${AWS::AccountId}:changeSet/${Environment}-${Scope}-*:*"
+                                },
+                                {
+                                    "Fn::Sub": "arn:aws:cloudformation:*:aws:transform/*"
+                                },
+                                {
+                                    "Fn::Sub": "arn:aws:codebuild:*:${AWS::AccountId}:project/${Environment}-${Scope}-*"
+                                },
+                                {
+                                    "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:/aws/codebuild/${Environment}-${Scope}-*"
+                                }
+                            ]
                         }
                     ]
                 }
@@ -176,6 +191,29 @@
                 }],
                 "RoleName": {
                     "Fn::Sub": "${Environment}-${MasterPipeline}-scopes-${Scope}-CodeBuildRole"
+                }
+            }
+        },
+        "RoleCloudFormation": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [{
+                        "Effect": "Allow",
+                        "Principal": {
+                            "Service": [
+                                "cloudformation.amazonaws.com"
+                            ]
+                        },
+                        "Action": "sts:AssumeRole"
+                    }]
+                },
+                "ManagedPolicyArns": [{
+                    "Ref": "IamPolicyBaseline"
+                }],
+                "RoleName": {
+                    "Fn::Sub": "${Environment}-${MasterPipeline}-scopes-${Scope}-CloudFormationRole"
                 }
             }
         },

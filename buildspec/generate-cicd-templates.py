@@ -64,7 +64,10 @@ assume_role_statement = {
         {
             "Sid": "AllowAssumeEnvironmentRoles",
             "Effect": "Allow",
-            "Action": "sts:AssumeRole",
+            "Action": [
+                "sts:AssumeRole",
+                "iam:PassRole"
+            ],
             "Resource": []
         },
         {
@@ -135,6 +138,21 @@ s3_bucket_statement = {
         }
     ]
 }
+base_statement.append(
+    {
+        "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${MasterPipeline}-scopes-${Scope}-CloudFormationRole"
+    }    
+)
+base_statement.append(
+    {
+        "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${MasterPipeline}-scopes-${Scope}-CodePipelineRole"
+    }    
+)
+base_statement.append(
+    {
+        "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${MasterPipeline}-scopes-${Scope}-CodeBuildRole"
+    }    
+)
 for env in environments:
     env_lower = env.lower()
     base_statement.append(
@@ -159,49 +177,6 @@ for env in environments:
         "Actions": [
             {
                 "Fn::If": [
-                    "SdlcCodeBuildPre",
-                    {
-                        "ActionTypeId": {
-                        "Category": "Build",
-                        "Owner": "AWS",
-                        "Provider": "CodeBuild",
-                        "Version": "1"
-                        },
-                        "Configuration": {
-                            "ProjectName": {
-                                "Fn::Sub": env_lower + "-${MasterPipeline}-${Scope}-${SubScope}-CodeBuildPre"
-                            },
-                            "PrimarySource": "SourceOutput"
-                        },
-                        "Name": "CodeBuildSdlcPre",
-                        "InputArtifacts": [
-                            {
-                                "Name": "SourceOutput"
-                            },
-                            {
-                                "Fn::If": [
-                                    "CicdCodeBuild",
-                                    {
-                                        "Name": "BuildOutput"
-                                    },
-                                    {
-                                        "Ref": "AWS::NoValue"
-                                    }
-                                ]
-                            }
-                        ],
-                        "RunOrder": 1,
-                        "RoleArn": {
-                            "Fn::Sub":"arn:aws:iam::${" + env + "Account}:role/" + env_lower + "-${MasterPipeline}-scopes-${Scope}-CodeBuildRole"
-                        }
-                    },
-                    {
-                        "Ref": "AWS::NoValue"
-                    }
-                ]
-            },
-            {
-                "Fn::If": [
                     "SdlcCloudFormation",
                     {
                         "ActionTypeId":{
@@ -222,13 +197,13 @@ for env in environments:
                             "TemplatePath": {
                                 "Fn::If": [
                                     "CicdCodeBuild",
-                                    "BuildOutput::CloudFormation.template",
-                                    "SourceOutput::CloudFormation.template"
+                                    "BuildOutput::CloudFormation-SDLC.template",
+                                    "SourceOutput::CloudFormation-SDLC.template"
                                 ]
                             },
                             "TemplateConfiguration":{
                                 "Fn::If":[
-                                    "IncludeEnvCfTemplateConfigs",
+                                    "IncludeSdlcCfvars",
                                     {
                                         "Fn::If": [
                                             "CicdCodeBuild",
@@ -247,19 +222,14 @@ for env in environments:
                                     [
                                         "{",
                                         {
-                                            "Fn::If":[
-                                                "CfContainsLambda",
-                                                {
-                                                    "Fn::If": [
-                                                        "CicdCodeBuild",
-                                                        "\"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"BuildOutput\", \"BucketName\"]}, \"S3ObjectKey\" : { \"Fn::GetArtifactAtt\" : [\"BuildOutput\", \"ObjectKey\"]},",
-                                                        "\"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"S3ObjectKey\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"ObjectKey\"]},"
-                                                    ]
-                                                },
-                                                {
-                                                    "Ref":"AWS::NoValue"
-                                                }
+                                            "Fn::If": [
+                                                "CicdCodeBuild",
+                                                "\"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"BuildOutput\", \"BucketName\"]}, \"S3ObjectKey\" : { \"Fn::GetArtifactAtt\" : [\"BuildOutput\", \"ObjectKey\"]},",
+                                                "\"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"S3ObjectKey\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"ObjectKey\"]},"
                                             ]
+                                        },
+                                        {
+                                            "Fn::Sub": "\"KmsCmkArn\": \"${KmsCmkArn}\","
                                         },
                                         {
                                             "Fn::Sub": "\"Environment\": \"" + env_lower + "\","
@@ -271,10 +241,7 @@ for env in environments:
                                             "Fn::Sub": "\"Scope\": \"${Scope}\","
                                         },
                                         {
-                                            "Fn::Sub": "\"SubScope\": \"${SubScope}\","
-                                        },
-                                        {
-                                            "Fn::Sub": "\"KmsCmkArn\": \"${KmsCmkArn}\""
+                                            "Fn::Sub": "\"SubScope\": \"${SubScope}\""
                                         },
                                         "}"
                                     ]
@@ -310,21 +277,27 @@ for env in environments:
             },
             {
                 "Fn::If": [
-                    "SdlcCodeBuildPost",
+                    "SdlcCodeBuild",
                     {
                         "ActionTypeId": {
-                        "Category": "Build",
-                        "Owner": "AWS",
-                        "Provider": "CodeBuild",
-                        "Version": "1"
+                            "Category": "Build",
+                            "Owner": "AWS",
+                            "Provider": "CodeBuild",
+                            "Version": "1"
                         },
                         "Configuration": {
                             "ProjectName": {
-                                "Fn::Sub": env_lower + "-${MasterPipeline}-${Scope}-${SubScope}-CodeBuildPre"
+                                "Fn::Sub": env_lower + "-${Scope}-${SubScope}-CodeBuild"
                             },
-                            "PrimarySource": "SourceOutput"
+                            "PrimarySource": {
+                                "Fn::If": [
+                                    "CicdCodeBuild",
+                                    "BuildOutput",
+                                    "SourceOutput"
+                                ]  
+                            }
                         },
-                        "Name": "CodeBuildSdlcPost",
+                        "Name": "CodeBuildSdlc",
                         "InputArtifacts": [
                             {
                                 "Name": "SourceOutput"
@@ -362,11 +335,11 @@ for env in environments:
 assume_role_statement['Fn::If'][1]['Resource'] = base_statement[:]
 kms_key_statement['Fn::If'][1]['Principal']['AWS'] = base_statement[:]
 s3_bucket_statement['Fn::If'][1]['Principal']['AWS'] = base_statement[:]
-s3_bucket_statement['Fn::If'][1]['Principal']['AWS'].append(
-    {
-        "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${Environment}-${MasterPipeline}-scopes-${Scope}-CodePipelineRole"
-    }
-)
+# s3_bucket_statement['Fn::If'][1]['Principal']['AWS'].append(
+#     {
+#         "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${Environment}-${MasterPipeline}-scopes-${Scope}-CodePipelineRole"
+#     }
+# )
 
 # Loop through infra scopes within pipeline file
 for scope, scope_value in scopes.items():
@@ -482,7 +455,7 @@ for scope, scope_value in scopes.items():
             if 'Parameters' in pipeline:
                 for po, po_value in pipeline['Parameters'].items():
                     # Filter to parameters only applicable to CICD stack
-                    if po == 'SdlcCodeBuildPre' or po == 'SdlcCodeBuildPost' or po == 'SdlcCloudFormation' or po == 'CfContainsLambda' or po == 'CicdCodeBuild' or po == 'CicdCodeBuildImage' or po == 'IncludeEnvCfTemplateConfigs' or po == 'SourceRepo':
+                    if po == 'SdlcCodeBuild' or po == 'SdlcCloudFormation' or po == 'CicdCodeBuild' or po == 'CicdCodeBuildImage' or po == 'IncludeCicdCfvars' or po =='IncludeSdlcCfvars' or po == 'SourceRepo':
                         cicd_child['Resources'][pipeline['Name']]['Properties']['Parameters'][po] = po_value
     # Save child file
     with open('generated-cicd-templates/' + file_cicd_child + '-' + scope_lower + '.template', 'w') as cc_file_output:

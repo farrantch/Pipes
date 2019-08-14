@@ -191,10 +191,10 @@
                                     "Fn::Sub": "arn:aws:cloudformation:*:aws:transform/*"
                                 },
                                 {
-                                    "Fn::Sub": "arn:aws:codebuild:*:${AWS::AccountId}:project/${Environment}-${MasterPipeline}-${Scope}-*"
+                                    "Fn::Sub": "arn:aws:codebuild:*:${AWS::AccountId}:project/${Environment}-${Scope}-*"
                                 },
                                 {
-                                    "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:/aws/codebuild/${Environment}-${MasterPipeline}-*"
+                                    "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:/aws/codebuild/${Environment}-${Scope}-*"
                                 }
                             ]
                         },

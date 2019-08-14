@@ -16,8 +16,8 @@
             "Type":"String",
             "Default": "codecommit:"
         },
-        "IncludeEnvCfTemplateConfigs":{
-            "Description":"Include CloudFormation environment config files?",
+        "IncludeSdlcCfvars":{
+            "Description":"Include CloudFormation sdlc config files?",
             "Type":"String",
             "Default":"False",
             "AllowedValues":[
@@ -25,8 +25,8 @@
                 "True"
             ]
         },
-        "CfContainsLambda":{
-            "Description":"Does the cloudformation template contain a Lambda function?",
+        "IncludeCicdCfvars":{
+            "Description":"Include CloudFormation cicd config files?",
             "Type":"String",
             "Default":"False",
             "AllowedValues":[
@@ -63,21 +63,13 @@
             "Type": "String",
             "Default": "True"
         },
-        "SdlcCodeBuildPre": {
-            "Type": "String",
-            "Default": "False"
-        },
-        "SdlcCodeBuildPost": {
+        "SdlcCodeBuild": {
             "Type": "String",
             "Default": "False"
         },
         "CicdCodeBuild": {
             "Type": "String",
             "Default": "False"
-        },
-        "CicdCodeBuildImage": {
-            "Type": "String",
-            "Default": "aws/codebuild/standard:2.0"
         }
     },
     "Conditions":{
@@ -142,19 +134,19 @@
                 }
             ]
         },
-        "IncludeEnvCfTemplateConfigs":{
+        "IncludeSdlcCfvars":{
             "Fn::Equals":[
                 "True",
                 {
-                    "Ref":"IncludeEnvCfTemplateConfigs"
+                    "Ref":"IncludeSdlcCfvars"
                 }
             ]
         },
-        "CfContainsLambda":{
+        "IncludeCicdCfvars":{
             "Fn::Equals":[
                 "True",
                 {
-                    "Ref":"CfContainsLambda"
+                    "Ref":"IncludeCicdCfvars"
                 }
             ]
         },
@@ -167,26 +159,18 @@
             ]
         },
         "SdlcCloudFormation": {
-            "Fn::Equals":[
+            "Fn::Equals": [
                 "True",
                 {
-                    "Ref":"SdlcCloudFormation"
+                    "Ref": "SdlcCloudFormation"
                 }
             ]
         },
-        "SdlcCodeBuildPre": {
+        "SdlcCodeBuild": {
             "Fn::Equals":[
                 "True",
                 {
-                    "Ref":"SdlcCodeBuildPre"
-                }
-            ]
-        },
-        "SdlcCodeBuildPost": {
-            "Fn::Equals":[
-                "True",
-                {
-                    "Ref":"SdlcCodeBuildPost"
+                    "Ref": "SdlcCodeBuild"
                 }
             ]
         },
@@ -194,7 +178,23 @@
             "Fn::Equals":[
                 "True",
                 {
-                    "Ref":"CicdCodeBuild"
+                    "Ref": "CicdCodeBuild"
+                }
+            ]
+        },
+        "CicdCloudFormation": {
+            "Fn::Equals": [
+                "True",
+                {
+                    "Ref": "CicdCodeBuild"
+                }
+            ]
+        },
+        "CreateCicdStage": {
+            "Fn::Equals":[
+                "True",
+                {
+                    "Ref": "CicdCodeBuild"
                 }
             ]
         }
@@ -210,44 +210,6 @@
                     "Fn::Sub":"${AWS::StackName}"
                 }
             }
-        },
-        "CodeBuild": {
-          "Type": "AWS::CodeBuild::Project",
-          "Condition": "CicdCodeBuild",
-          "Properties": {
-            "Artifacts": {
-              "Type": "CODEPIPELINE"
-            },
-            "EncryptionKey": {
-                "Ref": "KmsCmkArn"
-            },
-            "Environment": {
-              "ComputeType": "BUILD_GENERAL1_SMALL",
-              "Image": {
-                "Ref": "CicdCodeBuildImage"
-              },
-              "EnvironmentVariables": [
-                {
-                  "Name": "Environment",
-                  "Type": "PLAINTEXT",
-                  "Value": "dev"
-                }
-              ],
-              "PrivilegedMode": false,
-              "Type": "LINUX_CONTAINER"
-            },
-            "Name": {
-              "Fn::Sub": "${Environment}-${MasterPipeline}-${Scope}-${SubScope}-CodeBuildPre"
-            },
-            "ServiceRole": {
-                "Ref": "IamRoleArnCodeBuild"
-            },
-            "Source": {
-              "Type": "CODEPIPELINE",
-              "BuildSpec": "buildspec/cicd.yml"
-            },
-            "TimeoutInMinutes": "5"
-          }
         },
         "CodePipeline": {
             "Type":"AWS::CodePipeline::Pipeline",
@@ -395,32 +357,112 @@
                     },
                     {
                         "Fn::If": [
-                            "CicdCodeBuild",
+                            "CreateCicdStage",
                             {
-                                "Name":"Build",
+                                "Name":"Cicd",
                                 "Actions":[
                                     {
-                                        "ActionTypeId": {
-                                            "Category": "Build",
-                                            "Owner": "AWS",
-                                            "Provider": "CodeBuild",
-                                            "Version": "1"
-                                        },
-                                        "Configuration": {
-                                            "ProjectName": {
-                                              "Fn::Sub": "${Environment}-${MasterPipeline}-${Scope}-${SubScope}-CodeBuildPre"
-                                            }
-                                        },
-                                        "Name": "RunCodeBuild",
-                                        "InputArtifacts": [
+                                        "Fn::If": [
+                                            "CicdCloudFormation",
                                             {
-                                              "Name": "SourceOutput"
-                                            }
-                                        ],
-                                        "RunOrder": 1,
-                                        "OutputArtifacts":[
+                                                "ActionTypeId":{
+                                                    "Category":"Deploy",
+                                                    "Owner":"AWS",
+                                                    "Provider":"CloudFormation",
+                                                    "Version":"1"
+                                                },
+                                                "Configuration":{
+                                                    "ActionMode":"REPLACE_ON_FAILURE",
+                                                    "Capabilities":"CAPABILITY_IAM,CAPABILITY_AUTO_EXPAND",
+                                                    "RoleArn":{
+                                                        "Fn::Sub":"arn:aws:iam::${AWS::AccountId}:role/cicd-${MasterPipeline}-scopes-${Scope}-CloudFormationRole"
+                                                    },
+                                                    "StackName":{
+                                                        "Fn::Sub": "cicd-${Scope}-${SubScope}"
+                                                    },
+                                                    "TemplatePath": "SourceOutput::CloudFormation-CICD.template",
+                                                    "TemplateConfiguration": {
+                                                        "Fn::If":[
+                                                            "IncludeCicdCfvars",
+                                                            "SourceOutput::cfvars/Cicd.template",
+                                                            {
+                                                                "Ref":"AWS::NoValue"
+                                                            }
+                                                        ]
+                                                    },
+                                                    "ParameterOverrides": {
+                                                        "Fn::Join": [
+                                                            "",
+                                                            [
+                                                                "{",
+                                                                "\"S3BucketName\": { \"Fn::GetArtifactAtt\": [\"SourceOutput\", \"BucketName\"]},",
+                                                                "\"S3ObjectKey\": { \"Fn::GetArtifactAtt\": [\"SourceOutput\", \"ObjectKey\"]},",
+                                                                {
+                                                                    "Fn::Sub": "\"KmsCmkArn\": \"${KmsCmkArn}\","
+                                                                },
+                                                                {
+                                                                    "Fn::Sub": "\"Environment\": \"cicd\","
+                                                                },
+                                                                {
+                                                                    "Fn::Sub": "\"MasterPipeline\": \"${MasterPipeline}\","
+                                                                },
+                                                                {
+                                                                    "Fn::Sub": "\"Scope\": \"${Scope}\","
+                                                                },
+                                                                {
+                                                                    "Fn::Sub": "\"SubScope\": \"${SubScope}\""
+                                                                },
+                                                                "}"
+                                                            ]
+                                                        ]
+                                                    }
+                                                },
+                                                "Name": "DeployCloudFormation",
+                                                "InputArtifacts": [
+                                                    {
+                                                        "Name": "SourceOutput"
+                                                    }
+                                                ],
+                                                "RunOrder": 1,
+                                                "RoleArn": {
+                                                    "Fn::Sub":"arn:aws:iam::${AWS::AccountId}:role/cicd-${MasterPipeline}-scopes-${Scope}-CodePipelineRole"
+                                                }
+                                            },
                                             {
-                                                "Name":"BuildOutput"
+                                                "Ref": "AWS::NoValue"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "Fn::If": [
+                                            "CicdCodeBuild",
+                                            {
+                                                "ActionTypeId": {
+                                                    "Category": "Build",
+                                                    "Owner": "AWS",
+                                                    "Provider": "CodeBuild",
+                                                    "Version": "1"
+                                                },
+                                                "Configuration": {
+                                                    "ProjectName": {
+                                                      "Fn::Sub": "cicd-${Scope}-${SubScope}-CodeBuild"
+                                                    }
+                                                },
+                                                "Name": "RunCodeBuild",
+                                                "InputArtifacts": [
+                                                    {
+                                                      "Name": "SourceOutput"
+                                                    }
+                                                ],
+                                                "RunOrder": 2,
+                                                "OutputArtifacts":[
+                                                    {
+                                                        "Name":"BuildOutput"
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "Ref": "AWS::NoValue"
                                             }
                                         ]
                                     }
