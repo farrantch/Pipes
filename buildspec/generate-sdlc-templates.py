@@ -135,11 +135,22 @@ for key, value in scopes.items():
     #                     sdlc_child['Resources'][pipeline['Name']]['Properties']['Parameters'][po] = po_value
         
     # Add policy statements to PolicyBaseline
+    # First, add resource-scoped/* if exists
+    if 'resource-scoped/*' in value['Policies']:
+        for filename in os.listdir('policies/resource-scoped'):
+            with open('policies/resource-scoped/' + filename) as f:
+                d = json.load(f)
+            for s in d['Statements']:
+                sdlc_child['Resources']['IamPolicyBaseline']['Properties']['PolicyDocument']['Statement'].append(s)
+    # Add rest of policies
     for ps in value['Policies']:
-        with open('policies/' + str(ps) + '.template') as json_file:
-            data = json.load(json_file)
-        for statement in data['Statements']:
-            sdlc_child['Resources']['IamPolicyBaseline']['Properties']['PolicyDocument']['Statement'].append(statement)
+        if ps != 'resource-scoped/*':
+            with open('policies/' + str(ps) + '.template') as json_file:
+                data = json.load(json_file)
+            # Don't re-add resource-scope policies if already added via wildcard
+            if not ps.startswith('resource-scoped/') and 'resource-scoped/*' in value['Policies']:
+                for statement in data['Statements']:
+                    sdlc_child['Resources']['IamPolicyBaseline']['Properties']['PolicyDocument']['Statement'].append(statement)
     
     with open('generated-sdlc-templates/' + file_sdlc_child + '-' + scope + '.template', 'w') as sc_file_output:
         json.dump(sdlc_child, sc_file_output, indent=4)

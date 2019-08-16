@@ -17,7 +17,8 @@
             "Sid": "ManagedSharedResourceWildcard",
             "Effect": "Allow",
             "Action": [
-                "cloudformation:List*"
+                "cloudformation:List*",
+                "logs:Describe*"
             ],
             "Resource": "*"
         }
@@ -40,7 +41,8 @@
             "Sid": "ManagedSharedResourceWildcard",
             "Effect": "Allow",
             "Action": [
-                "cloudformation:List*"
+                "cloudformation:List*",
+                "logs:Describe*"
             ],
             "Resource": "*"
         }
