@@ -6,6 +6,16 @@
             "Action": [
                 "apigateway:*"
             ],
+            "Resource": {
+                "Fn::Sub": "arn:aws:apigateway:*::/restapis/*/stages/${Scope}*"    
+            }
+        },
+        {
+            "Sid": "ResourceScopedApiGatewayTEMP",
+            "Effect": "Allow",
+            "Action": [
+                "apigateway:*"
+            ],
             "Resource": "*"
         }
     ]
