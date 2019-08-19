@@ -5,7 +5,7 @@ import json
 from collections import OrderedDict
 
 # Filenames
-file_environments = 'config/Environments'
+file_environments = 'Environments'
 file_master = 'Master'
 
 # Open Files

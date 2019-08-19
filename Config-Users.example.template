@@ -1,13 +1,13 @@
 {
     "UserA": {
-        "Scopes": {
+        "Scopes": [
             "LegacyMicroserviceFoo",
             "Frontend"
-        }
+        ]
     },
     "UserB": {
-        "Scopes": {
+        "Scopes": [
             "Frontend"
-        }
+        ]
     }
 }

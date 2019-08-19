@@ -7,9 +7,9 @@ from collections import OrderedDict
 from botocore.exceptions import ClientError
 
 # Filenames
-file_scopes = 'config/Scopes'
+file_scopes = 'Scopes'
 file_cicd_infra = 'CICD'
-file_environments = 'config/Environments'
+file_environments = 'Environments'
 file_cicd_parent = 'Scope-CICD-Parent'
 file_cicd_child = 'Scope-CICD-Child'
 
