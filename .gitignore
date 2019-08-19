@@ -1,3 +1,2 @@
 /generated*
-/config/*
-!/config/*.example.template
+!/*.example.template
