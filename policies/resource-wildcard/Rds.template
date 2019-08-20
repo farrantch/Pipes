@@ -1,0 +1,12 @@
+{
+    "Statements": [
+        {
+            "Sid": "ResourceWildcardRds",
+            "Effect": "Allow",
+            "Action": [
+                "rds:*"
+            ],
+            "Resource": "*"
+        }
+    ]
+}

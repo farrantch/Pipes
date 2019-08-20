@@ -1,0 +1,12 @@
+{
+    "Statements": [
+        {
+            "Sid": "ResourceWildcardCognito",
+            "Effect": "Allow",
+            "Action": [
+                "cognito:*"
+            ],
+            "Resource": "*"
+        }
+    ]
+}

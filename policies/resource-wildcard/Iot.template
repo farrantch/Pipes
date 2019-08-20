@@ -1,0 +1,12 @@
+{
+    "Statements": [
+        {
+            "Sid": "ResourceWildcardIot",
+            "Effect": "Allow",
+            "Action": [
+                "iot:*"
+            ],
+            "Resource": "*"
+        }
+    ]
+}

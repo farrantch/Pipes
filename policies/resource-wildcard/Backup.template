@@ -1,0 +1,12 @@
+{
+    "Statements": [
+        {
+            "Sid": "ResourceWildcardBackup",
+            "Effect": "Allow",
+            "Action": [
+                "backup:*"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
