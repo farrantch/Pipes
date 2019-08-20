@@ -153,7 +153,7 @@ base_statement.append(
         "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${MasterPipeline}-scopes-${Scope}-CodeBuildRole"
     }    
 )
-for env in environments:
+for  env, env_value in environments.items():
     env_lower = env.lower()
     base_statement.append(
         {
@@ -331,6 +331,11 @@ for env in environments:
     else:
         cicd_infra['Resources']['CodePipeline']['Properties']['Stages'].append(pipeline_sdlc_env)
 
+    # Add Environment ID to parameters for child stack
+    cicd_infra['Parameters'][env + 'Account'] = {
+        "Type": "String",
+        "Default": env_value['AccountId']
+    }
 
 assume_role_statement['Fn::If'][1]['Resource'] = base_statement[:]
 kms_key_statement['Fn::If'][1]['Principal']['AWS'] = base_statement[:]
