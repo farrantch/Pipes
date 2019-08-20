@@ -1,0 +1,14 @@
+{
+    "Statements": [
+        {
+            "Sid": "ResourceScopedEcrRepository",
+            "Effect": "Allow",
+            "Action": [
+                "ecr:*"
+            ],
+            "Resource": {
+                "Fn::Sub": "arn:aws:ecr:*:${AWS::AccountId}:repository/${Scope}-*"
+            }
+        }
+    ]
+}
