@@ -34,12 +34,6 @@
                 "True"
             ]
         },
-        "ProdAccount": {
-            "Type": "String"
-        },
-        "DevAccount": {
-            "Type": "String"
-        },
         "Environment": {
             "Type": "String"
         },
