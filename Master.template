@@ -623,7 +623,43 @@
                                         "Fn::Sub": "{ \"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"MasterPipeline\" : \"${AWS::StackName}\"}"  
                                     }
                                 },
-                                "Name": "DeployCicdTemplates",
+                                "Name": "DeployCicdScopes",
+                                "InputArtifacts": [
+                                    {
+                                        "Name": "SourceOutput"
+                                    },
+                                    {
+                                        "Name": "CicdTemplates"
+                                    }
+                                ],
+                                "RunOrder": 2,
+                                "RoleArn": {
+                                    "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${AWS::StackName}-CodePipelineRole"
+                                }
+                            },
+                            {
+                                "ActionTypeId": {
+                                    "Category": "Deploy",
+                                    "Owner": "AWS",
+                                    "Provider": "CloudFormation",
+                                    "Version": "1"
+                                },
+                                "Configuration": {
+                                    "ActionMode": "CREATE_UPDATE",
+                                    "Capabilities": "CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND",
+                                    "RoleArn": {
+                                        "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${AWS::StackName}-CloudFormationRole"
+                                    },
+                                    "StackName": {
+                                        "Fn::Sub": "cicd-${AWS::StackName}-users"
+                                    },
+                                    "TemplatePath": "CicdTemplates::User-CICD-Parent.template",
+                                    "TemplateConfiguration": "SourceOutput::cfvars/Cicd.template",
+                                    "ParameterOverrides": {
+                                        "Fn::Sub": "{ \"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"MasterPipeline\" : \"${AWS::StackName}\"}"  
+                                    }
+                                },
+                                "Name": "DeployCicdUsers",
                                 "InputArtifacts": [
                                     {
                                         "Name": "SourceOutput"
