@@ -5,10 +5,10 @@ One might assume that because most software companies follow the same SDLC proce
 ## Core Concepts:
    - SDLC: Software Development Life Cycle
    - Environment: Self explanatory. The most important permissions boundary of all! Never cross environment boundaries. Always the first prefix when naming resources.
-   - Scope: A logical permissions boundary used within an environment to segregate services.
-
-What this manages:
-   - CodePipelines
+   - Scope: A logical permissions boundary used within an environment to segregate services. Often used for a microservice's permission boundary.
+   -
+What this currently manages:
+   - Scoped CodePipelines
    - Roles/Policies for CodePipeline, CloudFormation, and CodeBuild.
    - User permissions via scope assignments.
 
@@ -50,4 +50,5 @@ Edit your Pipelines.template file as needed. Enjoy!
    - Ability for child pipelines to self update?
    - Add optional pipeline scanning step
    - Groups for users?
+   - Ability to change name of CICD account.
 
