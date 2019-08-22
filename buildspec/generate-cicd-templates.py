@@ -127,7 +127,7 @@ def read_file(location):
 # Save file
 def write_file(location, contents):
     # Save Pipeline Template file
-    with open(location, 'w') as f:
+    with open(location + '.template', 'w') as f:
         json.dump(contents, f, indent=4)
     f.close()
 
@@ -449,7 +449,7 @@ def generate_pipeline_template(environments):
         else:
             template_pipeline['Resources']['CodePipeline']['Properties']['Stages'].append(pipeline_step_sdlc_env)
     # Save file
-    write_file('generated-cicd-templates/' + FILE_TEMPLATE_PIPELINE + '.template', template_pipeline)
+    write_file('generated-cicd-templates/' + FILE_TEMPLATE_PIPELINE, template_pipeline)
 
 def generate_scoped_pipelines_template(scope, scope_value):
     scope_lower = scope.lower()
@@ -471,7 +471,7 @@ def generate_scoped_pipelines_template(scope, scope_value):
                     if po == 'SdlcCodeBuild' or po == 'SdlcCloudFormation' or po == 'CicdCodeBuild' or po == 'CicdCodeBuildImage' or po == 'IncludeCicdCfvars' or po =='IncludeSdlcCfvars' or po == 'SourceRepo':
                         template_scope_child['Resources'][pipeline['Name']]['Properties']['Parameters'][po] = po_value
     # Save individual scoped child file
-    write_file('generated-cicd-templates/' + FILE_TEMPLATE_SCOPE_CICD_CHILD + '-' + scope_lower + '.template', template_scope_child)
+    write_file('generated-cicd-templates/' + FILE_TEMPLATE_SCOPE_CICD_CHILD + '-' + scope_lower, template_scope_child)
     return
 
 def generate_scoped_templates(environments):
@@ -482,7 +482,7 @@ def generate_scoped_templates(environments):
     child_stack_parameters = get_parameters_of_child_stacks(master_stack_created)
     # Open files
     template_scope_parent = read_file('templates/' + FILE_TEMPLATE_SCOPE_PARENT)
-    scopes = read_file(FILE_CONFIG_SCOPES + '.template')
+    scopes = read_file(FILE_CONFIG_SCOPES)
     # Loop through scopes
     for scope, scope_value in scopes.items():
         # Determine if all environments for this scope have been created
@@ -493,12 +493,12 @@ def generate_scoped_templates(environments):
         generate_scoped_pipelines_template(scope, scope_value)
         
     # Save parent file
-    write_file('generated-cicd-templates/' + FILE_TEMPLATE_SCOPE_PARENT + '.template', template_scope_parent)
+    write_file('generated-cicd-templates/' + FILE_TEMPLATE_SCOPE_PARENT, template_scope_parent)
 
 def main():
     # Open Files
-    users = read_file(FILE_CONFIG_USERS + '.template')
-    environments = read_file(FILE_CONFIG_ENVIRONMENTS + '.template')
+    users = read_file(FILE_CONFIG_USERS)
+    environments = read_file(FILE_CONFIG_ENVIRONMENTS)
 
     # Update cross account policy statements with environments
     update_statements_with_crossaccount_permissions(environments)
