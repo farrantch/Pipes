@@ -306,7 +306,7 @@ def insert_pipeline_step_for_environment(env, env_value):
                             ],
                             "RunOrder": 3,
                             "RoleArn": {
-                                "Fn::Sub":"arn:aws:iam::${" + env + "Account}:role/" + env_lower + "-${MasterPipeline}-scopes-${Scope}-CodeBuildRole"
+                                "Fn::Sub":"arn:aws:iam::" + env_value['AccountId'] + ":role/" + env_lower + "-${MasterPipeline}-scopes-${Scope}-CodeBuildRole"
                             }
                         },
                         {
