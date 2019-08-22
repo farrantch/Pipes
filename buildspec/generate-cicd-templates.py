@@ -395,7 +395,7 @@ def insert_pipelinestack_into_childstack(template_scope_child, pipeline, scope):
                 }
             }],
             "TemplateURL": {
-                "Fn::Sub": "https://s3.amazonaws.com/${MasterS3BucketName}/generated-cicd-templates/CICD.template"
+                "Fn::Sub": "https://s3.amazonaws.com/${MasterS3BucketName}/generated-cicd-templates/Pipeline.template"
             }
         }
     }
