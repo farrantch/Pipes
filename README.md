@@ -6,16 +6,16 @@ One might assume that because most software companies follow the same SDLC proce
    - SDLC: Software Development Life Cycle
    - Environment: Self explanatory. The most important permissions boundary of all! Never cross environment boundaries. Always the first prefix for named resources.
    - Scope: A logical permissions boundary used within an environment to segregate services. Often used for a microservice's permission boundary.
-   -
+
 What this currently manages:
    - Scoped CodePipelines
-   - Roles/Policies for CodePipeline, CloudFormation, and CodeBuild.
-   - User permissions via scope assignments.
+   - Scoped Roles/Policies for CodePipeline, CloudFormation, and CodeBuild.
+   - Scoped User permissions via Scope assignments.
 
 ## Architecture Diagram
 ![Diagram](https://farrantch.github.io/pipes.png)
 
-## Set up the master pipeline
+## Setting up the master pipeline
 Within your cicd account, run the Master.template through CloudFormation.
    - Name the stack "master" or something similar (lowercase)
    - Set AllEnvironmentsCreated: False
