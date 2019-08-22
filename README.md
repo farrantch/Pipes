@@ -2,14 +2,18 @@
 The purpose of this project is to easily manage AWS cross-account permissions that have traditionally been difficult to automate and maintain.
 One might assume that because most software companies follow the same SDLC process, that this framework should have already existed. But alas..
 
+## Core Concepts:
+   - Scope: A logical permissions boundary used to 
+
 What this manages:
-   -  
+   - CodePipelines
+   - S
 
 ## Architecture Diagram
 ![Diagram](https://farrantch.github.io/pipes.png)
 
 ## Set up the master pipeline
-Within your cicd account, run Master.template through CloudFormation.
+Within your cicd account, run the Master.template through CloudFormation.
    - Name the stack "master" or something similar (lowercase)
    - Set AllEnvironmentsCreated = False
    - Leave SourceCodeCommitRepo blank to create a repo. Fill with "codecommit:repo-name" to point to an existing repo. Fill with "github:repo-url:key" to link to a github repo.
@@ -40,5 +44,6 @@ Edit your Pipelines.template file as needed. Enjoy!
    - Inline policies
    - YAML support?
    - Ability to have master pipeline in separate account than CICD account
-   - Ability for pipelines to self update
+   - Ability for child pipelines to self update?
+   - Add optional pipeline scanning step
 
