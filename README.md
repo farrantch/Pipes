@@ -4,7 +4,7 @@ One might assume that because most software companies follow the same SDLC proce
 
 ## Core Concepts:
    - SDLC: Software Development Life Cycle
-   - Environment: Self explanatory. The most important permissions boundary of all! Never cross environment boundaries. Always the first prefix when naming resources.
+   - Environment: Self explanatory. The most important permissions boundary of all! Never cross environment boundaries. Always the first prefix for named resources.
    - Scope: A logical permissions boundary used within an environment to segregate services. Often used for a microservice's permission boundary.
    -
 What this currently manages:
