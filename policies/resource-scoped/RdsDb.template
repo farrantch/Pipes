@@ -1,0 +1,32 @@
+{
+    "ServiceStatements": [
+        {
+            "Sid": "ResourceScopedRdsDb",
+            "Effect": "Allow",
+            "Action": [
+                "rds:*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:rds:*:${AWS::AccountId}:db:${Environment}-${Scope}-*"
+                }
+            ]
+        }
+    ],
+    "UserStatements": [
+        {
+            "Sid": "ResourceScopedRdsDb",
+            "Effect": "Allow",
+            "Action": [
+                "rds:Get*",
+                "rds:Describe*",
+                "rds:List*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:rds:*:${AWS::AccountId}:db:${Environment}-${Scope}-*"
+                }
+            ]
+        }
+    ]
+}

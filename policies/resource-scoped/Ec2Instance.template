@@ -18,6 +18,9 @@
                 "StringEquals": {
                     "ec2:ResourceTag/Scope": {
                         "Fn::Sub": "${Scope}"
+                    },
+                    "ec2:ResourceTag/Environment": {
+                        "Fn::Sub": "${Environment}"
                     }
                 }
             }
@@ -44,6 +47,9 @@
                 "StringEquals": {
                     "ec2:ResourceTag/Scope": {
                         "Fn::Sub": "${Scope}"
+                    },
+                    "ec2:ResourceTag/Environment": {
+                        "Fn::Sub": "${Environment}"
                     }
                 }
             }
