@@ -1,5 +1,5 @@
 {
-    "Statements": [
+    "ServiceStatements": [
         {
             "Sid": "ResourceScopedS3Bucket",
             "Effect": "Allow",

@@ -1,5 +1,5 @@
 {
-    "Statements": [
+    "ServiceStatements": [
         {
             "Sid": "ResourceScopedLambdaFunction",
             "Effect": "Allow",

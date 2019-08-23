@@ -1,10 +1,36 @@
 {
-    "Statements": [
+    "ServiceStatements": [
         {
             "Sid": "ResourceScopedEc2Instance",
             "Effect": "Allow",
             "Action": [
                 "ec2:*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:ec2:*:${AWS::AccountId}:instance/*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:ec2:*:${AWS::AccountId}:volume/*"
+                }
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "ec2:ResourceTag/Scope": {
+                        "Fn::Sub": "${Scope}"
+                    }
+                }
+            }
+        }
+    ],
+    "UserStatements": [
+        {
+            "Sid": "ResourceScopedEc2Instance",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:Get*",
+                "ec2:Describe*",
+                "ec2:List*"
             ],
             "Resource": [
                 {

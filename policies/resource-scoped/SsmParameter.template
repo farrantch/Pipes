@@ -1,5 +1,5 @@
 {
-    "Statements": [
+    "ServiceStatements": [
         {
             "Sid": "ResourceScopedSsmParameter",
             "Effect": "Allow",

@@ -1,5 +1,5 @@
 {
-    "Statements": [
+    "ServiceStatements": [
         {
             "Sid": "ResourceWildcardEc2",
             "Effect": "Allow",

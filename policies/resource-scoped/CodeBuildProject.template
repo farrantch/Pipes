@@ -1,5 +1,5 @@
 {
-    "Statements": [
+    "ServiceStatements": [
         {
             "Sid": "ResourceScopedCodeBuildProject",
             "Effect": "Allow",
