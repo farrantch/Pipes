@@ -86,54 +86,6 @@ for key, value in scopes.items():
     with open('scope-templates/' + file_sdlc_child + '.template') as sc_file:
         sdlc_child = json.load(sc_file)
         
-    # # Loop through pipelines
-    # if 'Pipelines' in value:
-    #     for pipeline in value['Pipelines']:
-    #         name = pipeline['Name'].lower()
-    #         # Insert Scope CICD CodeBuildPre Projects
-    #         sdlc_child['Resources'][pipeline['Name']] = {
-    #             "Type": "AWS::CloudFormation::Stack",
-    #             "Properties": {
-    #                 "Parameters": {
-    #                     "Scope": scope,
-    #                     "SubScope": name,
-    #                     "Environment": {
-    #                         "Ref": "Environment"
-    #                     },
-    #                     "KmsCmkArn": {
-    #                         "Ref": "KmsCmkArn"
-    #                     },
-    #                     "RoleArnCodeBuild": {
-    #                         "Fn::GetAtt": [
-    #                             "IamRoleCodeBuild",
-    #                             "Arn"
-    #                         ]
-    #                     },
-    #                     "MasterPipeline": {
-    #                         "Ref": "MasterPipeline"
-    #                     }
-    #                 },
-    #                 "Tags": [
-    #                     {
-    #                         "Key": "Environment",
-    #                         "Value": {
-    #                             "Fn::Sub": "${Environment}"
-    #                         }
-    #                     }
-    #                 ],
-    #                 "TemplateURL": {
-    #                     "Fn::Sub": "https://s3.amazonaws.com/${MasterS3BucketName}/infra-templates/SDLC.template"
-    #                 }
-    #             }
-    #         }
-            
-    #         # Add Parameter Overrides
-    #         if 'Parameters' in pipeline:
-    #             for po, po_value in pipeline['Parameters'].items():
-    #                 # Filter to parameters only applicable to SDLC stack
-    #                 if po == 'SdlcCodeBuildPre' or po == 'SdlcCodeBuildPost' or po == 'SdlcCodeBuildImagePre' or po == 'SdlcCodeBuildImagePost':
-    #                     sdlc_child['Resources'][pipeline['Name']]['Properties']['Parameters'][po] = po_value
-        
     # Add policy statements to PolicyBaseline
     # First, add resource-scoped/* if exists
     if 'resource-scoped/*' in value['Policies']:
@@ -148,7 +100,7 @@ for key, value in scopes.items():
             with open('policies/' + str(ps) + '.template') as json_file:
                 data = json.load(json_file)
             # Don't re-add resource-scope policies if already added via wildcard
-            if not ps.startswith('resource-scoped/') and 'resource-scoped/*' in value['Policies']:
+            if not ps.startswith('resource-scoped/') or 'resource-scoped/*' not in value['Policies']:
                 for statement in data['Statements']:
                     sdlc_child['Resources']['IamPolicyBaseline']['Properties']['PolicyDocument']['Statement'].append(statement)
     
