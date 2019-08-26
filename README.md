@@ -1,5 +1,5 @@
 # Pipes
-The purpose of this project is to easily manage AWS cross-account permissions that have traditionally been difficult to automate and maintain.
+The purpose of this project is to easily manage AWS cross-account SDLC permissions that have traditionally been difficult to automate and maintain.
 One might assume that because most software companies follow the same SDLC process, that this framework should have already existed for AWS. But alas...
 
 ## Core Concepts:
