@@ -43,12 +43,16 @@
             ],
             "Condition": {
                 "StringEquals": {
-                    "ec2:ResourceTag/Scope": [{
-                        "Fn::Sub": "${Scope}"
-                    }],
-                    "ec2:ResourceTag/Environment": [{
-                        "Fn::Sub": "${Environment}"
-                    }]
+                    "ec2:ResourceTag/Scope": [
+                        {
+                            "Fn::Sub": "${Scope}"
+                        }
+                    ],
+                    "ec2:ResourceTag/Environment": [
+                        {
+                            "Fn::Sub": "${Environment}"
+                        }
+                    ]
                 }
             }
         }
@@ -72,12 +76,16 @@
             ],
             "Condition": {
                 "StringEquals": {
-                    "ec2:ResourceTag/Scope": [{
-                        "Fn::Sub": "${Scope}"
-                    }],
-                    "ec2:ResourceTag/Environment": [{
-                        "Fn::Sub": "${Environment}"
-                    }]
+                    "ec2:ResourceTag/Scope": [
+                        {
+                            "Fn::Sub": "${Scope}"
+                        }
+                    ],
+                    "ec2:ResourceTag/Environment": [
+                        {
+                            "Fn::Sub": "${Environment}"
+                        }
+                    ]
                 }
             }
         }

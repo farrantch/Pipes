@@ -21,9 +21,11 @@
             "Resource": "*",
             "Condition": {
                 "StringLike": {
-                    "lambda:FunctionArn": {
-                        "Fn::Sub": "arn:aws:lambda:*:${AWS::AccountId}:function:${Environment}-${Scope}-*"
-                    }
+                    "lambda:FunctionArn": [
+                        {
+                            "Fn::Sub": "arn:aws:lambda:*:${AWS::AccountId}:function:${Environment}-${Scope}-*"
+                        }
+                    ]
                 }
             }
         },
@@ -79,9 +81,11 @@
             "Resource": "*",
             "Condition": {
                 "StringLike": {
-                    "lambda:FunctionArn": {
-                        "Fn::Sub": "arn:aws:lambda:*:${AWS::AccountId}:function:${Environment}-${Scope}-*"
-                    }
+                    "lambda:FunctionArn": [
+                        {
+                            "Fn::Sub": "arn:aws:lambda:*:${AWS::AccountId}:function:${Environment}-${Scope}-*"
+                        }
+                    ]
                 }
             }
         },
