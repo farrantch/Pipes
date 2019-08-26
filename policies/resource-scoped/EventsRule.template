@@ -1,4 +1,18 @@
 {
+    "DeploymentStatements": [
+        {
+            "Sid": "ResourceScopedEventsRule",
+            "Effect": "Allow",
+            "Action": [
+                "events:*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:events:*:${AWS::AccountId}:rule/${Environment}-${Scope}-*"
+                }
+            ]
+        }
+    ],
     "ServiceStatements": [
         {
             "Sid": "ResourceScopedEventsRule",

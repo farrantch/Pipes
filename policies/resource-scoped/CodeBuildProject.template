@@ -1,4 +1,18 @@
 {
+    "DeploymentStatements": [
+        {
+            "Sid": "ResourceScopedCodeBuildProject",
+            "Effect": "Allow",
+            "Action": [
+                "codebuild:*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:codebuild:*:${AWS::AccountId}:project/${Environment}-${Scope}-*"
+                }
+            ]
+        }
+    ],
     "ServiceStatements": [
         {
             "Sid": "ResourceScopedCodeBuildProject",

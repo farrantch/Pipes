@@ -1,4 +1,21 @@
 {
+    "DeploymentStatements": [
+        {
+            "Sid": "ResourceScopedSsmParameter",
+            "Effect": "Allow",
+            "Action": [
+                "ssm:*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:ssm:*:${AWS::AccountId}:parameter/${Environment}/${Scope}/*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:ssm:*:${AWS::AccountId}:parameter/${Environment}/shared/${Scope}/*"
+                }
+            ]
+        }
+    ],
     "ServiceStatements": [
         {
             "Sid": "ResourceScopedSsmParameter",

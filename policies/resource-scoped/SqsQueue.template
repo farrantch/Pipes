@@ -1,4 +1,18 @@
 {
+    "DeploymentStatements": [
+        {
+            "Sid": "ResourceScopedSqsQueue",
+            "Effect": "Allow",
+            "Action": [
+                "sqs:*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:sqs:*:${AWS::AccountId}:${Environment}-${Scope}-*"
+                }
+            ]
+        }
+    ],
     "ServiceStatements": [
         {
             "Sid": "ResourceScopedSqsQueue",

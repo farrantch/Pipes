@@ -1,4 +1,18 @@
 {
+    "DeploymentStatements": [
+        {
+            "Sid": "ResourceScopedCloudWatchAlarms",
+            "Effect": "Allow",
+            "Action": [
+                "cloudwatch:*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:cloudwatch:*:${AWS::AccountId}:alarm:${Environment}-${Scope}-*"
+                }
+            ]
+        }
+    ],
     "ServiceStatements": [
         {
             "Sid": "ResourceScopedCloudWatchAlarms",

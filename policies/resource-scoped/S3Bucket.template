@@ -1,4 +1,18 @@
 {
+    "DeploymentStatements": [
+        {
+            "Sid": "ResourceScopedS3Bucket",
+            "Effect": "Allow",
+            "Action": [
+                "s3:*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:s3:::${Environment}-${Scope}-*"
+                }
+            ]
+        }
+    ],
     "ServiceStatements": [
         {
             "Sid": "ResourceScopedS3Bucket",

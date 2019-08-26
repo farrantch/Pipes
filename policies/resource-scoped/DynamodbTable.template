@@ -1,4 +1,21 @@
 {
+    "DeploymentStatements": [
+        {
+            "Sid": "ResourceScopedDynamodbTable",
+            "Effect": "Allow",
+            "Action": [
+                "dynamodb:*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:dynamodb:*:${AWS::AccountId}:table/${Environment}-${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:dynamodb:*:${AWS::AccountId}:table/${Environment}-${Scope}-*:*"
+                }
+            ]
+        }
+    ],
     "ServiceStatements": [
         {
             "Sid": "ResourceScopedDynamodbTable",

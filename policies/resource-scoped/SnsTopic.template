@@ -1,4 +1,18 @@
 {
+    "DeploymentStatements": [
+        {
+            "Sid": "ResourceScopedSnsTopic",
+            "Effect": "Allow",
+            "Action": [
+                "sns:*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:sns:*:${AWS::AccountId}:${Environment}-${Scope}-*"
+                }
+            ]
+        }
+    ],
     "ServiceStatements": [
         {
             "Sid": "ResourceScopedSnsTopic",
