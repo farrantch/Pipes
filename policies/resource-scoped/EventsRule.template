@@ -1,5 +1,5 @@
 {
-    "DeploymentStatements": [
+    "DeployStatements": [
         {
             "Sid": "ResourceScopedEventsRule",
             "Effect": "Allow",

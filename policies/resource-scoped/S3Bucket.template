@@ -1,5 +1,5 @@
 {
-    "DeploymentStatements": [
+    "DeployStatements": [
         {
             "Sid": "ResourceScopedS3Bucket",
             "Effect": "Allow",
