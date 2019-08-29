@@ -1,14 +1,25 @@
 # Pipes
 The purpose of this project is to easily manage AWS cross-account SDLC permissions that have traditionally been difficult to automate and maintain.
+This can also manage cross-account codepipeline's as well (The original intent of this project).
 One might assume that because most software companies follow the same SDLC process, that this framework should have already existed for AWS. But alas...
 
 ## Core Concepts:
    - SDLC: Software Development Life Cycle
-   - Environment: Self explanatory. The most important permissions boundary of all! Never cross environment boundaries. Always the first prefix for named resources.
-   - Scope: A logical permissions boundary used within an environment to segregate services. Often used for a microservice's permission boundary.
+   - Scope: A list of policies that primarily uses a specific name/tag to control access to AWS resources. Typically this value is the name of a service or microservice. Can be configured to access resources outside of the base name/tag.
+   - Services should never cross environment boundaries. The environment should be the first prefix for resource names within AWS.
+   - A pipeline runs within 1 scope, but a scope may have multiple pipelines.
+  
+
+## Config Files - There are 4 config files used to configure this project.
+   - Environment: A list of your environments. (e.g dev, qa, prod)
+   - Scopes: A list of scope definitions. (e.g. microservice1, serviceA, backupservice, orders)
+   - Groups: A list of group definitions. (e.g. admins, managers, developers, team1)
+   - Users: A list of user definitons. (e.g. bob, sara, testuser)
+
+Roles for internal users are generated on a per user per environment basis. These roles should be assumed from your organizations SSO account. Users can be assigned to multiple scoped. Users can also be assigned to groups.
 
 What this currently manages:
-   - Scoped CodePipelines
+   - Policies
    - Scoped Roles/Policies for CodePipeline, CloudFormation, and CodeBuild.
    - Scoped User permissions via Scope assignments.
 
