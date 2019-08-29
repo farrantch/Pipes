@@ -10,7 +10,7 @@ One might assume that because most software companies follow the same SDLC proce
    - A pipeline runs within 1 scope, but a scope may have multiple pipelines.
   
 
-## Config Files - There are 4 config files used to configure this project.
+## Config Files - 4 files used to configure this project.
    - Environment: A list of your environments. (e.g dev, qa, prod)
    - Scopes: A list of scope definitions. (e.g. microservice1, serviceA, backupservice, orders)
    - Groups: A list of group definitions. (e.g. admins, managers, developers, team1)
