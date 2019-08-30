@@ -1,0 +1,116 @@
+{
+    "DeployStatements": [
+        {
+            "Sid": "ResourceScopedCodeCommitRepo",
+            "Effect": "Allow",
+            "Action": [
+                "codecommit:*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:codecommit:*:${AWS::AccountId}:${Scope}-*"
+                }
+            ]
+        },
+        {
+            "Sid": "ResourceScopedCodeCommitRepoCondition",
+            "Effect": "Allow",
+            "Action": [
+                "codecommit:*"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/Scope": [
+                            {
+                            "Fn::Sub": "${Scope}"
+                        }
+                    ],
+                    "aws:ResourceTag/Environment": [
+                        {
+                            "Fn::Sub": "${Environment}"
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "ServiceStatements": [
+        {
+            "Sid": "ResourceScopedCodeCommitRepo",
+            "Effect": "Allow",
+            "Action": [
+                "codecommit:*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:codecommit:*:${AWS::AccountId}:${Scope}-*"
+                }
+            ]
+        },
+        {
+            "Sid": "ResourceScopedCodeCommitRepoCondition",
+            "Effect": "Allow",
+            "Action": [
+                "codecommit:*"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/Scope": [
+                            {
+                            "Fn::Sub": "${Scope}"
+                        }
+                    ],
+                    "aws:ResourceTag/Environment": [
+                        {
+                            "Fn::Sub": "${Environment}"
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "UserStatements": [
+        {
+            "Sid": "ResourceScopedCodeCommitRepo",
+            "Effect": "Allow",
+            "Action": [
+                "codecommit:Get*",
+                "codecommit:List*",
+                "codecommit:Describe*",
+                "codecommit:Create*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:codecommit:*:${AWS::AccountId}:${Scope}-*"
+                }
+            ]
+        },
+        {
+            "Sid": "ResourceScopedCodeCommitRepoCondition",
+            "Effect": "Allow",
+            "Action": [
+                "codecommit:Get*",
+                "codecommit:List*",
+                "codecommit:Describe*",
+                "codecommit:Create*"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/Scope": [
+                            {
+                            "Fn::Sub": "${Scope}"
+                        }
+                    ],
+                    "aws:ResourceTag/Environment": [
+                        {
+                            "Fn::Sub": "${Environment}"
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}
