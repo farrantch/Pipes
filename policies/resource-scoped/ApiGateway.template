@@ -1,5 +1,46 @@
 {
+    
+    "DeployStatements": [
+        {
+            "Sid": "ResourceScopedApiGateway",
+            "Effect": "Allow",
+            "Action": [
+                "apigateway:*"
+            ],
+            "Resource": {
+                "Fn::Sub": "arn:aws:apigateway:*::/restapis/*/stages/${Scope}*"    
+            }
+        },
+        {
+            "Sid": "ResourceScopedApiGatewayTEMP",
+            "Effect": "Allow",
+            "Action": [
+                "apigateway:*"
+            ],
+            "Resource": "*"
+        }
+    ],
     "ServiceStatements": [
+        {
+            "Sid": "ResourceScopedApiGateway",
+            "Effect": "Allow",
+            "Action": [
+                "apigateway:*"
+            ],
+            "Resource": {
+                "Fn::Sub": "arn:aws:apigateway:*::/restapis/*/stages/${Scope}*"    
+            }
+        },
+        {
+            "Sid": "ResourceScopedApiGatewayTEMP",
+            "Effect": "Allow",
+            "Action": [
+                "apigateway:*"
+            ],
+            "Resource": "*"
+        }
+    ],
+    "UserStatements": [
         {
             "Sid": "ResourceScopedApiGateway",
             "Effect": "Allow",

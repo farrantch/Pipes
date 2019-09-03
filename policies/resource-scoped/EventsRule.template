@@ -34,7 +34,9 @@
             "Action": [
                 "events:Get*",
                 "events:List*",
-                "events:Describe*"
+                "events:Describe*",
+                "events:EnableRule",
+                "events:DisableRule"
             ],
             "Resource": [
                 {

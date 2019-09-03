@@ -14,6 +14,29 @@
                     "Fn::Sub": "arn:aws:ssm:*:${AWS::AccountId}:parameter/${Environment}/shared/${Scope}/*"
                 }
             ]
+        },
+        {
+            "Sid": "ResourceScopedSsmParameterCondition",
+            "Effect": "Allow",
+            "Action": [
+                "ssm:*"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/Scope": [
+                            {
+                            "Fn::Sub": "${Scope}"
+                        }
+                    ],
+                    "aws:ResourceTag/Environment": [
+                        {
+                            "Fn::Sub": "${Environment}"
+                        }
+                    ]
+                }
+            }
+
         }
     ],
     "ServiceStatements": [
@@ -31,6 +54,29 @@
                     "Fn::Sub": "arn:aws:ssm:*:${AWS::AccountId}:parameter/${Environment}/shared/${Scope}/*"
                 }
             ]
+        },
+        {
+            "Sid": "ResourceScopedSsmParameterCondition",
+            "Effect": "Allow",
+            "Action": [
+                "ssm:*"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/Scope": [
+                            {
+                            "Fn::Sub": "${Scope}"
+                        }
+                    ],
+                    "aws:ResourceTag/Environment": [
+                        {
+                            "Fn::Sub": "${Environment}"
+                        }
+                    ]
+                }
+            }
+
         }
     ],
     "UserStatements": [
@@ -48,6 +94,29 @@
                     "Fn::Sub": "arn:aws:ssm:*:${AWS::AccountId}:parameter/${Environment}/shared/${Scope}/*"
                 }
             ]
+        },
+        {
+            "Sid": "ResourceScopedSsmParameterCondition",
+            "Effect": "Allow",
+            "Action": [
+                "ssm:*"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/Scope": [
+                            {
+                            "Fn::Sub": "${Scope}"
+                        }
+                    ],
+                    "aws:ResourceTag/Environment": [
+                        {
+                            "Fn::Sub": "${Environment}"
+                        }
+                    ]
+                }
+            }
+
         }
     ]
 }

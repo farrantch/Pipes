@@ -45,7 +45,8 @@
             "Effect": "Allow",
             "Action": [
                 "logs:Get*",
-                "logs:List*"
+                "logs:List*",
+                "logs:Describe*"
             ],
             "Resource": [
                 {

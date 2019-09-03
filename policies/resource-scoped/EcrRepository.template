@@ -1,10 +1,36 @@
 {
+    "DeployStatements": [
+        {
+            "Sid": "ResourceScopedEcrRepository",
+            "Effect": "Allow",
+            "Action": [
+                "ecr:*"
+            ],
+            "Resource": {
+                "Fn::Sub": "arn:aws:ecr:*:${AWS::AccountId}:repository/${Scope}-*"
+            }
+        }
+    ],
     "ServiceStatements": [
         {
             "Sid": "ResourceScopedEcrRepository",
             "Effect": "Allow",
             "Action": [
                 "ecr:*"
+            ],
+            "Resource": {
+                "Fn::Sub": "arn:aws:ecr:*:${AWS::AccountId}:repository/${Scope}-*"
+            }
+        }
+    ],
+    "UserStatements": [
+        {
+            "Sid": "ResourceScopedEcrRepository",
+            "Effect": "Allow",
+            "Action": [
+                "ecr:Get*",
+                "ecr:Describe*",
+                "ecr:List*"
             ],
             "Resource": {
                 "Fn::Sub": "arn:aws:ecr:*:${AWS::AccountId}:repository/${Scope}-*"

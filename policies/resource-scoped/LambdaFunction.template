@@ -1,4 +1,62 @@
 {
+    "DeployStatements": [
+        {
+            "Sid": "ResourceScopedLambdaFunction",
+            "Effect": "Allow",
+            "Action": [
+                "lambda:*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:lambda:*:${AWS::AccountId}:function:${Environment}-${Scope}-*"
+                }
+            ]
+        },
+        {
+            "Sid": "ResourceScopedLambdaEventSourceMapping",
+            "Effect": "Allow",
+            "Action": [
+                "lambda:*"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "StringLike": {
+                    "lambda:FunctionArn": [
+                        {
+                            "Fn::Sub": "arn:aws:lambda:*:${AWS::AccountId}:function:${Environment}-${Scope}-*"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "Sid": "ResourceScopedLambdaFunctionResourceWildcard",
+            "Effect": "Allow",
+            "Action": [
+                "lambda:Get*",
+                "logs:CreateLogGroup"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "ResourceScopedLambdaFunctionLogging",
+            "Effect": "Allow",
+            "Action": [
+                "logs:*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:/aws/lambda/${Environment}-${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:/aws/lambda/${Environment}-${Scope}-*:*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:/aws/lambda/${Environment}-${Scope}-*:*:*"
+                }
+            ]
+        }
+    ],
     "ServiceStatements": [
         {
             "Sid": "ResourceScopedLambdaFunction",

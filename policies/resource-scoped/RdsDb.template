@@ -11,6 +11,28 @@
                     "Fn::Sub": "arn:aws:rds:*:${AWS::AccountId}:db:${Environment}-${Scope}-*"
                 }
             ]
+        },
+        {
+            "Sid": "ResourceScopedRdsDbCondition",
+            "Effect": "Allow",
+            "Action": [
+                "rds:*"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "rds:db-tag/Scope": [
+                            {
+                            "Fn::Sub": "${Scope}"
+                        }
+                    ],
+                    "aws:db-tag/Environment": [
+                        {
+                            "Fn::Sub": "${Environment}"
+                        }
+                    ]
+                }
+            }
         }
     ],
     "ServiceStatements": [
@@ -25,6 +47,28 @@
                     "Fn::Sub": "arn:aws:rds:*:${AWS::AccountId}:db:${Environment}-${Scope}-*"
                 }
             ]
+        },
+        {
+            "Sid": "ResourceScopedRdsDbCondition",
+            "Effect": "Allow",
+            "Action": [
+                "rds:*"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "rds:db-tag/Scope": [
+                            {
+                            "Fn::Sub": "${Scope}"
+                        }
+                    ],
+                    "aws:db-tag/Environment": [
+                        {
+                            "Fn::Sub": "${Environment}"
+                        }
+                    ]
+                }
+            }
         }
     ],
     "UserStatements": [
@@ -41,6 +85,30 @@
                     "Fn::Sub": "arn:aws:rds:*:${AWS::AccountId}:db:${Environment}-${Scope}-*"
                 }
             ]
+        },
+        {
+            "Sid": "ResourceScopedRdsDbCondition",
+            "Effect": "Allow",
+            "Action": [
+                "rds:Get*",
+                "rds:Describe*",
+                "rds:List*"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "rds:db-tag/Scope": [
+                            {
+                            "Fn::Sub": "${Scope}"
+                        }
+                    ],
+                    "aws:db-tag/Environment": [
+                        {
+                            "Fn::Sub": "${Environment}"
+                        }
+                    ]
+                }
+            }
         }
     ]
 }

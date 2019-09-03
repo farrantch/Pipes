@@ -14,6 +14,28 @@
                     "Fn::Sub": "arn:aws:dynamodb:*:${AWS::AccountId}:table/${Environment}-${Scope}-*:*"
                 }
             ]
+        },
+        {
+            "Sid": "ResourceScopedDynamodbTableCondition",
+            "Effect": "Allow",
+            "Action": [
+                "dynamodb:*"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/Scope": [
+                            {
+                            "Fn::Sub": "${Scope}"
+                        }
+                    ],
+                    "aws:ResourceTag/Environment": [
+                        {
+                            "Fn::Sub": "${Environment}"
+                        }
+                    ]
+                }
+            }
         }
     ],
     "ServiceStatements": [
@@ -31,6 +53,28 @@
                     "Fn::Sub": "arn:aws:dynamodb:*:${AWS::AccountId}:table/${Environment}-${Scope}-*:*"
                 }
             ]
+        },
+        {
+            "Sid": "ResourceScopedDynamodbTableCondition",
+            "Effect": "Allow",
+            "Action": [
+                "dynamodb:*"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/Scope": [
+                            {
+                            "Fn::Sub": "${Scope}"
+                        }
+                    ],
+                    "aws:ResourceTag/Environment": [
+                        {
+                            "Fn::Sub": "${Environment}"
+                        }
+                    ]
+                }
+            }
         }
     ],
     "UserStatements": [
@@ -52,6 +96,32 @@
                     "Fn::Sub": "arn:aws:dynamodb:*:${AWS::AccountId}:table/${Environment}-${Scope}-*:*"
                 }
             ]
+        },
+        {
+            "Sid": "ResourceScopedDynamodbTableCondition",
+            "Effect": "Allow",
+            "Action": [
+                "dynamodb:Get*",
+                "dynamodb:Describe*",
+                "dynamodb:Query",
+                "dynamodb:Scan",
+                "dynadmob:List*"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/Scope": [
+                            {
+                            "Fn::Sub": "${Scope}"
+                        }
+                    ],
+                    "aws:ResourceTag/Environment": [
+                        {
+                            "Fn::Sub": "${Environment}"
+                        }
+                    ]
+                }
+            }
         }
     ]
 }
