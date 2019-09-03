@@ -1,7 +1,7 @@
 {
     "DeployStatements": [
         {
-            "Sid": "ResourceScopedCloudWatchAlarms",
+            "Sid": "ResourceScopedCloudWatchAlarm",
             "Effect": "Allow",
             "Action": [
                 "cloudwatch:*"
@@ -11,11 +11,33 @@
                     "Fn::Sub": "arn:aws:cloudwatch:*:${AWS::AccountId}:alarm:${Environment}-${Scope}-*"
                 }
             ]
+        },
+        {
+            "Sid": "ResourceScopedCloudWatchAlarmCondition",
+            "Effect": "Allow",
+            "Action": [
+                "cloudwatch:*"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/Scope": [
+                            {
+                            "Fn::Sub": "${Scope}"
+                        }
+                    ],
+                    "aws:ResourceTag/Environment": [
+                        {
+                            "Fn::Sub": "${Environment}"
+                        }
+                    ]
+                }
+            }
         }
     ],
     "ServiceStatements": [
         {
-            "Sid": "ResourceScopedCloudWatchAlarms",
+            "Sid": "ResourceScopedCloudWatchAlarm",
             "Effect": "Allow",
             "Action": [
                 "cloudwatch:*"
@@ -25,11 +47,33 @@
                     "Fn::Sub": "arn:aws:cloudwatch:*:${AWS::AccountId}:alarm:${Environment}-${Scope}-*"
                 }
             ]
+        },
+        {
+            "Sid": "ResourceScopedCloudWatchAlarmCondition",
+            "Effect": "Allow",
+            "Action": [
+                "cloudwatch:*"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/Scope": [
+                            {
+                            "Fn::Sub": "${Scope}"
+                        }
+                    ],
+                    "aws:ResourceTag/Environment": [
+                        {
+                            "Fn::Sub": "${Environment}"
+                        }
+                    ]
+                }
+            }
         }
     ],
     "UserStatements": [
         {
-            "Sid": "ResourceScopedCloudWatchAlarms",
+            "Sid": "ResourceScopedCloudWatchAlarm",
             "Effect": "Allow",
             "Action": [
                 "cloudwatch:Get*",
@@ -41,6 +85,30 @@
                     "Fn::Sub": "arn:aws:cloudwatch:*:${AWS::AccountId}:alarm:${Environment}-${Scope}-*"
                 }
             ]
+        },
+        {
+            "Sid": "ResourceScopedCloudWatchAlarmCondition",
+            "Effect": "Allow",
+            "Action": [
+                "cloudwatch:Get*",
+                "cloudwatch:List*",
+                "cloudwatch:Describe*"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/Scope": [
+                            {
+                            "Fn::Sub": "${Scope}"
+                        }
+                    ],
+                    "aws:ResourceTag/Environment": [
+                        {
+                            "Fn::Sub": "${Environment}"
+                        }
+                    ]
+                }
+            }
         }
     ]
 }

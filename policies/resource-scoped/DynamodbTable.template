@@ -43,7 +43,17 @@
             "Sid": "ResourceScopedDynamodbTable",
             "Effect": "Allow",
             "Action": [
-                "dynamodb:*"
+                "dynamodb:BatchGetItem*",
+                "dynamodb:BatchPutItem*",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:Describe*",
+                "dynamodb:Get*",
+                "dynamodb:List*",
+                "dynaomdb:PutItem",
+                "dynamodb:Query",
+                "dynamodb:Scan",
+                "dynamodb:UpdateItem"
             ],
             "Resource": [
                 {
@@ -58,7 +68,17 @@
             "Sid": "ResourceScopedDynamodbTableCondition",
             "Effect": "Allow",
             "Action": [
-                "dynamodb:*"
+                "dynamodb:BatchGetItem*",
+                "dynamodb:BatchPutItem*",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:Describe*",
+                "dynamodb:Get*",
+                "dynamodb:List*",
+                "dynaomdb:PutItem",
+                "dynamodb:Query",
+                "dynamodb:Scan",
+                "dynamodb:UpdateItem"
             ],
             "Resource": "*",
             "Condition": {
@@ -82,11 +102,17 @@
             "Sid": "ResourceScopedDynamodbTable",
             "Effect": "Allow",
             "Action": [
-                "dynamodb:Get*",
+                "dynamodb:BatchGetItem*",
+                "dynamodb:BatchPutItem*",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:DeleteItem",
                 "dynamodb:Describe*",
+                "dynamodb:Get*",
+                "dynamodb:List*",
+                "dynaomdb:PutItem",
                 "dynamodb:Query",
                 "dynamodb:Scan",
-                "dynadmob:List*"
+                "dynamodb:UpdateItem"
             ],
             "Resource": [
                 {
@@ -101,11 +127,17 @@
             "Sid": "ResourceScopedDynamodbTableCondition",
             "Effect": "Allow",
             "Action": [
-                "dynamodb:Get*",
+                "dynamodb:BatchGetItem*",
+                "dynamodb:BatchPutItem*",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:DeleteItem",
                 "dynamodb:Describe*",
+                "dynamodb:Get*",
+                "dynamodb:List*",
+                "dynaomdb:PutItem",
                 "dynamodb:Query",
                 "dynamodb:Scan",
-                "dynadmob:List*"
+                "dynamodb:UpdateItem"
             ],
             "Resource": "*",
             "Condition": {

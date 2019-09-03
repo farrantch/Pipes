@@ -79,7 +79,13 @@
                 "codecommit:Get*",
                 "codecommit:List*",
                 "codecommit:Describe*",
-                "codecommit:Create*"
+                "codecommit:Create*",
+                "codecommit:Batch*",
+                "codecommit:Create*",
+                "codecommit:Merge*",
+                "codecommit:Post*",
+                "codecommit:Put*",
+                "codecommit:Update*"
             ],
             "Resource": [
                 {
@@ -94,7 +100,13 @@
                 "codecommit:Get*",
                 "codecommit:List*",
                 "codecommit:Describe*",
-                "codecommit:Create*"
+                "codecommit:Create*",
+                "codecommit:Batch*",
+                "codecommit:Create*",
+                "codecommit:Merge*",
+                "codecommit:Post*",
+                "codecommit:Put*",
+                "codecommit:Update*"
             ],
             "Resource": "*",
             "Condition": {

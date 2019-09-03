@@ -18,7 +18,11 @@
             "Sid": "ResourceScopedEventsRule",
             "Effect": "Allow",
             "Action": [
-                "events:*"
+                "events:Get*",
+                "events:List*",
+                "events:Describe*",
+                "events:EnableRule",
+                "events:DisableRule"
             ],
             "Resource": [
                 {

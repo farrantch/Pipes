@@ -31,7 +31,13 @@
             "Sid": "ResourceScopedEc2Instance",
             "Effect": "Allow",
             "Action": [
-                "ec2:*"
+                "ec2:Get*",
+                "ec2:Describe*",
+                "ec2:List*",
+                "ec2:StopInstances",
+                "ec2:StartInstances",
+                "ec2:RebootInstances",
+                "ec2:CreateSnapshots"
             ],
             "Resource": [
                 {
@@ -64,7 +70,11 @@
             "Action": [
                 "ec2:Get*",
                 "ec2:Describe*",
-                "ec2:List*"
+                "ec2:List*",
+                "ec2:StopInstances",
+                "ec2:StartInstances",
+                "ec2:RebootInstances",
+                "ec2:CreateSnapshots"
             ],
             "Resource": [
                 {
