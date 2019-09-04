@@ -1,0 +1,83 @@
+{
+    "DeployStatements": [
+        {
+            "Sid": "ResourceScopedSsmPatchBaselineCondition",
+            "Effect": "Allow",
+            "Action": [
+                "ssm:*"
+            ],
+            "Resource": {
+                "Fn::Sub": "arn:aws:ssm:*:${AWS::AccountId}:patchbaseline/*"
+            },
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/Scope": [
+                        {
+                            "Fn::Sub": "${Scope}"
+                        }
+                    ],
+                    "aws:ResourceTag/Environment": [
+                        {
+                            "Fn::Sub": "${Environment}"
+                        }
+                    ]
+                }
+            }
+
+        }
+    ],
+    "ServiceStatements": [
+        {
+            "Sid": "ResourceScopedSsmPatchBaselineCondition",
+            "Effect": "Allow",
+            "Action": [
+                "ssm:*"
+            ],
+            "Resource": {
+                "Fn::Sub": "arn:aws:ssm:*:${AWS::AccountId}:patchbaseline/*"
+            },
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/Scope": [
+                        {
+                            "Fn::Sub": "${Scope}"
+                        }
+                    ],
+                    "aws:ResourceTag/Environment": [
+                        {
+                            "Fn::Sub": "${Environment}"
+                        }
+                    ]
+                }
+            }
+
+        }
+    ],
+    "UserStatements": [
+        {
+            "Sid": "ResourceScopedSsmPatchBaselineCondition",
+            "Effect": "Allow",
+            "Action": [
+                "ssm:*"
+            ],
+            "Resource": {
+                "Fn::Sub": "arn:aws:ssm:*:${AWS::AccountId}:patchbaseline/*"
+            },
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/Scope": [
+                        {
+                            "Fn::Sub": "${Scope}"
+                        }
+                    ],
+                    "aws:ResourceTag/Environment": [
+                        {
+                            "Fn::Sub": "${Environment}"
+                        }
+                    ]
+                }
+            }
+
+        }
+    ]
+}
