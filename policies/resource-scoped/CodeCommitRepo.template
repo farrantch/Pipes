@@ -58,7 +58,7 @@
             "Condition": {
                 "StringEquals": {
                     "aws:ResourceTag/Scope": [
-                            {
+                        {
                             "Fn::Sub": "${Scope}"
                         }
                     ],
@@ -112,7 +112,7 @@
             "Condition": {
                 "StringEquals": {
                     "aws:ResourceTag/Scope": [
-                            {
+                        {
                             "Fn::Sub": "${Scope}"
                         }
                     ],
