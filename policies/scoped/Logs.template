@@ -15,8 +15,25 @@
                 },
                 {
                     "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:${Environment}-${Scope}-*:*:*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:/aws/*/${Environment}-${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:/aws/*/${Environment}-${Scope}-*:*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:/aws/*/${Environment}-${Scope}-*:*:*"
                 }
             ]
+        },
+        {
+            "Sid": "ScopedLogsLogGroup",
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogGroup"
+            ],
+            "Resource": "*"
         }
     ],
     "ServiceStatements": [
@@ -35,8 +52,25 @@
                 },
                 {
                     "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:${Environment}-${Scope}-*:*:*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:/aws/*/${Environment}-${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:/aws/*/${Environment}-${Scope}-*:*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:/aws/*/${Environment}-${Scope}-*:*:*"
                 }
             ]
+        },
+        {
+            "Sid": "ScopedLogsLogGroup",
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogGroup"
+            ],
+            "Resource": "*"
         }
     ],
     "UserStatements": [
@@ -57,6 +91,15 @@
                 },
                 {
                     "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:${Environment}-${Scope}-*:*:*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:/aws/*/${Environment}-${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:/aws/*/${Environment}-${Scope}-*:*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:/aws/*/${Environment}-${Scope}-*:*:*"
                 }
             ]
         }
