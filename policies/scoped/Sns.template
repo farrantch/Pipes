@@ -1,7 +1,7 @@
 {
     "DeployStatements": [
         {
-            "Sid": "ResourceScopedSnsTopic",
+            "Sid": "ScopedSns",
             "Effect": "Allow",
             "Action": [
                 "sns:*"
@@ -15,7 +15,7 @@
     ],
     "ServiceStatements": [
         {
-            "Sid": "ResourceScopedSnsTopic",
+            "Sid": "ScopedSns",
             "Effect": "Allow",
             "Action": [
                 "sns:*"
@@ -29,7 +29,7 @@
     ],
     "UserStatements": [
         {
-            "Sid": "ResourceScopedSnsTopic",
+            "Sid": "ScopedSns",
             "Effect": "Allow",
             "Action": [
                 "sns:Get*",

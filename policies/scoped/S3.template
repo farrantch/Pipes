@@ -1,0 +1,47 @@
+{
+    "DeployStatements": [
+        {
+            "Sid": "ScopedS3",
+            "Effect": "Allow",
+            "Action": [
+                "s3:*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:s3:::${Environment}-${Scope}-*"
+                }
+            ]
+        }
+    ],
+    "ServiceStatements": [
+        {
+            "Sid": "ScopedS3",
+            "Effect": "Allow",
+            "Action": [
+                "s3:*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:s3:::${Environment}-${Scope}-*"
+                }
+            ]
+        }
+    ],
+    "UserStatements": [
+        {
+            "Sid": "ScopedS3",
+            "Effect": "Allow",
+            "Action": [
+                "s3:Get*",
+                "s3:List*",
+                "s3:PutObject*",
+                "s3:DeleteObject*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:s3:::${Environment}-${Scope}-*"
+                }
+            ]
+        }
+    ]
+}

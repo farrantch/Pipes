@@ -1,7 +1,7 @@
 {
     "DeployStatements": [
         {
-            "Sid": "ResourceScopedCloudWatchLogs",
+            "Sid": "ScopedLogs",
             "Effect": "Allow",
             "Action": [
                 "logs:*"
@@ -21,7 +21,7 @@
     ],
     "ServiceStatements": [
         {
-            "Sid": "ResourceScopedCloudWatchLogs",
+            "Sid": "ScopedLogs",
             "Effect": "Allow",
             "Action": [
                 "logs:*"
@@ -41,7 +41,7 @@
     ],
     "UserStatements": [
         {
-            "Sid": "ResourceScopedCloudWatchLogs",
+            "Sid": "ScopedLogs",
             "Effect": "Allow",
             "Action": [
                 "logs:Get*",

@@ -1,7 +1,7 @@
 {
     "DeployStatements": [
         {
-            "Sid": "ResourceScopedCloudWatchAlarm",
+            "Sid": "ScopedCloudWatchAlarm",
             "Effect": "Allow",
             "Action": [
                 "cloudwatch:*"
@@ -13,7 +13,7 @@
             ]
         },
         {
-            "Sid": "ResourceScopedCloudWatchAlarmCondition",
+            "Sid": "ScopedCloudWatchAlarmTag",
             "Effect": "Allow",
             "Action": [
                 "cloudwatch:*"
@@ -37,7 +37,7 @@
     ],
     "ServiceStatements": [
         {
-            "Sid": "ResourceScopedCloudWatchAlarm",
+            "Sid": "ScopedCloudWatchAlarm",
             "Effect": "Allow",
             "Action": [
                 "cloudwatch:*"
@@ -49,7 +49,7 @@
             ]
         },
         {
-            "Sid": "ResourceScopedCloudWatchAlarmCondition",
+            "Sid": "ScopedCloudWatchAlarmTag",
             "Effect": "Allow",
             "Action": [
                 "cloudwatch:*"
@@ -73,7 +73,7 @@
     ],
     "UserStatements": [
         {
-            "Sid": "ResourceScopedCloudWatchAlarm",
+            "Sid": "ScopedCloudWatchAlarm",
             "Effect": "Allow",
             "Action": [
                 "cloudwatch:Get*",
@@ -87,7 +87,7 @@
             ]
         },
         {
-            "Sid": "ResourceScopedCloudWatchAlarmCondition",
+            "Sid": "ScopedCloudWatchAlarmTag",
             "Effect": "Allow",
             "Action": [
                 "cloudwatch:Get*",

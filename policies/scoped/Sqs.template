@@ -1,7 +1,7 @@
 {
     "DeployStatements": [
         {
-            "Sid": "ResourceScopedSqsQueue",
+            "Sid": "ScopedSqs",
             "Effect": "Allow",
             "Action": [
                 "sqs:*"
@@ -15,7 +15,7 @@
     ],
     "ServiceStatements": [
         {
-            "Sid": "ResourceScopedSqsQueue",
+            "Sid": "ScopedSqs",
             "Effect": "Allow",
             "Action": [
                 "sqs:*"
@@ -29,7 +29,7 @@
     ],
     "UserStatements": [
         {
-            "Sid": "ResourceScopedSqsQueue",
+            "Sid": "ScopedSqs",
             "Effect": "Allow",
             "Action": [
                 "sqs:Get*",

@@ -2,7 +2,7 @@
     
     "DeployStatements": [
         {
-            "Sid": "ResourceScopedApiGateway",
+            "Sid": "ScopedApiGateway",
             "Effect": "Allow",
             "Action": [
                 "apigateway:*"
@@ -12,7 +12,7 @@
             }
         },
         {
-            "Sid": "ResourceScopedApiGatewayTEMP",
+            "Sid": "ScopedApiGatewayTEMP",
             "Effect": "Allow",
             "Action": [
                 "apigateway:*"
@@ -22,7 +22,7 @@
     ],
     "ServiceStatements": [
         {
-            "Sid": "ResourceScopedApiGateway",
+            "Sid": "ScopedApiGateway",
             "Effect": "Allow",
             "Action": [
                 "apigateway:*"
@@ -32,7 +32,7 @@
             }
         },
         {
-            "Sid": "ResourceScopedApiGatewayTEMP",
+            "Sid": "ScopedApiGatewayTEMP",
             "Effect": "Allow",
             "Action": [
                 "apigateway:*"
@@ -42,7 +42,7 @@
     ],
     "UserStatements": [
         {
-            "Sid": "ResourceScopedApiGateway",
+            "Sid": "ScopedApiGateway",
             "Effect": "Allow",
             "Action": [
                 "apigateway:*"
@@ -52,7 +52,7 @@
             }
         },
         {
-            "Sid": "ResourceScopedApiGatewayTEMP",
+            "Sid": "ScopedApiGatewayTEMP",
             "Effect": "Allow",
             "Action": [
                 "apigateway:*"

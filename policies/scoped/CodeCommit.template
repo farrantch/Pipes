@@ -1,7 +1,7 @@
 {
     "DeployStatements": [
         {
-            "Sid": "ResourceScopedCodeCommitRepo",
+            "Sid": "ScopedCodeCommit",
             "Effect": "Allow",
             "Action": [
                 "codecommit:*"
@@ -13,7 +13,7 @@
             ]
         },
         {
-            "Sid": "ResourceScopedCodeCommitRepoCondition",
+            "Sid": "ScopedCodeCommitTag",
             "Effect": "Allow",
             "Action": [
                 "codecommit:*"
@@ -37,7 +37,7 @@
     ],
     "ServiceStatements": [
         {
-            "Sid": "ResourceScopedCodeCommitRepo",
+            "Sid": "ScopedCodeCommit",
             "Effect": "Allow",
             "Action": [
                 "codecommit:*"
@@ -49,7 +49,7 @@
             ]
         },
         {
-            "Sid": "ResourceScopedCodeCommitRepoCondition",
+            "Sid": "ScopedCodeCommitTag",
             "Effect": "Allow",
             "Action": [
                 "codecommit:*"
@@ -73,7 +73,7 @@
     ],
     "UserStatements": [
         {
-            "Sid": "ResourceScopedCodeCommitRepo",
+            "Sid": "ScopedCodeCommit",
             "Effect": "Allow",
             "Action": [
                 "codecommit:Get*",
@@ -94,7 +94,7 @@
             ]
         },
         {
-            "Sid": "ResourceScopedCodeCommitRepoCondition",
+            "Sid": "ScopedCodeCommitTag",
             "Effect": "Allow",
             "Action": [
                 "codecommit:Get*",

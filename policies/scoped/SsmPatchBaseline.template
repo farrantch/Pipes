@@ -1,7 +1,7 @@
 {
     "DeployStatements": [
         {
-            "Sid": "ResourceScopedSsmPatchBaselineCondition",
+            "Sid": "ScopedSsmPatchBaselineTag",
             "Effect": "Allow",
             "Action": [
                 "ssm:*"
@@ -28,7 +28,7 @@
     ],
     "ServiceStatements": [
         {
-            "Sid": "ResourceScopedSsmPatchBaselineCondition",
+            "Sid": "ScopedSsmPatchBaselineTag",
             "Effect": "Allow",
             "Action": [
                 "ssm:*"
@@ -55,7 +55,7 @@
     ],
     "UserStatements": [
         {
-            "Sid": "ResourceScopedSsmPatchBaselineCondition",
+            "Sid": "ScopedSsmPatchBaselineTag",
             "Effect": "Allow",
             "Action": [
                 "ssm:*"

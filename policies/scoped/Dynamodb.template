@@ -1,7 +1,7 @@
 {
     "DeployStatements": [
         {
-            "Sid": "ResourceScopedDynamodbTable",
+            "Sid": "ScopedDynamodb",
             "Effect": "Allow",
             "Action": [
                 "dynamodb:*"
@@ -16,7 +16,7 @@
             ]
         },
         {
-            "Sid": "ResourceScopedDynamodbTableCondition",
+            "Sid": "ScopedDynamodbTag",
             "Effect": "Allow",
             "Action": [
                 "dynamodb:*"
@@ -40,7 +40,7 @@
     ],
     "ServiceStatements": [
         {
-            "Sid": "ResourceScopedDynamodbTable",
+            "Sid": "ScopedDynamodb",
             "Effect": "Allow",
             "Action": [
                 "dynamodb:BatchGetItem*",
@@ -65,7 +65,7 @@
             ]
         },
         {
-            "Sid": "ResourceScopedDynamodbTableCondition",
+            "Sid": "ScopedDynamodbTag",
             "Effect": "Allow",
             "Action": [
                 "dynamodb:BatchGetItem*",
@@ -99,7 +99,7 @@
     ],
     "UserStatements": [
         {
-            "Sid": "ResourceScopedDynamodbTable",
+            "Sid": "ScopedDynamodb",
             "Effect": "Allow",
             "Action": [
                 "dynamodb:BatchGetItem*",
@@ -124,7 +124,7 @@
             ]
         },
         {
-            "Sid": "ResourceScopedDynamodbTableCondition",
+            "Sid": "ScopedDynamodbTag",
             "Effect": "Allow",
             "Action": [
                 "dynamodb:BatchGetItem*",

@@ -1,7 +1,7 @@
 {
     "DeployStatements": [
         {
-            "Sid": "ResourceScopedEc2Instance",
+            "Sid": "ScopedEc2Instance",
             "Effect": "Allow",
             "Action": [
                 "ec2:*"
@@ -28,7 +28,7 @@
     ],
     "ServiceStatements": [
         {
-            "Sid": "ResourceScopedEc2Instance",
+            "Sid": "ScopedEc2Instance",
             "Effect": "Allow",
             "Action": [
                 "ec2:Get*",
@@ -65,7 +65,7 @@
     ],
     "UserStatements": [
         {
-            "Sid": "ResourceScopedEc2Instance",
+            "Sid": "ScopedEc2Instance",
             "Effect": "Allow",
             "Action": [
                 "ec2:Get*",

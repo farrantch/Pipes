@@ -1,7 +1,7 @@
 {
     "ServiceStatements": [
         {
-            "Sid": "ScopeFrontend",
+            "Sid": "AppFrontend",
             "Effect": "Allow",
             "Action": [
                 "route53:*",

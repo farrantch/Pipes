@@ -1,7 +1,7 @@
 {
     "DeployStatements": [
         {
-            "Sid": "ResourceScopedEventsRule",
+            "Sid": "ScopedEventsRule",
             "Effect": "Allow",
             "Action": [
                 "events:*"
@@ -15,7 +15,7 @@
     ],
     "ServiceStatements": [
         {
-            "Sid": "ResourceScopedEventsRule",
+            "Sid": "ScopedEventsRule",
             "Effect": "Allow",
             "Action": [
                 "events:Get*",
@@ -33,7 +33,7 @@
     ],
     "UserStatements": [
         {
-            "Sid": "ResourceScopedEventsRule",
+            "Sid": "ScopedEventsRule",
             "Effect": "Allow",
             "Action": [
                 "events:Get*",

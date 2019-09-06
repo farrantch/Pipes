@@ -1,7 +1,7 @@
 {
     "DeployStatements": [
         {
-            "Sid": "ResourceScopedSsmMaintWindowCondition",
+            "Sid": "ScopedSsmMaintWindowTag",
             "Effect": "Allow",
             "Action": [
                 "ssm:*"
@@ -28,7 +28,7 @@
     ],
     "ServiceStatements": [
         {
-            "Sid": "ResourceScopedSsmMaintWindowCondition",
+            "Sid": "ScopedSsmMaintWindowTag",
             "Effect": "Allow",
             "Action": [
                 "ssm:*"
@@ -55,7 +55,7 @@
     ],
     "UserStatements": [
         {
-            "Sid": "ResourceScopedSsmMaintWindowCondition",
+            "Sid": "ScopedSsmMaintWindowTag",
             "Effect": "Allow",
             "Action": [
                 "ssm:*"

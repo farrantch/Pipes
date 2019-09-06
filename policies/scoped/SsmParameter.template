@@ -1,7 +1,7 @@
 {
     "DeployStatements": [
         {
-            "Sid": "ResourceScopedSsmParameter",
+            "Sid": "ScopedSsmParameter",
             "Effect": "Allow",
             "Action": [
                 "ssm:*"
@@ -16,7 +16,7 @@
             ]
         },
         {
-            "Sid": "ResourceScopedSsmParameterCondition",
+            "Sid": "ScopedSsmParameterTag",
             "Effect": "Allow",
             "Action": [
                 "ssm:*"
@@ -60,7 +60,7 @@
             ]
         },
         {
-            "Sid": "ResourceScopedSsmParameterCondition",
+            "Sid": "ResourceScopedSsmParameterTag",
             "Effect": "Allow",
             "Action": [
                 "ssm:*"
@@ -103,7 +103,7 @@
             ]
         },
         {
-            "Sid": "ResourceScopedSsmParameterCondition",
+            "Sid": "ResourceScopedSsmParameterTag",
             "Effect": "Allow",
             "Action": [
                 "ssm:*"

@@ -1,7 +1,7 @@
 {
     "ServiceStatements": [
         {
-            "Sid": "ScopeLegacyMicroserviceFoo",
+            "Sid": "AppMicroserviceFoo",
             "Effect": "Allow",
             "Action": [
                 "route53:*",

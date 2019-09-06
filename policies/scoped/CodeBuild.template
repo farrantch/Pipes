@@ -1,45 +1,44 @@
 {
     "DeployStatements": [
         {
-            "Sid": "ResourceScopedS3Bucket",
+            "Sid": "ScopedCodeBuild",
             "Effect": "Allow",
             "Action": [
-                "s3:*"
+                "codebuild:*"
             ],
             "Resource": [
                 {
-                    "Fn::Sub": "arn:aws:s3:::${Environment}-${Scope}-*"
+                    "Fn::Sub": "arn:aws:codebuild:*:${AWS::AccountId}:project/${Environment}-${Scope}-*"
                 }
             ]
         }
     ],
     "ServiceStatements": [
         {
-            "Sid": "ResourceScopedS3Bucket",
+            "Sid": "ScopedCodeBuild",
             "Effect": "Allow",
             "Action": [
-                "s3:*"
+                "codebuild:*"
             ],
             "Resource": [
                 {
-                    "Fn::Sub": "arn:aws:s3:::${Environment}-${Scope}-*"
+                    "Fn::Sub": "arn:aws:codebuild:*:${AWS::AccountId}:project/${Environment}-${Scope}-*"
                 }
             ]
         }
     ],
     "UserStatements": [
         {
-            "Sid": "ResourceScopedS3Bucket",
+            "Sid": "ScopedCodeBuild",
             "Effect": "Allow",
             "Action": [
-                "s3:Get*",
-                "s3:List*",
-                "s3:PutObject*",
-                "s3:DeleteObject*"
+                "codebuild:Get*",
+                "codebuild:List*",
+                "codebuild:Describe*"
             ],
             "Resource": [
                 {
-                    "Fn::Sub": "arn:aws:s3:::${Environment}-${Scope}-*"
+                    "Fn::Sub": "arn:aws:codebuild:*:${AWS::AccountId}:project:${Environment}-${Scope}-*"
                 }
             ]
         }
