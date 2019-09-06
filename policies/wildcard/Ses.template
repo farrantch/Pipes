@@ -1,7 +1,7 @@
 {
     "ServiceStatements": [
         {
-            "Sid": "ResourceWildcardSes",
+            "Sid": "WildcardSes",
             "Effect": "Allow",
             "Action": [
                 "ses:*"

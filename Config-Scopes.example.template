@@ -1,10 +1,10 @@
 {
     "LegacyMicroserviceFoo": {
         "Policies": [
-            "resource-scoped/DynamodbTable",
-            "resource-scoped/LambdaFunction",
-            "resource-scoped/IamRole",
-            "scope/LegacyMicroserviceFoo"
+            "scoped/Dynamodb",
+            "scoped/Lambda",
+            "scoped/Iam",
+            "app/LegacyMicroserviceFoo"
         ],
         "Pipelines": [
             {
@@ -20,8 +20,8 @@
     },
     "Frontend": {
         "Policies": [
-            "scope/Frontend",
-            "resource-scoped/IamRole"
+            "app/Frontend",
+            "scoped/IamRole"
         ]
     }
 }

@@ -1,7 +1,7 @@
 {
     "ServiceStatements": [
         {
-            "Sid": "ResourceWildcardCognito",
+            "Sid": "WildcardCognito",
             "Effect": "Allow",
             "Action": [
                 "cognito:*"

@@ -1,7 +1,7 @@
 {
     "ServiceStatements": [
         {
-            "Sid": "ResourceWildcardEcr",
+            "Sid": "WildcardEcr",
             "Effect": "Allow",
             "Action": [
                 "ecr:*"

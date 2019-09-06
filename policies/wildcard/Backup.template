@@ -1,7 +1,7 @@
 {
     "ServiceStatements": [
         {
-            "Sid": "ResourceWildcardBackup",
+            "Sid": "WildcardBackup",
             "Effect": "Allow",
             "Action": [
                 "backup:*"

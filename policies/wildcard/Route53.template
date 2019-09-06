@@ -1,7 +1,7 @@
 {
     "ServiceStatements": [
         {
-            "Sid": "ResourceWildcardRoute53",
+            "Sid": "WildcardRoute53",
             "Effect": "Allow",
             "Action": [
                 "route53:*"

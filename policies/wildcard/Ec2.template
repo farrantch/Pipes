@@ -1,7 +1,7 @@
 {
     "ServiceStatements": [
         {
-            "Sid": "ResourceWildcardEc2",
+            "Sid": "WildcardEc2",
             "Effect": "Allow",
             "Action": [
                 "ec2:*"

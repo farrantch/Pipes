@@ -1,7 +1,7 @@
 {
     "ServiceStatements": [
         {
-            "Sid": "ResourceWildcardRds",
+            "Sid": "WildcardRds",
             "Effect": "Allow",
             "Action": [
                 "rds:*"
