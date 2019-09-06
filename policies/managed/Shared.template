@@ -1,4 +1,28 @@
 {
+    "DeployStatements": [
+        {
+            "Sid": "ManagedSharedSsmParameter",
+            "Effect": "Allow",
+            "Action": [
+                "ssm:Get*",
+                "ssm:Describe*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:ssm:*:${AWS::AccountId}:parameter/${Environment}/shared/*"
+                }
+            ]
+        },
+        {
+            "Sid": "ManagedSharedResourceWildcard",
+            "Effect": "Allow",
+            "Action": [
+                "cloudformation:List*",
+                "logs:Describe*"
+            ],
+            "Resource": "*"
+        }
+    ],
     "ServiceStatements": [
         {
             "Sid": "ManagedSharedSsmParameter",
