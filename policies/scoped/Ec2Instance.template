@@ -16,10 +16,10 @@
             ],
             "Condition": {
                 "StringEquals": {
-                    "aws:ResourceTag/Scope": [{
+                    "ec2:ResourceTag/Scope": [{
                         "Fn::Sub": "${Scope}"
                     }],
-                    "aws:ResourceTag/Environment": [{
+                    "ec2:ResourceTag/Environment": [{
                         "Fn::Sub": "${Environment}"
                     }]
                 }
@@ -49,12 +49,12 @@
             ],
             "Condition": {
                 "StringEquals": {
-                    "aws:ResourceTag/Scope": [
+                    "ec2:ResourceTag/Scope": [
                         {
                             "Fn::Sub": "${Scope}"
                         }
                     ],
-                    "aws:ResourceTag/Environment": [
+                    "ec2:ResourceTag/Environment": [
                         {
                             "Fn::Sub": "${Environment}"
                         }
@@ -86,12 +86,12 @@
             ],
             "Condition": {
                 "StringEquals": {
-                    "aws:ResourceTag/Scope": [
+                    "ec2:ResourceTag/Scope": [
                         {
                             "Fn::Sub": "${Scope}"
                         }
                     ],
-                    "aws:ResourceTag/Environment": [
+                    "ec2:ResourceTag/Environment": [
                         {
                             "Fn::Sub": "${Environment}"
                         }

@@ -18,11 +18,13 @@
             "Action": [
                 "cloudwatch:*"
             ],
-            "Resource": "*",
+            "Resource": {
+                "Fn::Sub": "arn:aws:cloudwatch:*:${AWS::AccountId}:alarm:*"
+            },
             "Condition": {
                 "StringEquals": {
                     "aws:ResourceTag/Scope": [
-                            {
+                        {
                             "Fn::Sub": "${Scope}"
                         }
                     ],
@@ -54,7 +56,9 @@
             "Action": [
                 "cloudwatch:*"
             ],
-            "Resource": "*",
+            "Resource": {
+                "Fn::Sub": "arn:aws:cloudwatch:*:${AWS::AccountId}:alarm:*"
+            },
             "Condition": {
                 "StringEquals": {
                     "aws:ResourceTag/Scope": [
@@ -94,7 +98,9 @@
                 "cloudwatch:List*",
                 "cloudwatch:Describe*"
             ],
-            "Resource": "*",
+            "Resource": {
+                "Fn::Sub": "arn:aws:cloudwatch:*:${AWS::AccountId}:alarm:*"
+            },
             "Condition": {
                 "StringEquals": {
                     "aws:ResourceTag/Scope": [

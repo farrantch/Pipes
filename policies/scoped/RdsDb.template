@@ -13,12 +13,14 @@
             ]
         },
         {
-            "Sid": "ResourceScopedRdsDbCondition",
+            "Sid": "ResourceScopedRdsDbTag",
             "Effect": "Allow",
             "Action": [
                 "rds:*"
             ],
-            "Resource": "*",
+            "Resource": {
+                "Fn::Sub": "arn:aws:rds:*:${AWS::AccountId}:db:*"
+            },
             "Condition": {
                 "StringEquals": {
                     "rds:db-tag/Scope": [
@@ -49,12 +51,14 @@
             ]
         },
         {
-            "Sid": "ResourceScopedRdsDbCondition",
+            "Sid": "ResourceScopedRdsDbTag",
             "Effect": "Allow",
             "Action": [
                 "rds:*"
             ],
-            "Resource": "*",
+            "Resource": {
+                "Fn::Sub": "arn:aws:rds:*:${AWS::AccountId}:db:*"
+            },
             "Condition": {
                 "StringEquals": {
                     "rds:db-tag/Scope": [
@@ -87,14 +91,16 @@
             ]
         },
         {
-            "Sid": "ResourceScopedRdsDbCondition",
+            "Sid": "ResourceScopedRdsDbTag",
             "Effect": "Allow",
             "Action": [
                 "rds:Get*",
                 "rds:Describe*",
                 "rds:List*"
             ],
-            "Resource": "*",
+            "Resource": {
+                "Fn::Sub": "arn:aws:rds:*:${AWS::AccountId}:db:*"
+            },
             "Condition": {
                 "StringEquals": {
                     "rds:db-tag/Scope": [

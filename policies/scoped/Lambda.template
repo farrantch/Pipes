@@ -9,6 +9,12 @@
             "Resource": [
                 {
                     "Fn::Sub": "arn:aws:lambda:*:${AWS::AccountId}:function:${Environment}-${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:lambda:*:${AWS::AccountId}:layer:${Environment}-${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:lambda:*:${AWS::AccountId}:layer:${Environment}-${Scope}-*:*"
                 }
             ]
         },
@@ -18,7 +24,9 @@
             "Action": [
                 "lambda:*"
             ],
-            "Resource": "*",
+            "Resource": {
+                "Fn::Sub": "arn:aws:lambda:*:${AWS::AccountId}:event-source-mapping:*"
+            },
             "Condition": {
                 "StringLike": {
                     "lambda:FunctionArn": [
@@ -33,7 +41,8 @@
             "Sid": "ScopedLambdaResourceWildcard",
             "Effect": "Allow",
             "Action": [
-                "lambda:Get*"
+                "lambda:Get*",
+                "lambda:List*"
             ],
             "Resource": "*"
         }
@@ -48,6 +57,12 @@
             "Resource": [
                 {
                     "Fn::Sub": "arn:aws:lambda:*:${AWS::AccountId}:function:${Environment}-${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:lambda:*:${AWS::AccountId}:layer:${Environment}-${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:lambda:*:${AWS::AccountId}:layer:${Environment}-${Scope}-*:*"
                 }
             ]
         },
@@ -57,7 +72,9 @@
             "Action": [
                 "lambda:*"
             ],
-            "Resource": "*",
+            "Resource": {
+                "Fn::Sub": "arn:aws:lambda:*:${AWS::AccountId}:event-source-mapping:*"
+            },
             "Condition": {
                 "StringLike": {
                     "lambda:FunctionArn": [
@@ -72,7 +89,8 @@
             "Sid": "ScopedLambdaResourceWildcard",
             "Effect": "Allow",
             "Action": [
-                "lambda:Get*"
+                "lambda:Get*",
+                "lambda:List*"
             ],
             "Resource": "*"
         }
@@ -89,6 +107,12 @@
             "Resource": [
                 {
                     "Fn::Sub": "arn:aws:lambda:*:${AWS::AccountId}:function:${Environment}-${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:lambda:*:${AWS::AccountId}:layer:${Environment}-${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:lambda:*:${AWS::AccountId}:layer:${Environment}-${Scope}-*:*"
                 }
             ]
         },
@@ -98,7 +122,9 @@
             "Action": [
                 "lambda:UpdateEventSourceMapping"
             ],
-            "Resource": "*",
+            "Resource": {
+                "Fn::Sub": "arn:aws:lambda:*:${AWS::AccountId}:event-source-mapping:*"
+            },
             "Condition": {
                 "StringLike": {
                     "lambda:FunctionArn": [
@@ -113,7 +139,8 @@
             "Sid": "ScopedLambdaResourceWildcard",
             "Effect": "Allow",
             "Action": [
-                "lambda:Get*"
+                "lambda:Get*",
+                "lambda:List*"
             ],
             "Resource": "*"
         }

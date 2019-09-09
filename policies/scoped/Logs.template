@@ -28,7 +28,7 @@
             ]
         },
         {
-            "Sid": "ScopedLogsLogGroup",
+            "Sid": "ScopedLogsResourceWildcard",
             "Effect": "Allow",
             "Action": [
                 "logs:CreateLogGroup"
@@ -65,7 +65,7 @@
             ]
         },
         {
-            "Sid": "ScopedLogsLogGroup",
+            "Sid": "ScopedLogsResourceWildcard",
             "Effect": "Allow",
             "Action": [
                 "logs:CreateLogGroup"

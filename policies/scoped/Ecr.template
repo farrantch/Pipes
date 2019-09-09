@@ -9,6 +9,30 @@
             "Resource": {
                 "Fn::Sub": "arn:aws:ecr:*:${AWS::AccountId}:repository/${Scope}-*"
             }
+        },
+        {
+            "Sid": "ScopedEcrTag",
+            "Effect": "Allow",
+            "Action": [
+                "ecr:*"
+            ],
+            "Resource": {
+                "Fn::Sub": "arn:aws:ecr:*:${AWS::AccountId}:repository/*"
+            },
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/Scope": [
+                            {
+                            "Fn::Sub": "${Scope}"
+                        }
+                    ],
+                    "aws:ResourceTag/Environment": [
+                        {
+                            "Fn::Sub": "${Environment}"
+                        }
+                    ]
+                }
+            }
         }
     ],
     "ServiceStatements": [
@@ -20,6 +44,30 @@
             ],
             "Resource": {
                 "Fn::Sub": "arn:aws:ecr:*:${AWS::AccountId}:repository/${Scope}-*"
+            }
+        },
+        {
+            "Sid": "ScopedEcrTag",
+            "Effect": "Allow",
+            "Action": [
+                "ecr:*"
+            ],
+            "Resource": {
+                "Fn::Sub": "arn:aws:ecr:*:${AWS::AccountId}:repository/*"
+            },
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/Scope": [
+                            {
+                            "Fn::Sub": "${Scope}"
+                        }
+                    ],
+                    "aws:ResourceTag/Environment": [
+                        {
+                            "Fn::Sub": "${Environment}"
+                        }
+                    ]
+                }
             }
         }
     ],
@@ -34,6 +82,32 @@
             ],
             "Resource": {
                 "Fn::Sub": "arn:aws:ecr:*:${AWS::AccountId}:repository/${Scope}-*"
+            }
+        },
+        {
+            "Sid": "ScopedEcrTag",
+            "Effect": "Allow",
+            "Action": [
+                "ecr:Get*",
+                "ecr:Describe*",
+                "ecr:List*"
+            ],
+            "Resource": {
+                "Fn::Sub": "arn:aws:ecr:*:${AWS::AccountId}:repository/*"
+            },
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/Scope": [
+                            {
+                            "Fn::Sub": "${Scope}"
+                        }
+                    ],
+                    "aws:ResourceTag/Environment": [
+                        {
+                            "Fn::Sub": "${Environment}"
+                        }
+                    ]
+                }
             }
         }
     ]
