@@ -1,0 +1,12 @@
+{
+    "ServiceStatements": [
+        {
+            "Sid": "WildcardSsm",
+            "Effect": "Allow",
+            "Action": [
+                "Ssm:*"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
