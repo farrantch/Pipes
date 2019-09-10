@@ -1,5 +1,25 @@
 {
+    "DeployStatements": [
+        {
+            "Sid": "WildcardIot",
+            "Effect": "Allow",
+            "Action": [
+                "iot:*"
+            ],
+            "Resource": "*"
+        }
+    ],
     "ServiceStatements": [
+        {
+            "Sid": "WildcardIot",
+            "Effect": "Allow",
+            "Action": [
+                "iot:*"
+            ],
+            "Resource": "*"
+        }
+    ],
+    "UserStatements": [
         {
             "Sid": "WildcardIot",
             "Effect": "Allow",

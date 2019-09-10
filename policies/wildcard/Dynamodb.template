@@ -1,5 +1,25 @@
 {
+    "DeployStatements": [
+        {
+            "Sid": "WildcardDynamodb",
+            "Effect": "Allow",
+            "Action": [
+                "dynamodb:*"
+            ],
+            "Resource": "*"
+        }
+    ],
     "ServiceStatements": [
+        {
+            "Sid": "WildcardDynamodb",
+            "Effect": "Allow",
+            "Action": [
+                "dynamodb:*"
+            ],
+            "Resource": "*"
+        }
+    ],
+    "UserStatements": [
         {
             "Sid": "WildcardDynamodb",
             "Effect": "Allow",

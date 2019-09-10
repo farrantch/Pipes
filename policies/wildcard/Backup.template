@@ -1,5 +1,25 @@
 {
+    "DeployStatements": [
+        {
+            "Sid": "WildcardBackup",
+            "Effect": "Allow",
+            "Action": [
+                "backup:*"
+            ],
+            "Resource": "*"
+        }
+    ],
     "ServiceStatements": [
+        {
+            "Sid": "WildcardBackup",
+            "Effect": "Allow",
+            "Action": [
+                "backup:*"
+            ],
+            "Resource": "*"
+        }
+    ],
+    "UserStatements": [
         {
             "Sid": "WildcardBackup",
             "Effect": "Allow",

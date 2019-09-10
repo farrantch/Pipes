@@ -1,5 +1,25 @@
 {
+    "DeployStatements": [
+        {
+            "Sid": "WildcardSes",
+            "Effect": "Allow",
+            "Action": [
+                "ses:*"
+            ],
+            "Resource": "*"
+        }
+    ],
     "ServiceStatements": [
+        {
+            "Sid": "WildcardSes",
+            "Effect": "Allow",
+            "Action": [
+                "ses:*"
+            ],
+            "Resource": "*"
+        }
+    ],
+    "UserStatements": [
         {
             "Sid": "WildcardSes",
             "Effect": "Allow",

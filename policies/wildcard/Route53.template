@@ -1,5 +1,25 @@
 {
+    "DeployStatements": [
+        {
+            "Sid": "WildcardRoute53",
+            "Effect": "Allow",
+            "Action": [
+                "route53:*"
+            ],
+            "Resource": "*"
+        }
+    ],
     "ServiceStatements": [
+        {
+            "Sid": "WildcardRoute53",
+            "Effect": "Allow",
+            "Action": [
+                "route53:*"
+            ],
+            "Resource": "*"
+        }
+    ],
+    "UserStatements": [
         {
             "Sid": "WildcardRoute53",
             "Effect": "Allow",

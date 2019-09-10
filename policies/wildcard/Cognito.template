@@ -1,5 +1,25 @@
 {
+    "DeployStatements": [
+        {
+            "Sid": "WildcardCognito",
+            "Effect": "Allow",
+            "Action": [
+                "cognito:*"
+            ],
+            "Resource": "*"
+        }
+    ],
     "ServiceStatements": [
+        {
+            "Sid": "WildcardCognito",
+            "Effect": "Allow",
+            "Action": [
+                "cognito:*"
+            ],
+            "Resource": "*"
+        }
+    ],
+    "UserStatements": [
         {
             "Sid": "WildcardCognito",
             "Effect": "Allow",
