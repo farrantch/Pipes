@@ -1,0 +1,46 @@
+{
+    "DeployStatements": [
+        {
+            "Sid": "ScopedBackup",
+            "Effect": "Allow",
+            "Action": [
+                "backup:*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:backup:*:${AWS::AccountId}:backup-vault:${Environment}-${Scope}-*"
+                }
+            ]
+        }
+    ],
+    "ServiceStatements": [
+        {
+            "Sid": "ScopedBackup",
+            "Effect": "Allow",
+            "Action": [
+                "backup:*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:backup:*:${AWS::AccountId}:backup-vault:${Environment}-${Scope}-*"
+                }
+            ]
+        }
+    ],
+    "UserStatements": [
+        {
+            "Sid": "ScopedBackup",
+            "Effect": "Allow",
+            "Action": [
+                "backup:Get*",
+                "backup:List*",
+                "backup:Describe*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:backup:*:${AWS::AccountId}:backup-vault:${Environment}-${Scope}-*"
+                }
+            ]
+        }
+    ]
+}
