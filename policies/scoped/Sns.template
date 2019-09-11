@@ -11,6 +11,14 @@
                     "Fn::Sub": "arn:aws:sns:*:${AWS::AccountId}:${Environment}-${Scope}-*"
                 }
             ]
+        },
+        {
+            "Sid": "ScopedSnsWildcard",
+            "Effect": "Allow",
+            "Action": [
+                "sns:ListTopics"
+            ],
+            "Resource": "*"
         }
     ],
     "ServiceStatements": [
@@ -25,6 +33,14 @@
                     "Fn::Sub": "arn:aws:sns:*:${AWS::AccountId}:${Environment}-${Scope}-*"
                 }
             ]
+        },
+        {
+            "Sid": "ScopedSnsWildcard",
+            "Effect": "Allow",
+            "Action": [
+                "sns:ListTopics"
+            ],
+            "Resource": "*"
         }
     ],
     "UserStatements": [
@@ -40,6 +56,14 @@
                     "Fn::Sub": "arn:aws:sns:*:${AWS::AccountId}:${Environment}-${Scope}-*"
                 }
             ]
+        },
+        {
+            "Sid": "ScopedSnsWildcard",
+            "Effect": "Allow",
+            "Action": [
+                "sns:ListTopics"
+            ],
+            "Resource": "*"
         }
     ]
 }
