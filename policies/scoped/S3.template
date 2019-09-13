@@ -4,6 +4,23 @@
             "Sid": "ScopedS3",
             "Effect": "Allow",
             "Action": [
+                "s3:DeleteBucket*",
+                "s3:PutEncryptionConfiguration",
+                "s3:PutInventoryConfiguration",
+                "s3:PutLifecycleConfiguration",
+                "s3:PutMetricsConfiguration",
+                "s3:PutBucket*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:s3:::${Environment}-${Scope}-*"
+                }
+            ]
+        },
+        {
+            "Sid": "ScopedS3EncryptPrivate",
+            "Effect": "Allow",
+            "Action": [
                 "s3:*"
             ],
             "Resource": [
@@ -13,8 +30,7 @@
             ],
             "Condition": {
                 "StringEquals": {
-                    "s3:x-amz-server-side-encryption": "AES256",
-                    "s3:x-amz-acl": "private"
+                    "s3:x-amz-acl": ["private"]
                 }
             }
         }
