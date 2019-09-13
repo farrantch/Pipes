@@ -18,7 +18,7 @@
             ]
         },
         {
-            "Sid": "ScopedS3EncryptPrivate",
+            "Sid": "ScopedS3Private",
             "Effect": "Allow",
             "Action": [
                 "s3:*"
