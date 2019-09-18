@@ -63,6 +63,14 @@
                     "Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:/aws/*/${Environment}-${Scope}-*:*:*"
                 }
             ]
+        },
+        {
+            "Sid": "ScopedLogsResourceWildcard",
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogGroup"
+            ],
+            "Resource": "*"
         }
     ],
     "UserStatements": [
