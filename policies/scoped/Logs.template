@@ -31,7 +31,8 @@
             "Sid": "ScopedLogsResourceWildcard",
             "Effect": "Allow",
             "Action": [
-                "logs:CreateLogGroup"
+                "logs:CreateLogGroup",
+                "logs:Describe*"
             ],
             "Resource": "*"
         }
@@ -68,7 +69,8 @@
             "Sid": "ScopedLogsResourceWildcard",
             "Effect": "Allow",
             "Action": [
-                "logs:CreateLogGroup"
+                "logs:CreateLogGroup",
+                "logs:Describe*"
             ],
             "Resource": "*"
         }
