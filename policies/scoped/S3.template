@@ -46,7 +46,12 @@
                 "s3:Describe*",
                 "s3:Get*",
                 "s3:List*",
-                "s3:PutObject*",
+                "s3:PutObjectAcl",
+                "s3:PutObjectLegalHold",
+                "s3:PutObjectRetention",
+                "s3:PutObjectTagging",
+                "s3:PutObjectVersionAcl",
+                "s3:PutObjectVersionTagging",
                 "s3:RestoreObject",
                 "s3:UpdateJobPriority",
                 "s3:UpdateJobStatus"
@@ -56,6 +61,23 @@
                     "Fn::Sub": "arn:aws:s3:::${Environment}-${Scope}-*"
                 }
             ]
+        },
+        {
+            "Sid": "ScopedS3Encrypt",
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:s3:::${Environment}-${Scope}-*"
+                }
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "s3:x-amz-server-side-encryption": ["AES256"]
+                }
+            }  
         }
     ],
     "UserStatements": [
@@ -69,7 +91,12 @@
                 "s3:Describe*",
                 "s3:Get*",
                 "s3:List*",
-                "s3:PutObject*",
+                "s3:PutObjectAcl",
+                "s3:PutObjectLegalHold",
+                "s3:PutObjectRetention",
+                "s3:PutObjectTagging",
+                "s3:PutObjectVersionAcl",
+                "s3:PutObjectVersionTagging",
                 "s3:RestoreObject",
                 "s3:UpdateJobPriority",
                 "s3:UpdateJobStatus"
@@ -79,6 +106,23 @@
                     "Fn::Sub": "arn:aws:s3:::${Environment}-${Scope}-*"
                 }
             ]
+        },
+        {
+            "Sid": "ScopedS3Encrypt",
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:s3:::${Environment}-${Scope}-*"
+                }
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "s3:x-amz-server-side-encryption": ["AES256"]
+                }
+            }  
         }
     ]
 }
