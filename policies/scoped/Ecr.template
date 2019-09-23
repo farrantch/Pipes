@@ -6,9 +6,11 @@
             "Action": [
                 "ecr:*"
             ],
-            "Resource": {
-                "Fn::Sub": "arn:aws:ecr:*:${AWS::AccountId}:repository/${Scope}-*"
-            }
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:ecr:*:${AWS::AccountId}:repository/${Scope}-*"
+                }
+            ]
         },
         {
             "Sid": "ScopedEcrWildcard",
@@ -24,9 +26,11 @@
             "Action": [
                 "ecr:*"
             ],
-            "Resource": {
-                "Fn::Sub": "arn:aws:ecr:*:${AWS::AccountId}:repository/*"
-            },
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:ecr:*:${AWS::AccountId}:repository/*"
+                }
+            ],
             "Condition": {
                 "StringEquals": {
                     "aws:ResourceTag/Scope": [
@@ -81,9 +85,11 @@
                 "ecr:PutImage*",
                 "ecr:UploadLayerPart"
             ],
-            "Resource": {
-                "Fn::Sub": "arn:aws:ecr:*:${AWS::AccountId}:repository/${Scope}-*"
-            }
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:ecr:*:${AWS::AccountId}:repository/${Scope}-*"
+                }
+            ]
         },
         {
             "Sid": "ScopedEcrTag",
@@ -91,9 +97,11 @@
             "Action": [
                 "ecr:*"
             ],
-            "Resource": {
-                "Fn::Sub": "arn:aws:ecr:*:${AWS::AccountId}:repository/*"
-            },
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:ecr:*:${AWS::AccountId}:repository/*"
+                }
+            ],
             "Condition": {
                 "StringEquals": {
                     "aws:ResourceTag/Scope": [
@@ -119,9 +127,11 @@
                 "ecr:Describe*",
                 "ecr:List*"
             ],
-            "Resource": {
-                "Fn::Sub": "arn:aws:ecr:*:${AWS::AccountId}:repository/${Scope}-*"
-            }
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:ecr:*:${AWS::AccountId}:repository/${Scope}-*"
+                }
+            ]
         },
         {
             "Sid": "ScopedEcrTag",
@@ -131,9 +141,11 @@
                 "ecr:Describe*",
                 "ecr:List*"
             ],
-            "Resource": {
-                "Fn::Sub": "arn:aws:ecr:*:${AWS::AccountId}:repository/*"
-            },
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:ecr:*:${AWS::AccountId}:repository/*"
+                }
+            ],
             "Condition": {
                 "StringEquals": {
                     "aws:ResourceTag/Scope": [

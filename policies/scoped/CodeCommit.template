@@ -18,9 +18,11 @@
             "Action": [
                 "codecommit:*"
             ],
-            "Resource": {
-                "Fn::Sub": "arn:aws:codecommit:*:${AWS::AccountId}:*"
-            },
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:codecommit:*:${AWS::AccountId}:*"
+                }
+            ],
             "Condition": {
                 "StringEquals": {
                     "aws:ResourceTag/Scope": [
@@ -112,9 +114,11 @@
                 "codecommit:Put*",
                 "codecommit:Update*"
             ],
-            "Resource": {
-                "Fn::Sub": "arn:aws:codecommit:*:${AWS::AccountId}:*"
-            },
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:codecommit:*:${AWS::AccountId}:*"
+                }
+            ],
             "Condition": {
                 "StringEquals": {
                     "aws:ResourceTag/Scope": [
