@@ -22,11 +22,35 @@
             "Condition": {
                 "StringEquals": {
                     "aws:ResourceTag/Scope": [
-                            {
+                        {
                             "Fn::Sub": "${Scope}"
                         }
                     ],
                     "aws:ResourceTag/Environment": [
+                        {
+                            "Fn::Sub": "${Environment}"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "Sid": "ScopedEcrRequestTag",
+            "Effect": "Allow",
+            "Action": [
+                "ecr:*"
+            ],
+            "Resource": {
+                "Fn::Sub": "arn:aws:ecr:*:${AWS::AccountId}:repository/*"
+            },
+            "Condition": {
+                "StringEquals": {
+                    "aws:RequestTag/Scope": [
+                        {
+                            "Fn::Sub": "${Scope}"
+                        }
+                    ],
+                    "aws:RequestTag/Environment": [
                         {
                             "Fn::Sub": "${Environment}"
                         }
