@@ -1,4 +1,20 @@
 {
+    "PipelineStatements": [
+        {
+            "Sid": "ScopedCodeBuild",
+            "Effect": "Allow",
+            "Action": [
+                "codebuild:StartBuild",
+                "codebuild:StopBuild",
+                "codebuild:BatchGetBuilds"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:codebuild:*:${AWS::AccountId}:project/${Environment}-${Scope}-*"
+                }
+            ]
+        }
+    ],
     "DeployStatements": [
         {
             "Sid": "ScopedCodeBuild",

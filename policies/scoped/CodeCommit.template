@@ -1,4 +1,44 @@
 {
+    "PipelineStatements": [
+        {
+            "Sid": "ScopedCodeCommit",
+            "Effect": "Allow",
+            "Action": [
+                "codecommit:*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:codecommit:*:${AWS::AccountId}:${Scope}-*"
+                }
+            ]
+        },
+        {
+            "Sid": "ScopedCodeCommitTag",
+            "Effect": "Allow",
+            "Action": [
+                "codecommit:*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:codecommit:*:${AWS::AccountId}:*"
+                }
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/Scope": [
+                            {
+                            "Fn::Sub": "${Scope}"
+                        }
+                    ],
+                    "aws:ResourceTag/Environment": [
+                        {
+                            "Fn::Sub": "${Environment}"
+                        }
+                    ]
+                }
+            }
+        }
+    ],
     "DeployStatements": [
         {
             "Sid": "ScopedCodeCommit",
