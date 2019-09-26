@@ -8,7 +8,7 @@
             ],
             "Resource": [
                 {
-                    "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:cluster/${Scope}-*"
+                    "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:cluster/${Environment}-${Scope}-*"
                 }
             ]
         }
@@ -22,7 +22,7 @@
             ],
             "Resource": [
                 {
-                    "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:cluster/${Scope}-*"
+                    "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:cluster/${Environment}-${Scope}-*"
                 }
             ]
         }
@@ -38,7 +38,7 @@
             ],
             "Resource": [
                 {
-                    "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:cluster/${Scope}-*"
+                    "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:cluster/${Environment}-${Scope}-*"
                 }
             ]
         }
