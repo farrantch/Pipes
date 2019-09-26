@@ -11,7 +11,7 @@
                     "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:service/${Environment}-${Scope}-*"
                 },
                 {
-                    "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:service/${Environment}-${Scope}-*"
+                    "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:service/*/${Environment}-${Scope}-*"
                 },
                 {
                     "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:task-definition/${Environment}-${Scope}-*:*"
@@ -46,6 +46,9 @@
                     "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:service/${Environment}-${Scope}-*"
                 },
                 {
+                    "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:service/*/${Environment}-${Scope}-*"
+                },
+                {
                     "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:task-definition/${Environment}-${Scope}-*:*"
                 },
                 {
@@ -76,6 +79,9 @@
             "Resource": [
                 {
                     "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:service/${Environment}-${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:service/*/${Environment}-${Scope}-*"
                 },
                 {
                     "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:task-definition/${Environment}-${Scope}-*:*"
