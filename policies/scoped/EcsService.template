@@ -11,6 +11,9 @@
                     "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:service/${Scope}-*"
                 },
                 {
+                    "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:service/*/${Scope}-*"
+                },
+                {
                     "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:task-definition/${Scope}-*:*"
                 },
                 {
@@ -41,6 +44,9 @@
             "Resource": [
                 {
                     "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:service/${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:service/*/${Scope}-*"
                 },
                 {
                     "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:task-definition/${Scope}-*:*"
