@@ -8,16 +8,16 @@
             ],
             "Resource": [
                 {
-                    "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:service/${Scope}-*"
+                    "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:service/${Environment}-${Scope}-*"
                 },
                 {
-                    "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:service/*/${Scope}-*"
+                    "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:service/${Environment}-${Scope}-*"
                 },
                 {
-                    "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:task-definition/${Scope}-*:*"
+                    "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:task-definition/${Environment}-${Scope}-*:*"
                 },
                 {
-                    "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:task-set/${Scope}-*"
+                    "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:task-set/${Environment}-${Scope}-*"
                 }
             ]
         },
