@@ -1,0 +1,106 @@
+{
+    "PipelineStatements": [
+        {
+            "Sid": "ScopedEcsService",
+            "Effect": "Allow",
+            "Action": [
+                "ecs:*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:service/${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:task-definition/${Scope}-*:*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:task-set/${Scope}-*"
+                }
+            ]
+        },
+        {
+            "Sid": "ScopedEcsServiceWildcard",
+            "Effect": "Allow",
+            "Action": [
+                "ecs:DescribeTaskDefinition",
+                "ecs:DescribeTasks",
+                "ecs:ListTasks",
+                "ecs:RegisterTaskDefinition"
+            ],
+            "Resource": "*"
+        }
+    ],
+    "DeployStatements": [
+        {
+            "Sid": "ScopedEcsService",
+            "Effect": "Allow",
+            "Action": [
+                "ecs:*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:service/${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:task-definition/${Scope}-*:*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:task-set/${Scope}-*"
+                }
+            ]
+        },
+        {
+            "Sid": "ScopedEcsServiceWildcard",
+            "Effect": "Allow",
+            "Action": [
+                "ecs:DescribeTaskDefinition",
+                "ecs:DescribeTasks",
+                "ecs:ListTasks",
+                "ecs:RegisterTaskDefinition"
+            ],
+            "Resource": "*"
+        }
+    ],
+    "ServiceStatements": [
+        {
+            "Sid": "ScopedEcsService",
+            "Effect": "Allow",
+            "Action": [
+                "ecs:*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:service/${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:task-definition/${Scope}-*:*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:task-set/${Scope}-*"
+                }
+            ]
+        },
+        {
+            "Sid": "ScopedEcsServiceWildcard",
+            "Effect": "Allow",
+            "Action": [
+                "ecs:DescribeTaskDefinition",
+                "ecs:DescribeTasks",
+                "ecs:ListTasks"
+            ],
+            "Resource": "*"
+        }
+    ],
+    "UserStatements": [
+        {
+            "Sid": "ScopedEcsServiceWildcard",
+            "Effect": "Allow",
+            "Action": [
+                "ecs:Describe*",
+                "ecs:List*",
+                "ecs:Get*"
+            ],
+            "Resource": "*"
+        }
+    ]
+}

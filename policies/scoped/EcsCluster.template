@@ -1,0 +1,46 @@
+{
+    "DeployStatements": [
+        {
+            "Sid": "ScopedEcsCluster",
+            "Effect": "Allow",
+            "Action": [
+                "ecs:*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:cluster/${Scope}-*"
+                }
+            ]
+        }
+    ],
+    "ServiceStatements": [
+        {
+            "Sid": "ScopedEcsCluster",
+            "Effect": "Allow",
+            "Action": [
+                "ecs:*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:cluster/${Scope}-*"
+                }
+            ]
+        }
+    ],
+    "UserStatements": [
+        {
+            "Sid": "ScopedEcsCluster",
+            "Effect": "Allow",
+            "Action": [
+                "ecs:Get*",
+                "ecs:Describe*",
+                "ecs:List*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:cluster/${Scope}-*"
+                }
+            ]
+        }
+    ]
+}
