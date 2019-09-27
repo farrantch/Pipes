@@ -1,8 +1,22 @@
 {
-    "Dev": {
-        "AccountId": "0123456789"
+    "SsoAccount": {
+        "AccountId": "012345678910"
     },
-    "Prod": {
-        "AccountId": "1234567890"
+    "CicdAccount": {
+        "AccountId": "012345678910"
+    },
+    "SdlcAccounts": {
+        "Dev": {
+            "AccountId": "012345678910"
+        },
+        "Qa": {
+            "AccountId": "012345678910"
+        },
+        "Prod": {
+            "AccountId": "012345678910"
+        }
+    },
+    "PlayAccount": {
+        "AccountId": "012345678910"
     }
 }

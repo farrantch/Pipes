@@ -1,0 +1,34 @@
+{
+    "UserStatements": [
+        {
+            "Sid": "UsersReadOnlySsmDecrypt",
+            "Effect": "Allow",
+            "Action": [
+                "ssm:Describe*",
+                "ssm:Get*",
+                "ssm:List*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:ssm:*:*:parameter/${Environment}/*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:ssm:*:*:parameter/${Environment}"
+                }
+            ]
+        },
+        {
+            "Sid": "UsersReadOnlySsmDescribe",
+            "Action": [
+                "ssm:DescribeParameters"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:ssm:*:${AWS::AccountId}:*"
+                }
+            ],
+            "Effect": "Allow"
+        }
+    ]
+}
+    

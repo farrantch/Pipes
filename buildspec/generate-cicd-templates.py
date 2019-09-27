@@ -1,8 +1,12 @@
+#!/usr/bin/python
 import boto3
 import sys
 import time
 import os
 import json
+import generate_users_template
+import pipeline_builder
+from utils import read_file, write_file, get_policy_statements, add_policy_statements, consolidate_statements
 from collections import OrderedDict
 from botocore.exceptions import ClientError
 
@@ -10,11 +14,11 @@ from botocore.exceptions import ClientError
 FILE_CONFIG_SCOPES = 'Config-Scopes'
 FILE_CONFIG_ENVIRONMENTS = 'Config-Environments'
 FILE_CONFIG_USERS = 'Config-Users'
-FILE_TEMPLATE_PIPELINE = 'Pipeline'
+FILE_TEMPLATE_USERS = 'Users'
 FILE_TEMPLATE_SCOPE_PARENT = 'Scope-CICD-Parent'
 FILE_TEMPLATE_SCOPE_CICD_CHILD = 'Scope-CICD-Child'
 MASTERSCOPESTACK = 'cicd-master-scopes'
-ENVIRONMENT = 'cicd'
+ENVIRONMENT = os.environ['Environment']
 
 # Template Snippets
 assume_role_statement = {
@@ -25,6 +29,22 @@ assume_role_statement = {
             "Effect": "Allow",
             "Action": [
                 "sts:AssumeRole",
+                
+            ],
+            "Resource": []
+        },
+        {
+            "Ref": "AWS::NoValue"
+        }
+    ]
+}
+pass_role_statement = {
+    "Fn::If": [
+        "NotInitialCreation",
+        {
+            "Sid": "AllowPassEnvironmentRoles",
+            "Effect": "Allow",
+            "Action": [
                 "iam:PassRole"
             ],
             "Resource": []
@@ -117,27 +137,16 @@ def get_parameters_of_child_stacks(master_stack_created):
                 )['Stacks'][0]['Parameters']
     return child_stack_parameters
 
-# Open file
-def read_file(location):
-    with open(location + '.template') as f:
-        contents = json.load(f)
-    f.close()
-    return contents
-
-# Save file
-def write_file(location, contents):
-    # Save Pipeline Template file
-    with open(location + '.template', 'w') as f:
-        json.dump(contents, f, indent=4)
-    f.close()
-
 def update_statements_with_crossaccount_permissions(environments):
     # Generate base statement needed for cross-environment access. 
-    base_statement = generate_base_statement(environments)
+    base_statement_all = generate_base_statement(environments, "All")
+    base_statement_deploy = generate_base_statement(environments, "Deploy")
+    base_statement_pipeline = generate_base_statement(environments, "Pipeline")
     # Insert base statement into larger statements
-    assume_role_statement['Fn::If'][1]['Resource'] = base_statement[:]
-    kms_key_statement['Fn::If'][1]['Principal']['AWS'] = base_statement[:]
-    s3_bucket_statement['Fn::If'][1]['Principal']['AWS'] = base_statement[:]
+    assume_role_statement['Fn::If'][1]['Resource'] = base_statement_pipeline[:]
+    pass_role_statement['Fn::If'][1]['Resource'] = base_statement_deploy[:]
+    kms_key_statement['Fn::If'][1]['Principal']['AWS'] = base_statement_all[:]
+    s3_bucket_statement['Fn::If'][1]['Principal']['AWS'] = base_statement_all[:]
 
 # Check if master stack exists
 def master_stack_exists():
@@ -160,7 +169,7 @@ def are_all_environments_created_for_scope(scope, child_stack_parameters):
         all_envs_created = list(filter(lambda item: item['ParameterKey'] == 'AllEnvironmentsCreated', child_stack_parameters[scope_lower]))[0]['ParameterValue']
     return all_envs_created
 
-def insert_pipeline_step_for_environment(env, env_value):
+def insert_pipeline_step_for_environment(env, env_value, scope_lower, name):
     env_lower = env.lower()
     pipeline_step = {
             "Name": env,
@@ -179,10 +188,10 @@ def insert_pipeline_step_for_environment(env, env_value):
                                 "ActionMode":"REPLACE_ON_FAILURE",
                                 "Capabilities":"CAPABILITY_IAM,CAPABILITY_AUTO_EXPAND",
                                 "RoleArn":{
-                                    "Fn::Sub":"arn:aws:iam::" + env_value['AccountId'] + ":role/"+ env_lower + "-${MasterPipeline}-scopes-${Scope}-CloudFormationRole"
+                                    "Fn::Sub":"arn:aws:iam::" + env_value['AccountId'] + ":role/"+ env_lower + "-${MasterPipeline}-scopes-" + scope_lower + "-CloudFormationRole"
                                 },
                                 "StackName":{
-                                    "Fn::Sub": env_lower + "-${Scope}-${SubScope}"
+                                    "Fn::Sub": env_lower + "-" + scope_lower + "-" + name
                                 },
                                 "TemplatePath": {
                                     "Fn::If": [
@@ -228,10 +237,10 @@ def insert_pipeline_step_for_environment(env, env_value):
                                                 "Fn::Sub": "\"MasterPipeline\": \"${MasterPipeline}\","
                                             },
                                             {
-                                                "Fn::Sub": "\"Scope\": \"${Scope}\","
+                                                "Fn::Sub": "\"Scope\": \"" + scope_lower + "\","
                                             },
                                             {
-                                                "Fn::Sub": "\"SubScope\": \"${SubScope}\""
+                                                "Fn::Sub": "\"SubScope\": \"" + name + "\""
                                             },
                                             "}"
                                         ]
@@ -257,7 +266,7 @@ def insert_pipeline_step_for_environment(env, env_value):
                             ],
                             "RunOrder": 2,
                             "RoleArn": {
-                                "Fn::Sub":"arn:aws:iam::" + env_value['AccountId'] + ":role/" + env_lower + "-${MasterPipeline}-scopes-${Scope}-CodePipelineRole"
+                                "Fn::Sub":"arn:aws:iam::" + env_value['AccountId'] + ":role/" + env_lower + "-${MasterPipeline}-scopes-" + scope_lower + "-CodePipelineRole"
                             }
                         },
                         {
@@ -277,7 +286,7 @@ def insert_pipeline_step_for_environment(env, env_value):
                             },
                             "Configuration": {
                                 "ProjectName": {
-                                    "Fn::Sub": env_lower + "-${Scope}-${SubScope}-CodeBuild"
+                                    "Fn::Sub": env_lower + "-" + scope_lower + "-" + name + "-CodeBuild"
                                 },
                                 "PrimarySource": {
                                     "Fn::If": [
@@ -306,7 +315,7 @@ def insert_pipeline_step_for_environment(env, env_value):
                             ],
                             "RunOrder": 3,
                             "RoleArn": {
-                                "Fn::Sub":"arn:aws:iam::" + env_value['AccountId'] + ":role/" + env_lower + "-${MasterPipeline}-scopes-${Scope}-CodeBuildRole"
+                                "Fn::Sub":"arn:aws:iam::" + env_value['AccountId'] + ":role/" + env_lower + "-${MasterPipeline}-scopes-" + scope_lower + "-CodeBuildRole"
                             }
                         },
                         {
@@ -351,125 +360,128 @@ def insert_childstack_into_parentstack(template_scope_parent, scope, all_envs_cr
     }
     return template_scope_parent
 
-def insert_pipelinestack_into_childstack(template_scope_child, pipeline, scope):
-    scope_lower = scope.lower()
-    name = pipeline['Name'].lower()
-    template_scope_child['Resources'][pipeline['Name']] = {
-        "Type": "AWS::CloudFormation::Stack",
-        "Condition": "NotInitialCreation",
-        "DependsOn": ["RoleCodePipeline", "RoleCodeBuild"],
-        "Properties": {
-            "Parameters": {
-                "MasterPipeline": {
-                    "Ref": "MasterPipeline"
-                },
-                "Scope": scope_lower,
-                "SubScope": name,
-                "Environment": "cicd",
-                "S3BucketName": {
-                    "Ref": "S3Bucket"
-                },
-                "KmsCmkArn": {
-                    "Fn::GetAtt": [
-                        "KmsKey",
-                        "Arn"
-                    ]
-                },
-                "IamRoleArnCodePipeline": {
-                    "Fn::GetAtt": [
-                        "RoleCodePipeline",
-                        "Arn"
-                    ]
-                },
-                "IamRoleArnCodeBuild": {
-                    "Fn::GetAtt": [
-                        "RoleCodeBuild",
-                        "Arn"
-                    ]
-                }
-            },
-            "Tags": [{
-                "Key": "Environment",
-                "Value": {
-                    "Fn::Sub": "${Environment}"
-                }
-            }],
-            "TemplateURL": {
-                "Fn::Sub": "https://s3.amazonaws.com/${MasterS3BucketName}/generated-cicd-templates/Pipeline.template"
-            }
-        }
-    }
-
-    return template_scope_child
-
 # Generate base_statement policy used for cross-account access
-def generate_base_statement(environments):
+def generate_base_statement(environments, purpose):
+    # Purpose - All / Deploy / Pipeline
+    base_statement = []
+    if purpose == "Pipeline" or purpose == "All":
+        base_statement.append(
+            {
+                "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${MasterPipeline}-scopes-${Scope}-CodePipelineRole"
+            }
+        )
+    if purpose == "Deploy" or purpose == "All":
+        base_statement.append(
+            {
+                "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${MasterPipeline}-scopes-${Scope}-CloudFormationRole"
+            }
+        )
+        base_statement.append(
+            {
+                "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${MasterPipeline}-scopes-${Scope}-CodeBuildRole"
+            }
+        )
+
     # CICD account is not optional
-    base_statement = [
-        {
-            "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${MasterPipeline}-scopes-${Scope}-CloudFormationRole"
-        },
-        {
-            "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${MasterPipeline}-scopes-${Scope}-CodePipelineRole"
-        },
-        {
-            "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${MasterPipeline}-scopes-${Scope}-CodeBuildRole"
-        }    
-    ]
+    # base_statement = [
+    #     {
+    #         "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${MasterPipeline}-scopes-${Scope}-CloudFormationRole"
+    #     },
+    #     {
+    #         "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${MasterPipeline}-scopes-${Scope}-CodePipelineRole"
+    #     },
+    #     {
+    #         "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${MasterPipeline}-scopes-${Scope}-CodeBuildRole"
+    #     }    
+    #]
+
     # Loop Through SDLC Environments
     for env, env_value in environments.items():
         env_lower = env.lower()
-        base_statement.append(
-            {
-                "Fn::Sub": "arn:aws:iam::" + env_value['AccountId'] + ":role/" + env_lower + "-${MasterPipeline}-scopes-${Scope}-CloudFormationRole"
-            }
-        )
-        base_statement.append(
-            {
-                "Fn::Sub": "arn:aws:iam::" + env_value['AccountId'] + ":role/" + env_lower + "-${MasterPipeline}-scopes-${Scope}-CodePipelineRole"
-            }
-        )
-        base_statement.append(
-            {
-                "Fn::Sub": "arn:aws:iam::" + env_value['AccountId'] + ":role/" + env_lower + "-${MasterPipeline}-scopes-${Scope}-CodeBuildRole"
-            }
-        )
+        if purpose == "Pipeline" or purpose == "All":
+            base_statement.append(
+                {
+                    "Fn::Sub": "arn:aws:iam::" + env_value['AccountId'] + ":role/" + env_lower + "-${MasterPipeline}-scopes-${Scope}-CodePipelineRole"
+                }
+            )
+        if purpose == "Deploy" or purpose == "All":
+            base_statement.append(
+                {
+                    "Fn::Sub": "arn:aws:iam::" + env_value['AccountId'] + ":role/" + env_lower + "-${MasterPipeline}-scopes-${Scope}-CloudFormationRole"
+                }
+            )
+            base_statement.append(
+                {
+                    "Fn::Sub": "arn:aws:iam::" + env_value['AccountId'] + ":role/" + env_lower + "-${MasterPipeline}-scopes-${Scope}-CodeBuildRole"
+                }
+            )
     return base_statement
 
-def generate_pipeline_template(environments):
-    template_pipeline = read_file('templates/' + FILE_TEMPLATE_PIPELINE)
-    # Loop Through Environments
-    for  env, env_value in environments.items():
-        env_lower = env.lower()
-        # Insert pipeline step for environment
-        pipeline_step_sdlc_env = insert_pipeline_step_for_environment(env, env_value)
-        # Insert step into child pipeline template for environment
-        if env_lower != 'prod':
-            template_pipeline['Resources']['CodePipeline']['Properties']['Stages'].insert(-1, pipeline_step_sdlc_env)
-        else:
-            template_pipeline['Resources']['CodePipeline']['Properties']['Stages'].append(pipeline_step_sdlc_env)
-    # Save file
-    write_file('generated-cicd-templates/' + FILE_TEMPLATE_PIPELINE, template_pipeline)
-
-def generate_scoped_pipelines_template(scope, scope_value):
+def generate_scoped_pipelines_template(environments, scope, scope_value):
     scope_lower = scope.lower()
     # Open child template to insert pipelines
     template_scope_child = read_file('templates/' + FILE_TEMPLATE_SCOPE_CICD_CHILD)
+
+    template_scope_child = add_policy_statements(template_scope_child, scope, scope_value, 'Cicd')
+
+    # Consolidate Policies
+    template_scope_child['Resources']['IamPolicyService']['Properties']['PolicyDocument']['Statement'] = consolidate_statements(
+        template_scope_child['Resources']['IamPolicyService']['Properties']['PolicyDocument']['Statement']
+    )
+
+    template_scope_child['Resources']['IamPolicyDeploy']['Properties']['PolicyDocument']['Statement'] = consolidate_statements(
+        template_scope_child['Resources']['IamPolicyDeploy']['Properties']['PolicyDocument']['Statement']
+    )
+
+    template_scope_child['Resources']['IamPolicyPipeline']['Properties']['PolicyDocument']['Statement'] = consolidate_statements(
+        template_scope_child['Resources']['IamPolicyPipeline']['Properties']['PolicyDocument']['Statement']
+    )
+
     # Add cross account policies we created above
-    template_scope_child['Resources']['IamPolicyBaseline']['Properties']['PolicyDocument']['Statement'].append(assume_role_statement)
+    template_scope_child['Resources']['IamPolicyPipeline']['Properties']['PolicyDocument']['Statement'].append(assume_role_statement)
+    template_scope_child['Resources']['IamPolicyPipeline']['Properties']['PolicyDocument']['Statement'].append(pass_role_statement)
+    template_scope_child['Resources']['IamPolicyDeploy']['Properties']['PolicyDocument']['Statement'].append(pass_role_statement)
     template_scope_child['Resources']['KmsKey']['Properties']['KeyPolicy']['Statement'].append(kms_key_statement)
     template_scope_child['Resources']['S3BucketPolicy']['Properties']['PolicyDocument']['Statement'].append(s3_bucket_statement)
+
     # Loop through pipelines
     if 'Pipelines' in scope_value:
         for pipeline in scope_value['Pipelines']:
             # Insert PipelineStack into ChildStack
-            template_scope_child = insert_pipelinestack_into_childstack(template_scope_child, pipeline, scope)
-            # Add PipelineStack Parameter Overrides
-            if 'Parameters' in pipeline:
-                for po, po_value in pipeline['Parameters'].items():
-                    # Filter to parameters only applicable to CICD stack
-                    if po == 'SdlcCodeBuild' or po == 'SdlcCloudFormation' or po == 'CicdCodeBuild' or po == 'CicdCodeBuildImage' or po == 'IncludeCicdCfvars' or po =='IncludeSdlcCfvars' or po == 'SourceRepo':
-                        template_scope_child['Resources'][pipeline['Name']]['Properties']['Parameters'][po] = po_value
+            #template_scope_child = insert_pipeline_into_childstack(environments, template_scope_child, pipeline, scope)
+            template_scope_child['Resources']['CodePipeline' + pipeline['Name']] = (pipeline_builder
+                .Pipeline(scope, environments, pipeline)
+                    .Properties()
+                        .Stages()
+                            .Source()
+                                .CodeCommit()
+                                .Build()
+                                .GitHub()
+                                .Build()
+                            .Build()
+                            .Cicd()
+                                .CicdCloudFormation()
+                                .Build()
+                                .CicdCodeBuild()
+                                .Build()
+                            .Build()
+                            .Sdlc()
+                                .Environments()
+                                .Build()
+                                .ManualApprovalPostDev()
+                                .Build()
+                                .ManualApprovalPreProd()
+                                .Build()
+                            .Build()
+                        .Build()
+                    .Build()
+                .Build())
+            # # Add PipelineStack Parameter Overrides
+            # if 'Parameters' in pipeline:
+            #     for po, po_value in pipeline['Parameters'].items():
+            #         # Filter to parameters only applicable to CICD stack
+            #         if po == 'SdlcCodeBuild' or po == 'SdlcCloudFormation' or po == 'CicdCodeBuild' or po == 'CicdCodeBuildImage' or po == 'IncludeCicdCfvars' or po =='IncludeSdlcCfvars' or po == 'SourceRepo':
+            #             template_scope_child['Resources'][pipeline['Name']]['Properties']['Parameters'][po] = po_value
     # Save individual scoped child file
     write_file('generated-cicd-templates/' + FILE_TEMPLATE_SCOPE_CICD_CHILD + '-' + scope_lower, template_scope_child)
     return
@@ -490,25 +502,22 @@ def generate_scoped_templates(environments):
         # Insert child stack into parent stack for CICD Scopes
         template_scope_parent = insert_childstack_into_parentstack(template_scope_parent, scope, all_envs_created)
         # Generate scoped pipelines template
-        generate_scoped_pipelines_template(scope, scope_value)
-        
+        generate_scoped_pipelines_template(environments, scope, scope_value)
     # Save parent file
     write_file('generated-cicd-templates/' + FILE_TEMPLATE_SCOPE_PARENT, template_scope_parent)
 
 def main():
-    # Open Files
-    users = read_file(FILE_CONFIG_USERS)
-    environments = read_file(FILE_CONFIG_ENVIRONMENTS)
+    # Open Environments File
+    environments = read_file(FILE_CONFIG_ENVIRONMENTS)['SdlcAccounts']
 
     # Update cross account policy statements with environments
     update_statements_with_crossaccount_permissions(environments)
 
-    # Generate global pipeline template
-    generate_pipeline_template(environments)
-
     # Generate scope templates
     generate_scoped_templates(environments)
 
+    # Generate users template
+    generate_users_template.generate_users_template('generated-cicd-templates/', "Cicd")
 
 if __name__ == "__main__":
     main()

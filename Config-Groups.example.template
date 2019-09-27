@@ -1,3 +1,30 @@
 {
-    
+    "Devs": {
+        "Scopes": [
+            "MicroserviceFoo",
+            "MicroserviceBar",
+            "Frontend"
+        ],
+        "Policies": {
+            "Sdlc": [
+                "users/ReadOnly"
+            ],
+            "Cicd": [
+                "users/ReadOnly"
+            ]
+        }
+    },
+    "Ops": {
+        "Scopes": [
+            "Network"
+        ],
+        "Policies": {
+            "Sdlc": [
+                "users/Admin"
+            ],
+            "Cicd": [
+                "users/Admin"
+            ]
+        }
+    }
 }

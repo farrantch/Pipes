@@ -9,6 +9,9 @@
             "Resource": [
                 {
                     "Fn::Sub": "arn:aws:ssm:*:${AWS::AccountId}:document/${Environment}-${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:ssm:*::document/AWS-*"
                 }
             ]
         },
@@ -49,6 +52,9 @@
             "Resource": [
                 {
                     "Fn::Sub": "arn:aws:ssm:*:${AWS::AccountId}:document/${Environment}-${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:ssm:*::document/AWS-*"
                 }
             ]
         },
@@ -58,9 +64,11 @@
             "Action": [
                 "ssm:*"
             ],
-            "Resource": {
-                "Fn::Sub": "arn:aws:ssm:*:${AWS::AccountId}:document/*"
-            },
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:ssm:*:${AWS::AccountId}:document/*"
+                }
+            ],
             "Condition": {
                 "StringEquals": {
                     "aws:ResourceTag/Scope": [
@@ -87,6 +95,9 @@
             "Resource": [
                 {
                     "Fn::Sub": "arn:aws:ssm:*:${AWS::AccountId}:document/${Environment}-${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:ssm:*::document/AWS-*"
                 }
             ]
         },

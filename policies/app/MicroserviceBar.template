@@ -1,10 +1,10 @@
 {
     "ServiceStatements": [
         {
-            "Sid": "AppMicroserviceFoo",
+            "Sid": "AppMicroserviceBar",
             "Effect": "Allow",
             "Action": [
-                "route53:*",
+                "ec2:*",
                 "acm:*",
                 "cognito-idp:*",
                 "cognito-identity:*",

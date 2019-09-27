@@ -15,6 +15,13 @@
                 "True",
                 "False"
             ]
+        },
+        "ManualApprovalPostDev": {
+            "Type": "String",
+            "AllowedValues": [
+                "True",
+                "False"
+            ]
         }
     },
     "Conditions": {
@@ -32,6 +39,14 @@
                     "Ref": "AllEnvironmentsCreated"
                 },
                 "True"
+            ]
+        },
+        "ManualApprovalPostDev": {
+            "Fn::Equals":[
+                "True",
+                {
+                    "Ref":"ManualApprovalPostDev"
+                }
             ]
         }
     },
@@ -92,7 +107,7 @@
               "Type": "CODEPIPELINE",
               "BuildSpec": "buildspec/generate-master-template.yml"
             },
-            "TimeoutInMinutes": "5"
+            "TimeoutInMinutes": "10"
           }
         },
         "CodeBuildGenerateCicdTemplates": {
@@ -653,7 +668,7 @@
                                     "StackName": {
                                         "Fn::Sub": "cicd-${AWS::StackName}-users"
                                     },
-                                    "TemplatePath": "CicdTemplates::User-CICD-Parent.template",
+                                    "TemplatePath": "CicdTemplates::Users.template",
                                     "TemplateConfiguration": "SourceOutput::cfvars/Cicd.template",
                                     "ParameterOverrides": {
                                         "Fn::Sub": "{ \"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"MasterPipeline\" : \"${AWS::StackName}\"}"  
@@ -702,6 +717,24 @@
                                   "Name": "SdlcTemplates"
                               }
                           ]
+                        },
+                        {
+                            "Fn::If":[
+                                "ManualApprovalPostDev",
+                                {
+                                    "Name":"ManualApproval",
+                                    "ActionTypeId":{
+                                        "Category":"Approval",
+                                        "Owner":"AWS",
+                                        "Version":"1",
+                                        "Provider":"Manual"
+                                    },
+                                    "RunOrder": 3
+                                },
+                                {
+                                    "Ref": "AWS::NoValue"
+                                }
+                            ]
                         }
                       ]
                     },

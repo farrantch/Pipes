@@ -1,27 +1,87 @@
 {
-    "LegacyMicroserviceFoo": {
-        "Policies": [
-            "scoped/Dynamodb",
-            "scoped/Lambda",
-            "scoped/Iam",
-            "app/LegacyMicroserviceFoo"
-        ],
+    "MicroserviceFoo": {
+        "Policies": {
+            "Sdlc": [
+                "scoped/Dynamodb",
+                "scoped/Lambda",
+                "scoped/Logs",
+                "scoped/Iam"
+            ],
+            "Cicd": [
+                "scoped/CodeBuild",
+                "scoped/CodeCommit",
+                "scoped/Logs"
+            ]
+        }
+    },
+    "MicroserviceBar": {
+        "Policies": {
+            "Sdlc": [
+                "app/MicroserviceBar",
+                "scoped/CloudWatchAlarm",
+                "scoped/Dynamodb",
+                "scoped/EventsRule",
+                "scoped/Iam",
+                "scoped/Lambda",
+                "scoped/Logs",
+                "scoped/Sns",
+                "scoped/Sqs"
+            ],
+            "Cicd": [
+                "scoped/CodeBuild",
+                "scoped/CodeCommit",
+                "scoped/Logs"
+            ]
+        },
         "Pipelines": [
             {
-                "Name": "Db",
-                "Parameters": {
-                    "IncludeEnvCfTemplateConfigs": "True",
-                    "CfContainsLambda": "True",
-                    "SdlcCodeBuildPost": "True",
-                    "SdlcEcs": "True"
-                }
+                "Name": "Infra",
+                "SourceRepo": "codecommit:microservicebar-infra",
+                "IncludeCfVars": true,
+                "CicdCodeBuild": true,
+                "CicdCloudFormation": true
+            }
+        ]
+    },
+    "MicroserviceBaz": {
+        "Policies": {
+            "Sdlc": [
+                "scoped/*"
+            ],
+            "Cicd": [
+                "scoped/*"
+            ]
+        },
+        "Pipelines": [
+            {
+                "Name": "AllowAllScoped",
+                "SourceRepo": "codecommit:microservicebaz-aas"
             }
         ]
     },
     "Frontend": {
-        "Policies": [
-            "app/Frontend",
-            "scoped/IamRole"
+        "Policies": {
+            "Sdlc": [
+                "app/Frontend",
+                "scoped/IamRole"
+            ]
+        }
+    },
+    "Network": {
+        "Policies": {
+            "Sdlc": [
+                "wildcard/Ec2",
+                "scoped/IamRole"
+            ],
+            "Cicd": [
+                "scoped/CodeCommit"
+            ]
+        },
+        "Pipelines": [
+            {
+                "Name": "Vpc",
+                "SourceRepo": "codecommit:network-vpc"
+            }
         ]
     }
 }

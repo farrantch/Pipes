@@ -1,0 +1,11 @@
+{
+    "UserStatements": [
+        {
+            "Sid": "UsersAdmin",
+            "Effect": "Allow",
+            "Action": "*",
+            "Resource": "*"
+        }
+    ]
+}
+    

@@ -1,13 +1,26 @@
 {
-    "UserA": {
+    "Joe": {
         "Scopes": [
-            "LegacyMicroserviceFoo",
+            "MicroserviceBar",
             "Frontend"
         ]
     },
-    "UserB": {
-        "Scopes": [
-            "Frontend"
+    "Bob": {
+        "Groups": [
+            "Devs"
+        ],
+        "Policies": {
+            "Sdlc": [
+                "users/ReadOnly"
+            ],
+            "Cicd": [
+                "users/Admin"
+            ]
+        }
+    },
+    "Tom": {
+        "Groups": [
+            "Ops"
         ]
     }
 }

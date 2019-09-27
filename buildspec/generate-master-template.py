@@ -104,7 +104,7 @@ s3_bucket_statement = {
     ]
 }
 
-for env in environments:
+for env in environments['SdlcAccounts']:
     env_lower = env.lower()
     base_statement.append(
         {
@@ -137,7 +137,7 @@ master['Resources']['S3BucketPolicy']['Properties']['PolicyDocument']['Statement
 
 run_order = 2
 # Loop through environments
-for key, value in environments.items():
+for key, value in environments['SdlcAccounts'].items():
     env = key
     env_lower = env.lower()
     
@@ -148,7 +148,7 @@ for key, value in environments.items():
     }
     
     # Add SDLC account to master pipeline
-    master['Resources']['CodePipeline']['Properties']['Stages'][-2]['Actions'].append(
+    master['Resources']['CodePipeline']['Properties']['Stages'][-2]['Actions'].extend([
         {
             "ActionTypeId": {
                 "Category": "Deploy",
@@ -184,8 +184,46 @@ for key, value in environments.items():
             "RoleArn": {
                 "Fn::Sub": "arn:aws:iam::${" + env + "Account}:role/" + env_lower + "-${AWS::StackName}-CodePipelineRole"
             }
-        }
+        },
+        {
+            "ActionTypeId": {
+                "Category": "Deploy",
+                "Owner": "AWS",
+                "Provider": "CloudFormation",
+                "Version": "1"
+            },
+            "Configuration": {
+                "ActionMode": "CREATE_UPDATE",
+                "Capabilities": "CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND",
+                "RoleArn": {
+                    "Fn::Sub": "arn:aws:iam::${" + env + "Account}:role/" + env_lower + "-${AWS::StackName}-CloudFormationRole"
+                },
+                "StackName": {
+                    "Fn::Sub": env_lower + "-${AWS::StackName}-users"
+                },
+                "TemplatePath": "SdlcTemplates::Users.template",
+                "TemplateConfiguration": "SourceOutput::cfvars/" + env + ".template",
+                "ParameterOverrides": {
+                    "Fn::Sub": "{ \"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"MasterPipeline\" : \"${AWS::StackName}\"}"
+                }
+            },
+            "Name": "Deploy" + env + "Users",
+            "InputArtifacts": [
+                {
+                    "Name": "SourceOutput"
+                },
+                {
+                    "Name": "SdlcTemplates"
+                }
+            ],
+            "RunOrder": run_order,
+            "RoleArn": {
+                "Fn::Sub": "arn:aws:iam::${" + env + "Account}:role/" + env_lower + "-${AWS::StackName}-CodePipelineRole"
+            }
+        }]
     )
+    if run_order == 2:
+        run_order = run_order + 1
     run_order = run_order + 1
         
 # Save files
