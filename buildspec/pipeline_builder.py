@@ -335,7 +335,7 @@ class EnvironmentsBuilder(Builder):
                             },
                             "StackName":  env_lower + "-" + self.scope_lower + "-" + self.name_lower if not self.sdlc_stack_name else self.sdlc_stack_name.replace('${Environment}', env_lower),
                             "TemplatePath": "BuildOutput::CloudFormation-SDLC.template" if self.cicd_codebuild else "SourceOutput::CloudFormation-SDLC.template",
-                            "TemplateConfiguration": ( "BuildOutput::cfvars/" + env + ".template" if self.cicd_codebuild else "SourceOutput::cfvars/" + env + ".template" ) if self.include_cf_vars else { "Ref": "AWS::NoValue" },
+                            "TemplateConfiguration": ( "BuildOutput::cfvars/" + env + ".template" if self.include_cf_vars else "SourceOutput::cfvars/" + env + ".template" ) if self.include_cf_vars else { "Ref": "AWS::NoValue" },
                             "ParameterOverrides":{
                                 "Fn::Join": [
                                     "",
