@@ -7,8 +7,7 @@
                 "iam:CreateRole",
                 "iam:AttachRolePolicy",
                 "iam:DetachRolePolicy",
-                "iam:PutRolePolicy",
-                "iam:DeleteRolePolicy"
+                "iam:PutRolePolicy"
             ],
             "Resource": [
                 {
@@ -31,7 +30,8 @@
             "Action": [
                 "iam:GetRole",
                 "iam:GetRolePolicy",
-                "iam:DeleteRole"
+                "iam:DeleteRole",
+                "iam:DeleteRolePolicy"
             ],
             "Resource": [
                 {
