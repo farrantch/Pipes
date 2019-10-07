@@ -28,7 +28,7 @@
                 "dynamodb:Describe*",
                 "dynamodb:Get*",
                 "dynamodb:List*",
-                "dynaomdb:PutItem",
+                "dynamodb:PutItem",
                 "dynamodb:Query",
                 "dynamodb:Scan",
                 "dynamodb:UpdateItem"
