@@ -22,12 +22,11 @@
             "Sid": "ScopedLambdaEventSourceMapping",
             "Effect": "Allow",
             "Action": [
-                "lambda:CreateEventSourceMapping",
-                "lambda:DeleteEventSourceMapping",
-                "lambda:ListEventSourceMappings",
-                "lambda:UpdateEventSourceMapping"
+                "lambda:*"
             ],
-            "Resource": "*",
+            "Resource": {
+                "Fn::Sub": "arn:aws:lambda:*:${AWS::AccountId}:event-source-mapping:*"
+            },
             "Condition": {
                 "StringLike": {
                     "lambda:FunctionArn": [
@@ -43,7 +42,8 @@
             "Effect": "Allow",
             "Action": [
                 "lambda:Get*",
-                "lambda:List*"
+                "lambda:List*",
+                "ec2:Describe*"
             ],
             "Resource": "*"
         }
@@ -91,7 +91,10 @@
             "Effect": "Allow",
             "Action": [
                 "lambda:Get*",
-                "lambda:List*"
+                "lambda:List*",
+                "ec2:CreateNetworkInterface",
+                "ec2:DescribeNetworkInterfaces",
+                "ec2:DeleteNetworkInterface"
             ],
             "Resource": "*"
         }
