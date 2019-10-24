@@ -46,6 +46,7 @@ for rs in resource_summaries:
 # Loop through infra scopes within pipeline file
 for key, value in scopes.items():
     scope = key.lower()
+    create_kms_key_scope = value.get('CreateKmsKeyScope', "False")
     
     # Determine stack output values
     s3_bucket_name = list(filter(lambda item: item['OutputKey'] == 'S3BucketName', child_stack_outputs[scope]))[0]['OutputValue']
@@ -69,7 +70,8 @@ for key, value in scopes.items():
                 "Scope": scope,
                 "MasterS3BucketName": {
                     "Fn::Sub": "${S3BucketName}"
-                }
+                },
+                "CreateKmsKeyScope": create_kms_key_scope
             },
             "Tags" : [
                 {
@@ -90,40 +92,35 @@ for key, value in scopes.items():
         sdlc_child = json.load(sc_file)
         
     sdlc_child = add_policy_statements(sdlc_child, scope, value, 'Sdlc')
-    # # Add policy statements
-    # # Add scoped/* if exists
-    # if 'scoped/*' in value['Policies']['Sdlc']:
-    #     for filename in os.listdir('policies/scoped'):
-    #         with open('policies/scoped/' + filename) as f:
-    #             d = json.load(f)
-    #         if 'ServiceStatements' in d:
-    #             for s in d['ServiceStatements']:
-    #                 sdlc_child['Resources']['IamPolicyService']['Properties']['PolicyDocument']['Statement'].append(s)
-    #         if 'DeployStatements' in d:
-    #             for s in d['DeployStatements']:
-    #                 sdlc_child['Resources']['IamPolicyDeploy']['Properties']['PolicyDocument']['Statement'].append(s)
-    # # Add rest of policies
-    # for ps in value['Policies']['Sdlc']:
-    #     # Add scoped policy if isn't scoped/*
-    #     if ps != 'scoped/*':
-    #         # Don't re-add resource-scope policies if already added via wildcard
-    #         if not ps.startswith('scoped/') or 'scoped/*' not in value['Policies']['Sdlc']:
-    #             with open('policies/' + str(ps) + '.template') as json_file:
-    #                 data = json.load(json_file)
-    #             if 'ServiceStatements' in data:
-    #                 for statement in data['ServiceStatements']:
-    #                     # AWS Policies
-    #                     if 'PolicyArn' in statement:
-    #                         sdlc_child['Resources']['IamPolicyService']['Properties']['PolicyDocument']['Statement'].extend(get_policy_statements(statement['PolicyArn']))
-    #                     # Inline Policies
-    #                     else:
-    #                         sdlc_child['Resources']['IamPolicyService']['Properties']['PolicyDocument']['Statement'].append(statement)
-    #             if 'DeployStatements' in data:
-    #                 for statement in data['DeployStatements']:
-    #                     if 'PolicyArn' in statement:
-    #                         sdlc_child['Resources']['IamPolicyDeploy']['Properties']['PolicyDocument']['Statement'].extend(get_policy_statements(statement['PolicyArn']))
-    #                     else:
-    #                         sdlc_child['Resources']['IamPolicyDeploy']['Properties']['PolicyDocument']['Statement'].append(statement)
+
+    # Add KmsKeyService policy if specified
+    create_kms_key_scope = value.get('CreateKmsKeyScope', 'False')
+    if create_kms_key_scope == 'True':
+        sdlc_child['Resources']['IamPolicyService']['Properties']['PolicyDocument']['Statement'].append(
+            {
+                "Sid": "KmsKeyScope",
+                "Effect": "Allow",
+                "Action": [
+                    "kms:Get*",
+                    "kms:List*",
+                    "kms:Describe*",
+                    "kms:GenerateDataKey",
+                    "kms:PutKeyPolicy",
+                    "kms:ReEncrypt*",
+                    "kms:Encrypt",
+                    "kms:DescribeKey",
+                    "kms:Decrypt"
+                ],
+                "Resource": [
+                    {
+                        "Fn::GetAtt": [
+                            "KmsKeyScope",
+                            "Arn"
+                        ]
+                    }
+                ]
+            }
+        )
     
     # Consolidate Policies
     sdlc_child['Resources']['IamPolicyService']['Properties']['PolicyDocument']['Statement'] = consolidate_statements(

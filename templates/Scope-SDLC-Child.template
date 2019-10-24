@@ -26,9 +26,43 @@
         },
         "MasterS3BucketName": {
             "Type": "String"
+        },
+        "CreateKmsKeyScope": {
+            "Type": "String"
+        }
+    },
+    "Conditions": {
+        "CreateKmsKeyScope": {
+            "Fn::Equals": [
+                {
+                    "Ref": "CreateKmsKeyScope"
+                },
+                "True"
+            ]
         }
     },
     "Resources": {
+        "KmsKeyScope": {
+            "Type": "AWS::KMS::Key",
+            "Condition": "CreateKmsKeyScope",
+            "Properties": {
+                "KeyPolicy": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "AWS": { "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:root" }
+                            },
+                            "Action": [
+                                "kms:*"
+                            ],
+                            "Resource": "*"
+                        }
+                    ]
+                }
+            }
+        },
         "IamRoleCodePipeline": {
             "Type": "AWS::IAM::Role",
             "Properties": {
@@ -316,6 +350,22 @@
                             ]
                         }
                     ]
+                }
+            }
+        }
+    },
+    "Outputs": {
+        "KmsKeyScope": {
+            "Condition": "CreateKmsKeyScope",
+            "Value": {
+                "Fn::GetAtt": [
+                    "KmsKeyScope",
+                    "Arn"
+                ]
+            },
+            "Export": {
+                "Name": {
+                    "Fn::Sub": "${Environment}-${MasterPipeline}-scopes-${Scope}-KmsKeyScope"
                 }
             }
         }
