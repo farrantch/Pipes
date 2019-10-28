@@ -57,14 +57,6 @@
                     ]
                 }
             }
-        },
-        {
-            "Sid": "ScopedSsmPatchBaselineWildcard",
-            "Effect": "Allow",
-            "Action": [
-                "ssm:CreatePatchBaseline"
-            ],
-            "Resource": "*"
         }
     ],
     "UserStatements": [
@@ -91,14 +83,6 @@
                     ]
                 }
             }
-        },
-        {
-            "Sid": "ScopedSsmPatchBaselineWildcard",
-            "Effect": "Allow",
-            "Action": [
-                "ssm:CreatePatchBaseline"
-            ],
-            "Resource": "*"
         }
     ]
 }
