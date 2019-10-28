@@ -63,6 +63,16 @@
                 }
             }
         },
+        "KmsAliasScope" : {
+            "Type" : "AWS::KMS::Alias",
+            "Condition": "CreateKmsKeyScope",
+            "Properties" : {
+              "AliasName" : {
+                  "Fn::Sub": "alias/${Environment}-${Scope}"
+              },
+              "TargetKeyId" : {"Ref": "KmsKeyScope"}
+            }
+        },
         "IamRoleCodePipeline": {
             "Type": "AWS::IAM::Role",
             "Properties": {
