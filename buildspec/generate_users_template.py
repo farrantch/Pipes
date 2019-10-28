@@ -120,6 +120,9 @@ def generate_users_template(output_location, environment_type):
             for scope in user_value['Scopes']:
                 scopes.append(scope)
                 add_scope_statements_to_user_policy(scope, user_statements, environment_type)
+        # Add Policies
+        if 'Policies' in user_value:
+            add_policy_statements_to_user_policy(user_value['Policies'], user_statements, environment_type)
         # Add Group Scopes
         if 'Groups' in user_value:
             for group in user_value['Groups']:
@@ -160,5 +163,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-    
