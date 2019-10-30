@@ -21,11 +21,7 @@ with open('templates/' + file_sdlc_parent + '.template') as sp_file:
     
 cf_client = boto3.client('cloudformation')
 
-#MASTERSCOPESTACK = os.environ['MASTERSCOPESTACK']
-#ENVIRONMENT = os.environ['Environment']
-
 MASTERSCOPESTACK = 'cicd-master-scopes'
-# ENVIRONMENT = 'cicd'
 
 # Get master infra stack resources
 resource_summaries = cf_client.list_stack_resources(
