@@ -138,4 +138,4 @@ for key, value in scopes.items():
 with open('generated-sdlc-templates/' + file_sdlc_parent + '.template', 'w') as sp_file_output:
     json.dump(sdlc_parent, sp_file_output, indent=4)
 
-generate_users_template.generate_users_template('generated-sdlc-templates/', "Sdlc")
+generate_users_template.generate_user_templates('generated-sdlc-templates/', "Sdlc")

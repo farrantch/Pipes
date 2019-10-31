@@ -157,7 +157,7 @@ if users:
                 "StackName": {
                     "Fn::Sub": "cicd-${AWS::StackName}-users"
                 },
-                "TemplatePath": "CicdTemplates::Users.template",
+                "TemplatePath": "CicdTemplates::Users-Parent.template",
                 "TemplateConfiguration": "SourceOutput::cfvars/Cicd.template",
                 "ParameterOverrides": {
                     "Fn::Sub": "{ \"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"MasterPipeline\" : \"${AWS::StackName}\"}"  
@@ -248,7 +248,7 @@ for key, value in environments['SdlcAccounts'].items():
                     "StackName": {
                         "Fn::Sub": env_lower + "-${AWS::StackName}-users"
                     },
-                    "TemplatePath": "SdlcTemplates::Users.template",
+                    "TemplatePath": "SdlcTemplates::Users-Parent.template",
                     "TemplateConfiguration": "SourceOutput::cfvars/" + env + ".template",
                     "ParameterOverrides": {
                         "Fn::Sub": "{ \"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"MasterPipeline\" : \"${AWS::StackName}\"}"

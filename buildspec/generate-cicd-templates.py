@@ -517,7 +517,7 @@ def main():
     generate_scoped_templates(environments)
 
     # Generate users template
-    generate_users_template.generate_users_template('generated-cicd-templates/', "Cicd")
+    generate_users_template.generate_user_templates('generated-cicd-templates/', "Cicd")
 
 if __name__ == "__main__":
     main()
