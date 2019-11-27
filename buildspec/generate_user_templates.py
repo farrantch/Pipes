@@ -5,35 +5,24 @@ import time
 import string
 import os
 import json
-from utils import get_policy_statements, read_file, write_file, consolidate_statements
+from utils import *
 from collections import OrderedDict
 from botocore.exceptions import ClientError
+from argparse import ArgumentParser
 
-# Variables
-FILE_CONFIG_SCOPES = 'Config-Scopes'
-FILE_CONFIG_ENVIRONMENTS = 'Config-Environments'
-FILE_CONFIG_USERS = 'Config-Users'
-FILE_CONFIG_GROUPS = 'Config-Groups'
-FILE_TEMPLATE_SCOPE_PARENT = 'Scope-CICD-Parent'
-FILE_TEMPLATE_SCOPE_CICD_CHILD = 'Scope-CICD-Child'
-FILE_TEMPLATE_USERS_CHILD = 'Users-Child'
-FILE_TEMPLATE_USERS_PARENT = 'Users-Parent'
-MASTERSCOPESTACK = 'cicd-master-scopes'
-ENVIRONMENT = os.environ['Environment']
-
-def insert_childstack_into_parentstack(template_users_parent, user):
-    user_lower = user.lower()
-    template_users_parent['Resources'][user_lower] = {
+def insert_childstack_into_parentstack(template_users_parent, user, environment_type):
+    environment_type_lower = environment_type.lower()
+    template_users_parent['Resources'][user] = {
         "Type" : "AWS::CloudFormation::Stack",
         "Properties": {
             "Parameters": {
-                "MasterPipeline": {
-                    "Ref": "MasterPipeline"
+                "MainPipeline": {
+                    "Ref": "MainPipeline"
                 },
                 "Environment": {
                     "Ref": "Environment"
                 },
-                "User": user_lower
+                "User": user
             },
             "Tags" : [
                 {
@@ -44,7 +33,7 @@ def insert_childstack_into_parentstack(template_users_parent, user):
                 }
             ],
             "TemplateURL" : {
-                "Fn::Sub": "https://s3.amazonaws.com/${S3BucketName}/generated-cicd-templates/" + FILE_TEMPLATE_USERS_CHILD + "-" + user_lower + ".template"
+                "Fn::Sub": "https://s3.amazonaws.com/${S3BucketName}/generated-user-templates-" + environment_type_lower + "/" + FILE_TEMPLATE_USERS_CHILD + "-" + user + ".template"
             }
         }
     }
@@ -63,11 +52,6 @@ def get_user_scopes(user_value):
                 for group_scope in groups[group]['Scopes']:
                     scopes.append(group_scope)
     return scopes
-
-def num_characters(o):
-    string_o = json.dumps(o)
-    string_o = string_o.translate({ord(c): None for c in string.whitespace})
-    return len(string_o)
 
 def insert_user_managed_policies(template_user, user_statements):
     # BinPack user_statements into policies
@@ -109,7 +93,6 @@ def insert_user_managed_policies(template_user, user_statements):
     return template_user
 
 def insert_user_into_userstack(template_user, user, user_value, user_statements):
-    user_lower = user.lower()
     sso_account_id = read_file(FILE_CONFIG_ENVIRONMENTS)['SsoAccount']['AccountId']
     # Only include inline policies if they have statements
     inline_policies = []
@@ -157,7 +140,7 @@ def insert_user_into_userstack(template_user, user, user_value, user_statements)
                 },
                 "Policies" : inline_policies,
                 "RoleName" : {
-                    "Fn::Sub": "${Environment}-" + user_lower
+                    "Fn::Sub": "${Environment}-" + user
                 },
                 "Tags": tags
             }
@@ -173,9 +156,10 @@ def add_policy_statements_to_user_policy(policies, user_statements, environment_
             for filename in os.listdir('policies/scoped'):
                 temp = read_file('policies/scoped/' + filename.split('.')[0])
                 # If scope provided, find & replace within policies
-                replaced = json.loads(json.dumps(temp).replace('${Scope}', scope.lower())) if scope else json.loads(json.dumps(temp))
-                if 'UserStatements' in replaced:
-                    for statement in replaced['UserStatements']:
+                scope_replaced = json.loads(json.dumps(temp).replace('${Scope}', scope)) if scope else json.loads(json.dumps(temp))
+                scope_lower_replaced = json.loads(json.dumps(scope_replaced).replace('${ScopeLower}', scope.lower())) if scope else json.loads(json.dumps(scope_replaced))
+                if 'UserStatements' in scope_lower_replaced:
+                    for statement in scope_lower_replaced['UserStatements']:
                         user_statements.append(statement)
         # Add rest of policies
         for policy in policies[environment_type]:
@@ -184,9 +168,10 @@ def add_policy_statements_to_user_policy(policies, user_statements, environment_
                 if not policy.startswith('scoped/') or 'scoped/*' not in policies:
                     temp = read_file('policies/' + policy)
                     # If scope provided, find & replace within policies
-                    replaced = json.loads(json.dumps(temp).replace('${Scope}', scope.lower())) if scope else json.loads(json.dumps(temp))
-                    if 'UserStatements' in replaced:
-                        for statement in replaced['UserStatements']:
+                    scope_replaced = json.loads(json.dumps(temp).replace('${Scope}', scope)) if scope else json.loads(json.dumps(temp))
+                    scope_lower_replaced = json.loads(json.dumps(scope_replaced).replace('${ScopeLower}', scope.lower())) if scope else json.loads(json.dumps(scope_replaced))
+                    if 'UserStatements' in scope_lower_replaced:
+                        for statement in scope_lower_replaced['UserStatements']:
                             if 'PolicyArn' in statement:
                                 user_statements.extend(get_policy_statements(statement['PolicyArn']))
                             else:
@@ -227,23 +212,24 @@ def generate_user_statements(user, user_value, environment_type):
     return user_statements_minimized
 
 def generate_user_template(user, user_value, environment_type, output_location):
-    user_lower = user.lower()
     template_user_child = read_file('templates/' + FILE_TEMPLATE_USERS_CHILD)
 
     user_statements = generate_user_statements(user, user_value, environment_type)
     template_user_child = insert_user_into_userstack(template_user_child, user, user_value, user_statements)
 
     # Output User Child file
-    write_file(output_location + FILE_TEMPLATE_USERS_CHILD + '-' + user_lower, template_user_child)
+    write_file(output_location + FILE_TEMPLATE_USERS_CHILD + '-' + user, template_user_child)
 
-def generate_user_templates(output_location, environment_type):
+def generate_user_templates(environment_type):
     # Open files
     users = read_file(FILE_CONFIG_USERS)
     template_users_parent = read_file('templates/' + FILE_TEMPLATE_USERS_PARENT)
+    # Set output location 
+    output_location = 'generated-user-templates-' + environment_type.lower() + '/'
     # Loop through users
     for user, user_value in users.items():
         # Insert Users child stack into Users parent stack
-        insert_childstack_into_parentstack(template_users_parent, user)
+        insert_childstack_into_parentstack(template_users_parent, user, environment_type)
         # Generate user template
         generate_user_template(user, user_value, environment_type, output_location)
         
@@ -252,8 +238,13 @@ def generate_user_templates(output_location, environment_type):
     return
 
 def main():
+    # Parse arguments
+    parser = ArgumentParser()
+    parser.add_argument("-et", "--environment_type", help="Choose environment type. Ex - 'Sdlc' or 'Cicd'")
+    args = parser.parse_args()
+
     # Generate users template
-    generate_user_templates('generated-cicd-templates/', "Sdlc")
+    generate_user_templates(args.environment_type)
 
 if __name__ == "__main__":
     main()

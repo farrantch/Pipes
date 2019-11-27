@@ -6,10 +6,8 @@ class Builder():
         self.parent = parent
         self.context = context
         self.scope = context['Scope']
-        self.scope_lower = context['Scope'].lower()
+        self.subscope = context['Parameters']['Name']
         self.environments = context['Environments']
-        self.name = context['Parameters']['Name']
-        self.name_lower = context['Parameters']['Name'].lower()
         self.source_repo = context['Parameters']['SourceRepo']
 
         # Get parameters w/ defaults
@@ -52,7 +50,10 @@ class CodeCommitBuilder(Builder):
                     "Name":"SourceOutput"
                 }
             ],
-            "RunOrder": 1
+            "RunOrder": 1,
+            "RoleArn": {
+                "Fn::Sub":"arn:aws:iam::${AWS::AccountId}:role/cicd-${MainPipeline}-scopes-" + self.scope + "-CodePipelineRole"
+            }
         }
         self.parent.actions.extend([self.action])
         return self.parent
@@ -90,7 +91,10 @@ class GitHubBuilder(Builder):
                     "Name":"SourceOutput"
                 }
             ],
-            "RunOrder": 1
+            "RunOrder": 1,
+            "RoleArn": {
+                "Fn::Sub":"arn:aws:iam::${AWS::AccountId}:role/cicd-${MainPipeline}-scopes-" + self.scope + "-CodePipelineRole"
+            }
         }
         self.parent.actions.extend([self.action])
         return self.parent
@@ -136,10 +140,10 @@ class CicdCloudFormationBuilder(Builder):
                 "ActionMode":"REPLACE_ON_FAILURE",
                 "Capabilities":"CAPABILITY_IAM,CAPABILITY_AUTO_EXPAND",
                 "RoleArn":{
-                    "Fn::Sub":"arn:aws:iam::${AWS::AccountId}:role/cicd-${MasterPipeline}-scopes-" + self.scope_lower + "-CloudFormationRole"
+                    "Fn::Sub":"arn:aws:iam::${AWS::AccountId}:role/cicd-${MainPipeline}-scopes-" + self.scope + "-CloudFormationRole"
                 },
                 "StackName":{
-                    "Fn::Sub": "cicd-" + self.scope_lower + "-" + self.name_lower
+                    "Fn::Sub": "cicd-" + self.scope + "-" + self.subscope
                 },
                 "TemplatePath": "SourceOutput::CloudFormation-CICD.template",
                 "TemplateConfiguration": "SourceOutput::cfvars/Cicd.template" if self.include_cf_vars else { "Ref": "AWS::NoValue" },
@@ -148,13 +152,13 @@ class CicdCloudFormationBuilder(Builder):
                         "",
                         [
                             "{",
-                            "\"S3BucketName\": { \"Fn::GetArtifactAtt\": [\"SourceOutput\", \"BucketName\"]},",
-                            "\"S3ObjectKey\": { \"Fn::GetArtifactAtt\": [\"SourceOutput\", \"ObjectKey\"]},",
+                            "\"PipelineS3BucketName\": { \"Fn::GetArtifactAtt\": [\"SourceOutput\", \"BucketName\"]},",
+                            "\"PipelineS3ObjectKey\": { \"Fn::GetArtifactAtt\": [\"SourceOutput\", \"ObjectKey\"]},",
                             {
                                 "Fn::Sub": [
-                                    "\"KmsCmkArn\": \"${KmsCmkArn}\",",
+                                    "\"PipelineKmsKeyArn\": \"${KmsKeyArn}\",",
                                     {
-                                        "KmsCmkArn": {
+                                        "KmsKeyArn": {
                                             "Fn::GetAtt": [
                                                 "KmsKey",
                                                 "Arn"
@@ -167,13 +171,13 @@ class CicdCloudFormationBuilder(Builder):
                                 "Fn::Sub": "\"Environment\": \"cicd\","
                             },
                             {
-                                "Fn::Sub": "\"MasterPipeline\": \"${MasterPipeline}\","
+                                "Fn::Sub": "\"MainPipeline\": \"${MainPipeline}\","
                             },
                             {
-                                "Fn::Sub": "\"Scope\": \"" + self.scope_lower + "\","
+                                "Fn::Sub": "\"Scope\": \"" + self.scope + "\","
                             },
                             {
-                                "Fn::Sub": "\"SubScope\": \"" + self.name_lower + "\""
+                                "Fn::Sub": "\"SubScope\": \"" + self.subscope + "\""
                             },
                             "}"
                         ]
@@ -188,7 +192,7 @@ class CicdCloudFormationBuilder(Builder):
             ],
             "RunOrder": 1,
             "RoleArn": {
-                "Fn::Sub":"arn:aws:iam::${AWS::AccountId}:role/cicd-${MasterPipeline}-scopes-" + self.scope_lower + "-CodePipelineRole"
+                "Fn::Sub":"arn:aws:iam::${AWS::AccountId}:role/cicd-${MainPipeline}-scopes-" + self.scope + "-CodePipelineRole"
             }
         }
         self.parent.actions.extend([self.action])
@@ -212,7 +216,7 @@ class CicdCodeBuildBuilder(Builder):
             },
             "Configuration": {
                 "ProjectName": {
-                    "Fn::Sub": "cicd-" + self.scope_lower + "-" + self.name_lower + "-CodeBuild"
+                    "Fn::Sub": "cicd-" + self.scope + "-" + self.subscope + "-CodeBuild"
                 }
             },
             "Name": "RunCodeBuild",
@@ -226,7 +230,10 @@ class CicdCodeBuildBuilder(Builder):
                 {
                     "Name":"BuildOutput"
                 }
-            ]
+            ],
+            "RoleArn": {
+                "Fn::Sub":"arn:aws:iam::${AWS::AccountId}:role/cicd-${MainPipeline}-scopes-" + self.scope + "-CodePipelineRole"
+            }
         }
         self.parent.actions.extend([self.action])
         return self.parent
@@ -331,9 +338,9 @@ class EnvironmentsBuilder(Builder):
                             "ActionMode":"REPLACE_ON_FAILURE",
                             "Capabilities":"CAPABILITY_IAM,CAPABILITY_AUTO_EXPAND",
                             "RoleArn":{
-                                "Fn::Sub":"arn:aws:iam::" + env_value['AccountId'] + ":role/"+ env_lower + "-${MasterPipeline}-scopes-" + self.scope_lower + "-CloudFormationRole"
+                                "Fn::Sub":"arn:aws:iam::" + env_value['AccountId'] + ":role/"+ env_lower + "-${MainPipeline}-scopes-" + self.scope + "-CloudFormationRole"
                             },
-                            "StackName":  env_lower + "-" + self.scope_lower + "-" + self.name_lower if not self.sdlc_stack_name else self.sdlc_stack_name.replace('${Environment}', env_lower),
+                            "StackName":  env_lower + "-" + self.scope + "-" + self.subscope if not self.sdlc_stack_name else self.sdlc_stack_name.replace('${Environment}', env_lower),
                             "TemplatePath": "BuildOutput::CloudFormation-SDLC.template" if self.cicd_codebuild else "SourceOutput::CloudFormation-SDLC.template",
                             "TemplateConfiguration": ( "BuildOutput::cfvars/" + env + ".template" if self.cicd_codebuild else "SourceOutput::cfvars/" + env + ".template" ) if self.include_cf_vars else { "Ref": "AWS::NoValue" },
                             "ParameterOverrides":{
@@ -341,13 +348,13 @@ class EnvironmentsBuilder(Builder):
                                     "",
                                     [
                                         "{",
-                                        "\"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"BuildOutput\", \"BucketName\"]}, \"S3ObjectKey\" : { \"Fn::GetArtifactAtt\" : [\"BuildOutput\", \"ObjectKey\"]}," if self.cicd_codebuild else
-                                            "\"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"S3ObjectKey\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"ObjectKey\"]},",
+                                        "\"PipelineS3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"BuildOutput\", \"BucketName\"]}, \"PipelineS3ObjectKey\" : { \"Fn::GetArtifactAtt\" : [\"BuildOutput\", \"ObjectKey\"]}," if self.cicd_codebuild else
+                                            "\"PipelineS3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"PipelineS3ObjectKey\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"ObjectKey\"]},",
                                         {
                                             "Fn::Sub": [
-                                                "\"KmsCmkArn\": \"${KmsCmkArn}\",",
+                                                "\"PipelineKmsKeyArn\": \"${KmsKeyArn}\",",
                                                 {
-                                                    "KmsCmkArn": {
+                                                    "KmsKeyArn": {
                                                         "Fn::GetAtt": [
                                                             "KmsKey",
                                                             "Arn"
@@ -360,13 +367,13 @@ class EnvironmentsBuilder(Builder):
                                             "Fn::Sub": "\"Environment\": \"" + env_lower + "\","
                                         },
                                         {
-                                            "Fn::Sub": "\"MasterPipeline\": \"${MasterPipeline}\","
+                                            "Fn::Sub": "\"MainPipeline\": \"${MainPipeline}\","
                                         },
                                         {
-                                            "Fn::Sub": "\"Scope\": \"" + self.scope_lower + "\","
+                                            "Fn::Sub": "\"Scope\": \"" + self.scope + "\","
                                         },
                                         {
-                                            "Fn::Sub": "\"SubScope\": \"" + self.name_lower + "\""
+                                            "Fn::Sub": "\"SubScope\": \"" + self.subscope + "\""
                                         },
                                         "}"
                                     ]
@@ -382,7 +389,7 @@ class EnvironmentsBuilder(Builder):
                         ],
                         "RunOrder": 1,
                         "RoleArn": {
-                            "Fn::Sub":"arn:aws:iam::" + env_value['AccountId'] + ":role/" + env_lower + "-${MasterPipeline}-scopes-" + self.scope_lower + "-CodePipelineRole"
+                            "Fn::Sub":"arn:aws:iam::" + env_value['AccountId'] + ":role/" + env_lower + "-${MainPipeline}-scopes-" + self.scope + "-CodePipelineRole"
                         }
                     }
                 )
@@ -397,7 +404,7 @@ class EnvironmentsBuilder(Builder):
                         },
                         "Configuration": {
                             "ClusterName": self.sdlc_ecs_cluster_name,
-                            "ServiceName": env_lower + '-' + self.scope_lower + '-' + self.name_lower,
+                            "ServiceName": env_lower + '-' + self.scope + '-' + self.subscope,
                             "FileName": "imagedefinitions.json"
                         },
                         "Name": "DeployEcs",
@@ -406,7 +413,7 @@ class EnvironmentsBuilder(Builder):
                         ],
                         "RunOrder": 2,
                         "RoleArn": {
-                            "Fn::Sub":"arn:aws:iam::" + env_value['AccountId'] + ":role/" + env_lower + "-${MasterPipeline}-scopes-" + self.scope_lower + "-CodePipelineRole"
+                            "Fn::Sub":"arn:aws:iam::" + env_value['AccountId'] + ":role/" + env_lower + "-${MainPipeline}-scopes-" + self.scope + "-CodePipelineRole"
                         }
                     }
                 )
@@ -421,7 +428,7 @@ class EnvironmentsBuilder(Builder):
                         },
                         "Configuration": {
                             "ProjectName": {
-                                "Fn::Sub": env_lower + "-" + self.scope_lower + "-" + self.name_lower + "-CodeBuild"
+                                "Fn::Sub": env_lower + "-" + self.scope + "-" + self.subscope + "-CodeBuild"
                             },
                             "PrimarySource": "BuildOutput" if self.cicd_codebuild else "SourceOutput"
                         },
@@ -434,7 +441,7 @@ class EnvironmentsBuilder(Builder):
                         ],
                         "RunOrder": 3,
                         "RoleArn": {
-                            "Fn::Sub":"arn:aws:iam::" + env_value['AccountId'] + ":role/" + env_lower + "-${MasterPipeline}-scopes-" + self.scope_lower + "-CodePipelineRole"
+                            "Fn::Sub":"arn:aws:iam::" + env_value['AccountId'] + ":role/" + env_lower + "-${MainPipeline}-scopes-" + self.scope + "-CodePipelineRole"
                         }
                     }
                 )            
@@ -519,7 +526,6 @@ class PropertiesBuilder(Builder):
                     "Arn"
                 ]
             },
-            "Name": f"{self.scope_lower}-{self.name_lower}",
             "Stages": self.stages
         }
         return self.parent

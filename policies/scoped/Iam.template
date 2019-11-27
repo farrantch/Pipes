@@ -6,8 +6,8 @@
             "Action": [
                 "iam:CreateRole",
                 "iam:AttachRolePolicy",
-                "iam:DetachRolePolicy",
-                "iam:PutRolePolicy"
+                "iam:PutRolePolicy",
+                "iam:PutRolePermissionsBoundary"
             ],
             "Resource": [
                 {
@@ -15,10 +15,10 @@
                 }
             ],
             "Condition": {
-                "StringEquals": {
+                "StringLike": {
                     "iam:PermissionsBoundary": [
                         {
-                            "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:policy/${Environment}-${MasterPipeline}-scopes-${Scope}-IamPolicyService"
+                            "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:policy/${Environment}-${MainPipeline}-scopes-${Scope}-*-IamPolicyService-*"
                         }
                     ]
                 }
@@ -31,6 +31,7 @@
                 "iam:GetRole",
                 "iam:GetRolePolicy",
                 "iam:DeleteRole",
+                "iam:DetachRolePolicy",
                 "iam:DeleteRolePolicy"
             ],
             "Resource": [

@@ -5,14 +5,10 @@
         "S3BucketName": {
             "Type": "String"
         },
-        "CicdAccount": {
-            "Description": "AWS AccountNumber for CICD Account.",
-            "Type": "String"
-        },
         "Environment": {
             "Type": "String"
         },
-        "MasterPipeline": {
+        "MainPipeline": {
             "Type": "String"
         }
     },

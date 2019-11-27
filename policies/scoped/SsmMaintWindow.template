@@ -23,14 +23,6 @@
                     ]
                 }
             }
-        },
-        {
-            "Sid": "ScopedSsmMaintWindowWildcard",
-            "Effect": "Allow",
-            "Action": [
-                "ssm:CreateMaintenanceWindow"
-            ],
-            "Resource": "*"
         }
     ],
     "ServiceStatements": [
@@ -57,14 +49,6 @@
                     ]
                 }
             }
-        },
-        {
-            "Sid": "ScopedSsmMaintWindowWildcard",
-            "Effect": "Allow",
-            "Action": [
-                "ssm:CreateMaintenanceWindow"
-            ],
-            "Resource": "*"
         }
     ],
     "UserStatements": [
@@ -91,14 +75,6 @@
                     ]
                 }
             }
-        },
-        {
-            "Sid": "ScopedSsmMaintWindowWildcard",
-            "Effect": "Allow",
-            "Action": [
-                "ssm:CreateMaintenanceWindow"
-            ],
-            "Resource": "*"
         }
     ]
 }

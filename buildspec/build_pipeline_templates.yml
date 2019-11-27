@@ -8,14 +8,12 @@ phases:
   build:
     commands:
       - echo Entered the build phase...
-      - mkdir -p generated-cicd-templates
-      - python buildspec/generate-cicd-templates.py
+      - python buildspec/generate_pipeline_templates.py
   post_build:
     commands:
-      - aws s3 sync generated-cicd-templates s3://${S3Bucket}/generated-cicd-templates/ --delete
+      - aws s3 sync generated-pipeline-templates s3://${S3Bucket}/generated-pipeline-templates/ --delete
       - aws s3 sync templates s3://${S3Bucket}/templates/ --delete
 artifacts:
   files:
     - '**/*'
-  base-directory: 'generated-cicd-templates'
-  discard-paths: yes
+  discard-paths: no

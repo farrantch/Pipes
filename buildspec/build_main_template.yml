@@ -8,10 +8,10 @@ phases:
   build:
     commands:
       - echo Entered the build phase...
-      - mkdir -p generated-master-template
-      - python buildspec/generate-master-template.py
+      - mkdir -p generated-main-template
+      - python buildspec/generate_main_template.py
 artifacts:
   files:
     - '**/*'
-  base-directory: 'generated-master-template'
+  base-directory: 'generated-main-template'
   discard-paths: yes

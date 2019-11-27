@@ -8,4 +8,4 @@ phases:
   build:
     commands:
       - echo Entered the build phase...
-      - python buildspec/update-stacks.py
+      - python buildspec/update_stacks.py

@@ -4,7 +4,10 @@
             "Sid": "ScopedCodeCommit",
             "Effect": "Allow",
             "Action": [
-                "codecommit:*"
+                "codecommit:Get*",
+                "codecommit:List*",
+                "codecommit:Describe*",
+                "codecommit:UploadArchive"
             ],
             "Resource": [
                 {
@@ -16,7 +19,10 @@
             "Sid": "ScopedCodeCommitTag",
             "Effect": "Allow",
             "Action": [
-                "codecommit:*"
+                "codecommit:Get*",
+                "codecommit:List*",
+                "codecommit:Describe*",
+                "codecommit:UploadArtifact"
             ],
             "Resource": [
                 {
@@ -39,84 +45,8 @@
             }
         }
     ],
-    "DeployStatements": [
-        {
-            "Sid": "ScopedCodeCommit",
-            "Effect": "Allow",
-            "Action": [
-                "codecommit:*"
-            ],
-            "Resource": [
-                {
-                    "Fn::Sub": "arn:aws:codecommit:*:${AWS::AccountId}:${Scope}-*"
-                }
-            ]
-        },
-        {
-            "Sid": "ScopedCodeCommitTag",
-            "Effect": "Allow",
-            "Action": [
-                "codecommit:*"
-            ],
-            "Resource": [
-                {
-                    "Fn::Sub": "arn:aws:codecommit:*:${AWS::AccountId}:*"
-                }
-            ],
-            "Condition": {
-                "StringEquals": {
-                    "aws:ResourceTag/Scope": [
-                            {
-                            "Fn::Sub": "${Scope}"
-                        }
-                    ],
-                    "aws:ResourceTag/Environment": [
-                        {
-                            "Fn::Sub": "${Environment}"
-                        }
-                    ]
-                }
-            }
-        }
-    ],
-    "ServiceStatements": [
-        {
-            "Sid": "ScopedCodeCommit",
-            "Effect": "Allow",
-            "Action": [
-                "codecommit:*"
-            ],
-            "Resource": [
-                {
-                    "Fn::Sub": "arn:aws:codecommit:*:${AWS::AccountId}:${Scope}-*"
-                }
-            ]
-        },
-        {
-            "Sid": "ScopedCodeCommitTag",
-            "Effect": "Allow",
-            "Action": [
-                "codecommit:*"
-            ],
-            "Resource": {
-                "Fn::Sub": "arn:aws:codecommit:*:${AWS::AccountId}:*"
-            },
-            "Condition": {
-                "StringEquals": {
-                    "aws:ResourceTag/Scope": [
-                        {
-                            "Fn::Sub": "${Scope}"
-                        }
-                    ],
-                    "aws:ResourceTag/Environment": [
-                        {
-                            "Fn::Sub": "${Environment}"
-                        }
-                    ]
-                }
-            }
-        }
-    ],
+    "DeployStatements": [],
+    "ServiceStatements": [],
     "UserStatements": [
         {
             "Sid": "ScopedCodeCommit",

@@ -1,0 +1,32 @@
+{
+    "DeployStatements": [
+        {
+            "Sid": "WildcardCloudFormation",
+            "Effect": "Allow",
+            "Action": [
+                "cloudformation:*"
+            ],
+            "Resource": "*"
+        }
+    ],
+    "ServiceStatements": [
+        {
+            "Sid": "WildcardCloudFormation",
+            "Effect": "Allow",
+            "Action": [
+                "cloudformation:*"
+            ],
+            "Resource": "*"
+        }
+    ],
+    "UserStatements": [
+        {
+            "Sid": "WildcardCloudFormation",
+            "Effect": "Allow",
+            "Action": [
+                "cloudformation:*"
+            ],
+            "Resource": "*"
+        }
+    ]
+}

@@ -1,8 +1,29 @@
 import json
 import boto3
 import os
+import string
 
 iam_client = boto3.client('iam')
+
+# Variables
+FILE_CONFIG_SCOPES = 'Config-Scopes'
+FILE_CONFIG_ENVIRONMENTS = 'Config-Environments'
+FILE_CONFIG_USERS = 'Config-Users'
+FILE_CONFIG_KEYS = 'Config-Keys'
+FILE_CONFIG_GROUPS = 'Config-Groups'
+FILE_TEMPLATE_MAIN = 'Main'
+FILE_TEMPLATE_USERS_CHILD = 'Users-Child'
+FILE_TEMPLATE_USERS_PARENT = 'Users-Parent'
+FILE_TEMPLATE_SCOPES_PARENT = 'Scopes-Parent'
+FILE_TEMPLATE_SCOPES_CHILD = 'Scopes-Child'
+FILE_TEMPLATE_PIPELINES_PARENT = 'Pipelines-Parent'
+FILE_TEMPLATE_PIPELINES_CHILD = 'Pipelines-Child'
+FILE_TEMPLATE_KEYS_PARENT = 'Keys-Parent'
+FILE_TEMPLATE_KEYS_CHILD = 'Keys-Child'
+MAINSCOPESTACK = 'cicd-main-scopes'
+MAIN_PIPELINE_STACK = 'cicd-main-pipelines'
+ENVIRONMENT = os.environ['Environment']
+#ENVIRONMENT = os.environ['dev']
 
 # Get IAM AWS Managed policy statements
 def get_policy_statements(policy_arn):
@@ -34,10 +55,18 @@ def read_file(location):
 
 # Save file
 def write_file(location, contents):
+    # Create directory if doesn't exist
+    os.makedirs(os.path.dirname(location + '.template'), exist_ok=True)
     # Save Pipeline Template file
     with open(location + '.template', 'w') as f:
         json.dump(contents, f, indent=4)
     f.close()
+
+# Calculate number of characters in an object
+def num_characters(o):
+    string_o = json.dumps(o)
+    string_o = string_o.translate({ord(c): None for c in string.whitespace})
+    return len(string_o)
 
 # Add policy statements from config files
 def add_policy_statements(template, scope, scope_value, environment_type):
@@ -87,9 +116,11 @@ def add_policy_statements(template, scope, scope_value, environment_type):
                                 template['Resources']['IamPolicyDeploy']['Properties']['PolicyDocument']['Statement'].extend(get_policy_statements(statement['PolicyArn']))
                             else:
                                 template['Resources']['IamPolicyDeploy']['Properties']['PolicyDocument']['Statement'].append(statement)
-    return template
+    
+    scope_lower_replaced = json.loads(json.dumps(template).replace('${ScopeLower}', scope.lower())) if scope else json.loads(json.dumps(template))
+    return scope_lower_replaced
 
-# Check if a policies actions contains a specific service
+# Check if a policy's actions contains a specific service
 def action_contains_service(service, action):
     if len(action) > 0:
         # List of String
@@ -104,7 +135,7 @@ def action_contains_service(service, action):
         # Tests passed.
     return False
 
-# Check if a policies resources contains a specific service
+# Check if a policy's resources contains a specific service
 def resource_contains_service(service, resource):
     if len(resource) > 0:
         # List
@@ -183,29 +214,30 @@ def is_statements_mergable(statement1, statement2):
     if 'Condition' in statement1:
         if statement1['Condition'] != statement2['Condition']:
             return False
-        # # Make sure first level of condition keys are equal
-        # if statement1['Condition'].keys() != statement2['Condition'].keys():
-        #     return False
-        # # Make sure second level of condition keys are equal
-        # for condition, condition_content in statement1['Condition'].items():
-        #     if condition_content.keys() != statement2['Condition'][condition].keys():
-        #         return False
     # Passed
     return True
 
 # Consolidates a list of statements
 def consolidate_statements(statements):
+    # Create arrays for each iteration of consolidating
+    statements_merged_sids = []
+    statements_merged_intelligent = []
+    statements_split_size = []
+
     # Group Similar SID's
     statement_map = {}
-    sids_consolidated = []
     for s in statements:
-        if 'Sid' in s:
+        # Skip all merging if NotAction or NotResource
+        if 'NotAction' in s or 'NotResource' in s:
+            statements_split_size.append(s)
+        # Skip merging by sids if doesn't exist and add directly to statements_merged_sids list
+        elif 'Sid' not in s:
+            statements_merged_sids.append(s)
+        # Sid exists, add to statement map if doesn't exist
+        else:
             if s["Sid"] not in statement_map:
                 statement_map[s["Sid"]] = []
             statement_map[s["Sid"]].append(s)
-        # Can't group by Sid, add directly to consolidated list
-        else:
-            sids_consolidated.append(s)
     # Loop through SID statements and combine resources
     for sid, statement_list in statement_map.items():
         # Loop through the rest of the statements
@@ -252,12 +284,11 @@ def consolidate_statements(statements):
                                             # If not, insert it
                                             base_sid_statement['Condition'][condition][statement_name].append({key: value})
         if base_sid_statement:
-            sids_consolidated.append(base_sid_statement)
-    #return sids_consolidated
+            statements_merged_sids.append(base_sid_statement)
+    #return statements_merged_sids
 
     # Perform final merge of SIDs
-    result_statements = []
-    for statement in sids_consolidated:
+    for statement in statements_merged_sids:
         # Create Sid prefix string used for statement
         sid_effect = statement['Effect']
         sid_action = "ActWild" if statement['Action'] == "*" or statement['Action'] == ["*"] else "ActScope"
@@ -265,7 +296,7 @@ def consolidate_statements(statements):
         sid_condition = "Cond" if 'Condition' in statement else "NoCond"
         sid = sid_effect + sid_action + sid_resource + sid_condition
         # Search for existing sids with matching pattern
-        results = list(filter(lambda statement: statement['Sid'].startswith(sid), result_statements))
+        results = list(filter(lambda statement: statement['Sid'].startswith(sid), statements_merged_intelligent))
         merged = False
         num_results = len(results)
         for result in results:
@@ -308,6 +339,32 @@ def consolidate_statements(statements):
             if 'Condition' in statement:
                 item['Condition'] = statement['Condition']
             # Add new statement to final list
-            result_statements.append(item)
+            statements_merged_intelligent.append(item)
 
-    return result_statements
+    # Split statement actions if too big
+    # Can easily happen on resource wildcards (ex: readonly policies)
+    for rs in statements_merged_intelligent:
+        # Get size of statement action
+        rs_size = num_characters(rs['Action'])
+        # Calculate num of splits
+        num_of_split_statements = (rs_size // 5900) + 1
+        # No split needed
+        if num_of_split_statements == 1:
+            statements_split_size.append(rs)
+        # Split needed
+        else:
+            # Calculate desired length of action post split
+            statement_size = (len(rs['Action']) // num_of_split_statements) + 1
+            # Peform split
+            for i in range(0, len(rs['Action']), statement_size):
+                item = {
+                    "Effect": rs['Effect'],
+                    "Resource": rs['Resource'],
+                    "Sid": rs['Sid'] + 'Split' + str(i),
+                    "Action": rs['Action'][i:i + statement_size]
+                }
+                if 'Condition' in rs:
+                    item['Condition'] = rs['Condition']
+                statements_split_size.append(item)
+
+    return statements_split_size

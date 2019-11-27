@@ -1,0 +1,18 @@
+{
+    "DeployStatements": [],
+    "ServiceStatements": [
+        {
+            "Sid": "ScopedIamManage",
+            "Effect": "Allow",
+            "Action": [
+                "iam:PassRole"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${Environment}-${Scope}-*"
+                }
+            ]
+        }
+    ],
+    "UserStatements": []
+}

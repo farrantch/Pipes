@@ -13,7 +13,7 @@
             ],
             "Resource": [
                 {
-                    "Fn::Sub": "arn:aws:s3:::${Environment}-${Scope}-*"
+                    "Fn::Sub": "arn:aws:s3:::${Environment}-${ScopeLower}-*"
                 }
             ]
         },
@@ -25,7 +25,7 @@
             ],
             "Resource": [
                 {
-                    "Fn::Sub": "arn:aws:s3:::${Environment}-${Scope}-*"
+                    "Fn::Sub": "arn:aws:s3:::${Environment}-${ScopeLower}-*"
                 }
             ],
             "Condition": {
@@ -58,7 +58,7 @@
             ],
             "Resource": [
                 {
-                    "Fn::Sub": "arn:aws:s3:::${Environment}-${Scope}-*"
+                    "Fn::Sub": "arn:aws:s3:::${Environment}-${ScopeLower}-*"
                 }
             ]
         },
@@ -70,7 +70,7 @@
             ],
             "Resource": [
                 {
-                    "Fn::Sub": "arn:aws:s3:::${Environment}-${Scope}-*"
+                    "Fn::Sub": "arn:aws:s3:::${Environment}-${ScopeLower}-*"
                 }
             ],
             "Condition": {
@@ -103,7 +103,7 @@
             ],
             "Resource": [
                 {
-                    "Fn::Sub": "arn:aws:s3:::${Environment}-${Scope}-*"
+                    "Fn::Sub": "arn:aws:s3:::${Environment}-${ScopeLower}-*"
                 }
             ]
         },
@@ -115,7 +115,7 @@
             ],
             "Resource": [
                 {
-                    "Fn::Sub": "arn:aws:s3:::${Environment}-${Scope}-*"
+                    "Fn::Sub": "arn:aws:s3:::${Environment}-${ScopeLower}-*"
                 }
             ],
             "Condition": {

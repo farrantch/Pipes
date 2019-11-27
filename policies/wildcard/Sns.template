@@ -1,0 +1,32 @@
+{
+    "DeployStatements": [
+        {
+            "Sid": "WildcardSns",
+            "Effect": "Allow",
+            "Action": [
+                "sns:*"
+            ],
+            "Resource": "*"
+        }
+    ],
+    "ServiceStatements": [
+        {
+            "Sid": "WildcardSns",
+            "Effect": "Allow",
+            "Action": [
+                "sns:*"
+            ],
+            "Resource": "*"
+        }
+    ],
+    "UserStatements": [
+        {
+            "Sid": "WildcardSns",
+            "Effect": "Allow",
+            "Action": [
+                "sns:*"
+            ],
+            "Resource": "*"
+        }
+    ]
+}

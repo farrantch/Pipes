@@ -2,15 +2,13 @@ import boto3
 import sys
 import time
 import os
+from utils import *
 
 client = boto3.client('cloudformation')
 
-MASTERSCOPESTACK = os.environ['MasterScopeStack']
-ENVIRONMENT = os.environ['Environment']
-
-# List master infra stack resources
+# List main infra stack resources
 resource_summaries = client.list_stack_resources(
-    StackName=MASTERSCOPESTACK
+    StackName=MAIN_PIPELINE_STACK
 )['StackResourceSummaries']
 
 # Update Stacks
@@ -70,7 +68,7 @@ for cs in change_sets:
         execution_status = client.describe_change_set(
             ChangeSetName = cs['ChangeSetId']
         )['ExecutionStatus']
-        time.sleep(1)
+        time.sleep(5)
     if execution_status == 'EXECUTE_FAILED':
         print("Stack Update Unsuccessful.")
         sys.exit(1)

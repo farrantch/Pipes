@@ -51,7 +51,7 @@
         }
     },
     "Resources": {
-        "CodeCommit": {
+        "CodeCommitRepo": {
             "Type": "AWS::CodeCommit::Repository",
             "Condition": "CreateCodeCommitRepo",
             "Properties": {
@@ -61,7 +61,7 @@
                 }
             }
         },
-        "CodeBuildGenerateMasterTemplate": {
+        "CodeBuildProjectBuildMainTemplate": {
           "Type": "AWS::CodeBuild::Project",
           "Properties": {
             "Artifacts": {
@@ -94,9 +94,6 @@
               "PrivilegedMode": false,
               "Type": "LINUX_CONTAINER"
             },
-            "Name": {
-              "Fn::Sub": "${AWS::StackName}-generate-master-template"
-            },
             "ServiceRole": {
                 "Fn::GetAtt": [
                     "IamRoleCodeBuild",
@@ -105,12 +102,12 @@
             },
             "Source": {
               "Type": "CODEPIPELINE",
-              "BuildSpec": "buildspec/generate-master-template.yml"
+              "BuildSpec": "buildspec/build_main_template.yml"
             },
             "TimeoutInMinutes": "10"
           }
         },
-        "CodeBuildGenerateCicdTemplates": {
+        "CodeBuildProjectBuildPipelineTemplates": {
           "Type": "AWS::CodeBuild::Project",
           "Properties": {
             "Artifacts": {
@@ -133,7 +130,7 @@
                     "Value": "cicd"
                 },
                 {
-                    "Name": "MasterScopeStack",
+                    "Name": "MainScopeStack",
                     "Type": "PLAINTEXT",
                     "Value": {
                         "Fn::Sub": "cicd-${AWS::StackName}-scopes"
@@ -150,9 +147,6 @@
               "PrivilegedMode": false,
               "Type": "LINUX_CONTAINER"
             },
-            "Name": {
-              "Fn::Sub": "${AWS::StackName}-generate-cicd-templates"
-            },
             "ServiceRole": {
                 "Fn::GetAtt": [
                     "IamRoleCodeBuild",
@@ -161,12 +155,12 @@
             },
             "Source": {
               "Type": "CODEPIPELINE",
-              "BuildSpec": "buildspec/generate-cicd-templates.yml"
+              "BuildSpec": "buildspec/build_pipeline_templates.yml"
             },
             "TimeoutInMinutes": "5"
           }
         },
-        "CodeBuildGenerateSdlcTemplates": {
+        "CodeBuildProjectBuildEnvironmentTemplates": {
           "Type": "AWS::CodeBuild::Project",
           "Properties": {
             "Artifacts": {
@@ -189,7 +183,7 @@
                     "Value": "cicd"
                 },
                 {
-                    "Name": "MasterScopeStack",
+                    "Name": "MainScopeStack",
                     "Type": "PLAINTEXT",
                     "Value": {
                         "Fn::Sub": "cicd-${AWS::StackName}-scopes"
@@ -206,9 +200,6 @@
               "PrivilegedMode": false,
               "Type": "LINUX_CONTAINER"
             },
-            "Name": {
-              "Fn::Sub": "${AWS::StackName}-generate-sdlc-templates"
-            },
             "ServiceRole": {
                 "Fn::GetAtt": [
                     "IamRoleCodeBuild",
@@ -217,12 +208,12 @@
             },
             "Source": {
               "Type": "CODEPIPELINE",
-              "BuildSpec": "buildspec/generate-sdlc-templates.yml"
+              "BuildSpec": "buildspec/build_environment_templates.yml"
             },
             "TimeoutInMinutes": "5"
           }
         },
-        "CodeBuildUpdateStacks": {
+        "CodeBuildProjectUpdateStacks": {
           "Type": "AWS::CodeBuild::Project",
           "Properties": {
             "Artifacts": {
@@ -245,7 +236,7 @@
                     "Value": "cicd"
                 },
                 {
-                    "Name": "MasterScopeStack",
+                    "Name": "MainScopeStack",
                     "Type": "PLAINTEXT",
                     "Value": {
                         "Fn::Sub": "cicd-${AWS::StackName}-scopes"
@@ -255,9 +246,6 @@
               "PrivilegedMode": false,
               "Type": "LINUX_CONTAINER"
             },
-            "Name": {
-              "Fn::Sub": "${AWS::StackName}-update-stacks"
-            },
             "ServiceRole": {
                 "Fn::GetAtt": [
                     "IamRoleCodeBuild",
@@ -266,7 +254,7 @@
             },
             "Source": {
               "Type": "CODEPIPELINE",
-              "BuildSpec": "buildspec/update-stacks.yml"
+              "BuildSpec": "buildspec/update_stacks.yml"
             },
             "TimeoutInMinutes": "5"
           }
@@ -504,7 +492,7 @@
                                             "CreateCodeCommitRepo",
                                             {
                                                 "Fn::GetAtt": [
-                                                    "CodeCommit",
+                                                    "CodeCommitRepo",
                                                     "Name"
                                                 ]
                                             },
@@ -537,10 +525,10 @@
                               },
                               "Configuration": {
                                 "ProjectName": {
-                                  "Ref": "CodeBuildGenerateMasterTemplate"
+                                  "Ref": "CodeBuildProjectBuildMainTemplate"
                                 }
                               },
-                              "Name": "GenerateMasterTemplate",
+                              "Name": "BuildMainTemplate",
                               "InputArtifacts": [
                                 {
                                     "Name": "SourceOutput"
@@ -549,7 +537,7 @@
                               "RunOrder": 1,
                               "OutputArtifacts": [
                                   {
-                                      "Name": "MasterTemplate"
+                                      "Name": "MainTemplate"
                                   }
                               ]
                             },
@@ -569,13 +557,13 @@
                                     "StackName": {
                                         "Fn::Sub": "${AWS::StackName}"
                                     },
-                                    "TemplatePath": "MasterTemplate::Master.template",
-                                    "TemplateConfiguration": "SourceOutput::cfvars/Master.template"
+                                    "TemplatePath": "MainTemplate::Main.template",
+                                    "TemplateConfiguration": "SourceOutput::cfvars/Main.template"
                                 },
                                 "Name": "UpdateCloudFormation",
                                 "InputArtifacts": [
                                     {
-                                        "Name": "MasterTemplate"
+                                        "Name": "MainTemplate"
                                     },
                                     {
                                         "Name": "SourceOutput"
@@ -589,7 +577,7 @@
                         ]
                     },
                     {
-                        "Name": "Cicd",
+                        "Name": "Pipelines",
                         "Actions": [
                             {
                               "ActionTypeId": {
@@ -600,10 +588,10 @@
                               },
                               "Configuration": {
                                 "ProjectName": {
-                                  "Ref": "CodeBuildGenerateCicdTemplates"
+                                  "Ref": "CodeBuildProjectBuildPipelineTemplates"
                                 }
                               },
-                              "Name": "GenerateCicdTemplates",
+                              "Name": "BuildPipelineTemplates",
                               "InputArtifacts": [
                                 {
                                     "Name": "SourceOutput"
@@ -612,7 +600,7 @@
                               "RunOrder": 1,
                               "OutputArtifacts": [
                                   {
-                                      "Name": "CicdTemplates"
+                                      "Name": "PipelineTemplates"
                                   }
                               ]
                             },
@@ -630,21 +618,21 @@
                                         "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${AWS::StackName}-CloudFormationRole"
                                     },
                                     "StackName": {
-                                        "Fn::Sub": "cicd-${AWS::StackName}-scopes"
+                                        "Fn::Sub": "cicd-${AWS::StackName}-pipelines"
                                     },
-                                    "TemplatePath": "CicdTemplates::Scope-CICD-Parent.template",
+                                    "TemplatePath": "PipelineTemplates::generated-pipeline-templates/Pipelines-Parent.template",
                                     "TemplateConfiguration": "SourceOutput::cfvars/Cicd.template",
                                     "ParameterOverrides": {
-                                        "Fn::Sub": "{ \"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"MasterPipeline\" : \"${AWS::StackName}\"}"  
+                                        "Fn::Sub": "{ \"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"MainPipeline\" : \"${AWS::StackName}\"}"  
                                     }
                                 },
-                                "Name": "DeployCicdScopes",
+                                "Name": "DeployPipelines",
                                 "InputArtifacts": [
                                     {
                                         "Name": "SourceOutput"
                                     },
                                     {
-                                        "Name": "CicdTemplates"
+                                        "Name": "PipelineTemplates"
                                     }
                                 ],
                                 "RunOrder": 2,
@@ -655,7 +643,7 @@
                         ]
                     },
                     {
-                      "Name": "Sdlc",
+                      "Name": "Environments",
                       "Actions": [
                         {
                           "ActionTypeId": {
@@ -666,10 +654,10 @@
                           },
                           "Configuration": {
                             "ProjectName": {
-                              "Ref": "CodeBuildGenerateSdlcTemplates"
+                              "Ref": "CodeBuildProjectBuildEnvironmentTemplates"
                             }
                           },
-                          "Name": "GenerateSdlcTemplates",
+                          "Name": "BuildEnvironmentTemplates",
                           "InputArtifacts": [
                             {
                                 "Name": "SourceOutput"
@@ -678,9 +666,45 @@
                           "RunOrder": 1,
                           "OutputArtifacts": [
                               {
-                                  "Name": "SdlcTemplates"
+                                  "Name": "EnvironmentTemplates"
                               }
                           ]
+                        },
+                        {
+                            "ActionTypeId": {
+                                "Category": "Deploy",
+                                "Owner": "AWS",
+                                "Provider": "CloudFormation",
+                                "Version": "1"
+                            },
+                            "Configuration": {
+                                "ActionMode": "CREATE_UPDATE",
+                                "Capabilities": "CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND",
+                                "RoleArn": {
+                                    "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${AWS::StackName}-CloudFormationRole"
+                                },
+                                "StackName": {
+                                    "Fn::Sub": "cicd-${AWS::StackName}-scopes"
+                                },
+                                "TemplatePath": "EnvironmentTemplates::generated-scope-templates-cicd/Scopes-Parent.template",
+                                "TemplateConfiguration": "SourceOutput::cfvars/Cicd.template",
+                                "ParameterOverrides": {
+                                    "Fn::Sub": "{ \"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"CicdAccount\" : \"${AWS::AccountId}\", \"MainPipeline\" : \"${AWS::StackName}\"}"  
+                                }
+                            },
+                            "Name": "DeployCicdScopes",
+                            "InputArtifacts": [
+                                {
+                                    "Name": "SourceOutput"
+                                },
+                                {
+                                    "Name": "EnvironmentTemplates"
+                                }
+                            ],
+                            "RunOrder": 3,
+                            "RoleArn": {
+                                "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${AWS::StackName}-CodePipelineRole"
+                            }
                         },
                         {
                             "Fn::If":[
@@ -693,7 +717,7 @@
                                         "Version":"1",
                                         "Provider":"Manual"
                                     },
-                                    "RunOrder": 3
+                                    "RunOrder": 6
                                 },
                                 {
                                     "Ref": "AWS::NoValue"
@@ -714,7 +738,7 @@
                           },
                           "Configuration": {
                             "ProjectName": {
-                              "Ref": "CodeBuildUpdateStacks"
+                              "Ref": "CodeBuildProjectUpdateStacks"
                             }
                           },
                           "Name": "UpdateStacks",
@@ -732,7 +756,7 @@
         }
     },
     "Outputs": {
-        "KmsCmkArn": {
+        "KmsKeyArn": {
             "Value": {
                 "Fn::GetAtt": [
                     "KmsKey",

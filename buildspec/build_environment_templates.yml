@@ -1,0 +1,28 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo Entered the install phase...
+      - pip install boto3
+  build:
+    commands:
+      - echo Entered the build phase...
+      - python buildspec/generate_scope_templates.py -et "Sdlc"
+      - python buildspec/generate_scope_templates.py -et "Cicd"
+      - python buildspec/generate_user_templates.py -et "Sdlc"
+      - python buildspec/generate_user_templates.py -et "Cicd"
+      - python buildspec/generate_key_templates.py -et "Sdlc"
+      - python buildspec/generate_key_templates.py -et "Cicd"
+  post_build:
+    commands:
+      - aws s3 sync generated-scope-templates-sdlc s3://${S3Bucket}/generated-scope-templates-sdlc/ --delete
+      - aws s3 sync generated-scope-templates-cicd s3://${S3Bucket}/generated-scope-templates-cicd/ --delete
+      - aws s3 sync generated-user-templates-sdlc s3://${S3Bucket}/generated-user-templates-sdlc/ --delete
+      - aws s3 sync generated-user-templates-cicd s3://${S3Bucket}/generated-user-templates-cicd/ --delete
+      - aws s3 sync generated-key-templates-sdlc s3://${S3Bucket}/generated-key-templates-sdlc/ --delete
+      - aws s3 sync generated-key-templates-cicd s3://${S3Bucket}/generated-key-templates-cicd/ --delete
+artifacts:
+  files:
+    - '**/*'
+  discard-paths: no

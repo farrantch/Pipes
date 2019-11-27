@@ -1,0 +1,17 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Creates the account's infrastructure that allows for cross-account CodePipelines.",
+    "Parameters": {
+        "Environment": {
+            "Type": "String"
+        },
+        "MainPipeline": {
+            "Type": "String"
+        },
+        "User": {
+            "Type": "String"
+        }
+    },
+    "Resources": {
+    }
+}

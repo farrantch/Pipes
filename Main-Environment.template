@@ -10,7 +10,7 @@
             "Description": "AWS AccountNumber for CICD Account.",
             "Type": "Number"
         },
-        "KmsCmkArn": {
+        "KmsKeyArn": {
             "Description": "ARN of the KMS CMK creates in CICD account.",
             "Type": "String"
         },

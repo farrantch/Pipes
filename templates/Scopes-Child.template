@@ -10,7 +10,7 @@
             "Description": "AWS AccountNumber for CICD Account.",
             "Type": "Number"
         },
-        "KmsCmkArn": {
+        "KmsKeyArn": {
             "Description": "ARN of the KMS CMK creates in CICD account.",
             "Type": "String"
         },
@@ -18,66 +18,22 @@
             "Description": "Environment",
             "Type": "String"
         },
-        "MasterPipeline": {
+        "MainPipeline": {
             "Type": "String"
         },
         "Scope": {
             "Type": "String"
         },
-        "MasterS3BucketName": {
+        "MainS3BucketName": {
             "Type": "String"
-        },
-        "CreateKmsKeyScope": {
-            "Type": "String"
-        }
-    },
-    "Conditions": {
-        "CreateKmsKeyScope": {
-            "Fn::Equals": [
-                {
-                    "Ref": "CreateKmsKeyScope"
-                },
-                "True"
-            ]
         }
     },
     "Resources": {
-        "KmsKeyScope": {
-            "Type": "AWS::KMS::Key",
-            "Condition": "CreateKmsKeyScope",
-            "Properties": {
-                "KeyPolicy": {
-                    "Version": "2012-10-17",
-                    "Statement": [
-                        {
-                            "Effect": "Allow",
-                            "Principal": {
-                                "AWS": { "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:root" }
-                            },
-                            "Action": [
-                                "kms:*"
-                            ],
-                            "Resource": "*"
-                        }
-                    ]
-                }
-            }
-        },
-        "KmsAliasScope" : {
-            "Type" : "AWS::KMS::Alias",
-            "Condition": "CreateKmsKeyScope",
-            "Properties" : {
-              "AliasName" : {
-                  "Fn::Sub": "alias/${Environment}-${Scope}"
-              },
-              "TargetKeyId" : {"Ref": "KmsKeyScope"}
-            }
-        },
         "IamRoleCodePipeline": {
             "Type": "AWS::IAM::Role",
             "Properties": {
                 "RoleName": {
-                    "Fn::Sub": "${Environment}-${MasterPipeline}-scopes-${Scope}-CodePipelineRole"
+                    "Fn::Sub": "${Environment}-${MainPipeline}-scopes-${Scope}-CodePipelineRole"
                 },
                 "AssumeRolePolicyDocument": {
                     "Version": "2012-10-17",
@@ -109,7 +65,7 @@
             "Type": "AWS::IAM::Role",
             "Properties": {
                 "RoleName": {
-                    "Fn::Sub": "${Environment}-${MasterPipeline}-scopes-${Scope}-CloudFormationRole"
+                    "Fn::Sub": "${Environment}-${MainPipeline}-scopes-${Scope}-CloudFormationRole"
                 },
                 "AssumeRolePolicyDocument": {
                     "Version": "2012-10-17",
@@ -139,7 +95,7 @@
             "Type": "AWS::IAM::Role",
             "Properties": {
                 "RoleName": {
-                    "Fn::Sub": "${Environment}-${MasterPipeline}-scopes-${Scope}-CodeBuildRole"
+                    "Fn::Sub": "${Environment}-${MainPipeline}-scopes-${Scope}-CodeBuildRole"
                 },
                 "AssumeRolePolicyDocument": {
                     "Version": "2012-10-17",
@@ -167,7 +123,7 @@
             "Type": "AWS::IAM::Role",
             "Properties": {
                 "RoleName": {
-                    "Fn::Sub": "${Environment}-${MasterPipeline}-scopes-${Scope}-CodeDeployRole"
+                    "Fn::Sub": "${Environment}-${MainPipeline}-scopes-${Scope}-CodeDeployRole"
                 },
                 "AssumeRolePolicyDocument": {
                     "Version": "2012-10-17",
@@ -194,9 +150,6 @@
         "IamPolicyPipeline": {
             "Type": "AWS::IAM::ManagedPolicy",
             "Properties": {
-                "ManagedPolicyName": {
-                    "Fn::Sub": "${Environment}-${MasterPipeline}-scopes-${Scope}-IamPolicyPipeline"
-                },
                 "PolicyDocument": {
                     "Version": "2012-10-17",
                     "Statement": [
@@ -221,10 +174,10 @@
                                     "Fn::Sub": "arn:aws:s3:::${S3BucketName}/*"
                                 },
                                 {
-                                    "Ref": "KmsCmkArn"
+                                    "Ref": "KmsKeyArn"
                                 },
                                 {
-                                    "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${Environment}-${MasterPipeline}-scopes-${Scope}-*"
+                                    "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${Environment}-${MainPipeline}-scopes-${Scope}-*"
                                 }
                             ]
                         },
@@ -263,9 +216,6 @@
         "IamPolicyDeploy": {
             "Type": "AWS::IAM::ManagedPolicy",
             "Properties": {
-                "ManagedPolicyName": {
-                    "Fn::Sub": "${Environment}-${MasterPipeline}-scopes-${Scope}-IamPolicyDeploy"
-                },
                 "PolicyDocument": {
                     "Version": "2012-10-17",
                     "Statement": [
@@ -290,13 +240,13 @@
                                     "Fn::Sub": "arn:aws:s3:::${S3BucketName}/*"
                                 },
                                 {
-                                    "Ref": "KmsCmkArn"
+                                    "Ref": "KmsKeyArn"
                                 },
                                 {
                                     "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${Environment}-${Scope}-*"
                                 },
                                 {
-                                    "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${Environment}-${MasterPipeline}-scopes-${Scope}-*"
+                                    "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${Environment}-${MainPipeline}-scopes-${Scope}-*"
                                 }
                             ]
                         },
@@ -333,9 +283,6 @@
         "IamPolicyService": {
             "Type": "AWS::IAM::ManagedPolicy",
             "Properties": {
-                "ManagedPolicyName": {
-                    "Fn::Sub": "${Environment}-${MasterPipeline}-scopes-${Scope}-IamPolicyService"
-                },
                 "PolicyDocument": {
                     "Version": "2012-10-17",
                     "Statement": [
@@ -355,7 +302,7 @@
                                     "Fn::Sub": "arn:aws:s3:::${S3BucketName}/*"
                                 },
                                 {
-                                    "Ref": "KmsCmkArn"
+                                    "Ref": "KmsKeyArn"
                                 }
                             ]
                         }
@@ -365,17 +312,13 @@
         }
     },
     "Outputs": {
-        "KmsKeyScope": {
-            "Condition": "CreateKmsKeyScope",
+        "IamPolicyArnService": {
             "Value": {
-                "Fn::GetAtt": [
-                    "KmsKeyScope",
-                    "Arn"
-                ]
+                "Ref": "IamPolicyService"
             },
             "Export": {
                 "Name": {
-                    "Fn::Sub": "${Environment}-${MasterPipeline}-scopes-${Scope}-KmsKeyScope"
+                    "Fn::Sub": "${Environment}-${MainPipeline}-scopes-${Scope}-IamPolicyArnService"
                 }
             }
         }
