@@ -9,7 +9,7 @@
             ],
             "Resource": [
                 {
-                    "Fn::Sub": "arn:aws:ssm:*:${AWS::AccountId}:parameter/${Environment}/shared/*"
+                    "Fn::Sub": "arn:aws:ssm:*:${AWS::AccountId}:parameter/${Environment}-shared-*"
                 }
             ]
         },
@@ -33,7 +33,7 @@
             ],
             "Resource": [
                 {
-                    "Fn::Sub": "arn:aws:ssm:*:${AWS::AccountId}:parameter/${Environment}/shared/*"
+                    "Fn::Sub": "arn:aws:ssm:*:${AWS::AccountId}:parameter/${Environment}-shared-*"
                 }
             ]
         },
@@ -57,7 +57,7 @@
             ],
             "Resource": [
                 {
-                    "Fn::Sub": "arn:aws:ssm:*:${AWS::AccountId}:parameter/${Environment}/shared/*"
+                    "Fn::Sub": "arn:aws:ssm:*:${AWS::AccountId}:parameter/${Environment}-shared-*"
                 }
             ]
         },
