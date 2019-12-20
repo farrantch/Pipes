@@ -22,11 +22,12 @@
             "Sid": "ScopedLambdaEventSourceMapping",
             "Effect": "Allow",
             "Action": [
-                "lambda:*"
+                "lambda:CreateEventSourceMapping",
+                "lambda:DeleteEventSourceMapping",
+                "lambda:GetEventSourceMapping",
+                "lambda:UpdateEventSourceMapping"
             ],
-            "Resource": {
-                "Fn::Sub": "arn:aws:lambda:*:${AWS::AccountId}:event-source-mapping:*"
-            },
+            "Resource": "*",
             "Condition": {
                 "StringLike": {
                     "lambda:FunctionArn": [
