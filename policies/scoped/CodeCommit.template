@@ -53,6 +53,7 @@
             "Effect": "Allow",
             "Action": [
                 "codecommit:Get*",
+                "codecommit:Git*",
                 "codecommit:List*",
                 "codecommit:Describe*",
                 "codecommit:Create*",
@@ -74,6 +75,7 @@
             "Effect": "Allow",
             "Action": [
                 "codecommit:Get*",
+                "codecommit:Git*",
                 "codecommit:List*",
                 "codecommit:Describe*",
                 "codecommit:Create*",
@@ -103,6 +105,16 @@
                     ]
                 }
             }
+        },
+        {
+            "Sid": "ScopedCodeCommitWildcard",
+            "Effect": "Allow",
+            "Action": [
+                "codecommit:Get*",
+                "codecommit:List*",
+                "codecommit:Describe*"
+            ],
+            "Resource": "*"
         }
     ]
 }

@@ -22,6 +22,9 @@
                 "True",
                 "False"
             ]
+        },
+        "Environment": {
+            "Type": "String"
         }
     },
     "Conditions": {
@@ -473,7 +476,7 @@
                     "Fn::GetAtt" : ["IamRoleCodePipeline", "Arn"]
                 },
                 "Name": {
-                    "Ref": "AWS::StackName"
+                    "Fn::Sub": "${Environment}-${AWS::StackName}-infra"
                 },
                 "Stages": [
                     {
@@ -558,7 +561,7 @@
                                         "Fn::Sub": "${AWS::StackName}"
                                     },
                                     "TemplatePath": "MainTemplate::Main.template",
-                                    "TemplateConfiguration": "SourceOutput::cfvars/Main.template"
+                                    "TemplateConfiguration": "SourceOutput::cfvars/main.template"
                                 },
                                 "Name": "UpdateCloudFormation",
                                 "InputArtifacts": [
@@ -589,12 +592,16 @@
                               "Configuration": {
                                 "ProjectName": {
                                   "Ref": "CodeBuildProjectBuildPipelineTemplates"
-                                }
+                                },
+                                "PrimarySource": "SourceOutput"
                               },
                               "Name": "BuildPipelineTemplates",
                               "InputArtifacts": [
                                 {
                                     "Name": "SourceOutput"
+                                },
+                                {
+                                    "Name": "MainTemplate"
                                 }
                               ],
                               "RunOrder": 1,
@@ -620,7 +627,7 @@
                                     "StackName": {
                                         "Fn::Sub": "cicd-${AWS::StackName}-pipelines"
                                     },
-                                    "TemplatePath": "PipelineTemplates::generated-pipeline-templates/Pipelines-Parent.template",
+                                    "TemplatePath": "PipelineTemplates::output/pipelines/Pipelines-Parent.template",
                                     "TemplateConfiguration": "SourceOutput::cfvars/Cicd.template",
                                     "ParameterOverrides": {
                                         "Fn::Sub": "{ \"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"MainPipeline\" : \"${AWS::StackName}\"}"  
@@ -643,7 +650,7 @@
                         ]
                     },
                     {
-                      "Name": "Environments",
+                      "Name": "CicdDev",
                       "Actions": [
                         {
                           "ActionTypeId": {
@@ -671,42 +678,6 @@
                           ]
                         },
                         {
-                            "ActionTypeId": {
-                                "Category": "Deploy",
-                                "Owner": "AWS",
-                                "Provider": "CloudFormation",
-                                "Version": "1"
-                            },
-                            "Configuration": {
-                                "ActionMode": "CREATE_UPDATE",
-                                "Capabilities": "CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND",
-                                "RoleArn": {
-                                    "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${AWS::StackName}-CloudFormationRole"
-                                },
-                                "StackName": {
-                                    "Fn::Sub": "cicd-${AWS::StackName}-scopes"
-                                },
-                                "TemplatePath": "EnvironmentTemplates::generated-scope-templates-cicd/Scopes-Parent.template",
-                                "TemplateConfiguration": "SourceOutput::cfvars/Cicd.template",
-                                "ParameterOverrides": {
-                                    "Fn::Sub": "{ \"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"CicdAccount\" : \"${AWS::AccountId}\", \"MainPipeline\" : \"${AWS::StackName}\"}"  
-                                }
-                            },
-                            "Name": "DeployCicdScopes",
-                            "InputArtifacts": [
-                                {
-                                    "Name": "SourceOutput"
-                                },
-                                {
-                                    "Name": "EnvironmentTemplates"
-                                }
-                            ],
-                            "RunOrder": 3,
-                            "RoleArn": {
-                                "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${AWS::StackName}-CodePipelineRole"
-                            }
-                        },
-                        {
                             "Fn::If":[
                                 "ManualApprovalPostDev",
                                 {
@@ -717,7 +688,7 @@
                                         "Version":"1",
                                         "Provider":"Manual"
                                     },
-                                    "RunOrder": 6
+                                    "RunOrder": 9
                                 },
                                 {
                                     "Ref": "AWS::NoValue"

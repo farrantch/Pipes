@@ -35,7 +35,7 @@ def get_cicd_stack_outputs():
             )['Stacks'][0]['Outputs']
     return child_stack_outputs
 
-def generate_scope_templates(environment_type, child_stack_outputs):
+def generate_scope_templates(environment, child_stack_outputs):
     # Open Files
     scopes = read_file(FILE_CONFIG_SCOPES)
     scope_parent = read_file('templates/' + FILE_TEMPLATE_SCOPES_PARENT)
@@ -77,7 +77,7 @@ def generate_scope_templates(environment_type, child_stack_outputs):
                     }
                 ],
                 "TemplateURL" : {
-                    "Fn::Sub": "https://s3.amazonaws.com/${S3BucketName}/generated-scope-templates-" + environment_type.lower() + "/Scopes-Child-" + scope + ".template"
+                    "Fn::Sub": "https://s3.amazonaws.com/${S3BucketName}/builds/scopes/" + BUILD_NUM + "/" + environment['Name'] + "/Scopes-Child-" + scope + ".template"
                 }
             }
         }
@@ -85,7 +85,7 @@ def generate_scope_templates(environment_type, child_stack_outputs):
         # Open child template to insert CodeBuildProjects
         scope_child = read_file('templates/' + FILE_TEMPLATE_SCOPES_CHILD)
             
-        scope_child = add_policy_statements(scope_child, scope, value, environment_type)
+        scope_child = add_policy_statements(scope_child, scope, value, environment['Name'])
 
         # Consolidate Policies
         scope_child['Resources']['IamPolicyService']['Properties']['PolicyDocument']['Statement'] = consolidate_statements(
@@ -101,22 +101,19 @@ def generate_scope_templates(environment_type, child_stack_outputs):
         )
 
         # Save child file
-        write_file('generated-scope-templates-' + environment_type.lower() + '/' + FILE_TEMPLATE_SCOPES_CHILD + '-' + scope, scope_child)
+        write_file(OUTPUT_FOLDER + '/scopes/' + environment['Name'] + '/' + FILE_TEMPLATE_SCOPES_CHILD + '-' + scope, scope_child)
 
     # Save parent file
-    write_file('generated-scope-templates-' + environment_type.lower() + '/' + FILE_TEMPLATE_SCOPES_PARENT, scope_parent)
+    write_file(OUTPUT_FOLDER + '/scopes/' + environment['Name'] + '/' + FILE_TEMPLATE_SCOPES_PARENT, scope_parent)
 
 def main():
-    # Parse arguments
-    parser = ArgumentParser()
-    parser.add_argument("-et", "--environment_type", help="Choose environment type. Ex - 'Sdlc' or 'Cicd'")
-    args = parser.parse_args()
-
     # Get outputs from cicd child stacks
     child_stack_outputs = get_cicd_stack_outputs()
 
     # Generate scope templates with CICD child stack outputs
-    generate_scope_templates(args.environment_type, child_stack_outputs)
+    environments = read_file(FILE_CONFIG_ENVIRONMENTS)
+    for env in environments['WorkloadAccounts']:
+        generate_scope_templates(env, child_stack_outputs)
 
 if __name__ == "__main__":
     main()

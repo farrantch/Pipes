@@ -12,6 +12,24 @@
             "Type": "String"
         }
     },
+    "Conditions": {
+        "IsProd": {
+            "Fn::Equals": [
+                {
+                    "Ref": "Environment"
+                },
+                "prod"
+            ]
+        },
+        "IsDev": {
+            "Fn::Equals": [
+                {
+                    "Ref": "Environment"
+                },
+                "dev"
+            ]
+        }
+    },
     "Resources": {
     }
 }

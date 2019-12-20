@@ -8,20 +8,16 @@ phases:
   build:
     commands:
       - echo Entered the build phase...
-      - python buildspec/generate_scope_templates.py -et "Sdlc"
-      - python buildspec/generate_scope_templates.py -et "Cicd"
-      - python buildspec/generate_user_templates.py -et "Sdlc"
-      - python buildspec/generate_user_templates.py -et "Cicd"
-      - python buildspec/generate_key_templates.py -et "Sdlc"
-      - python buildspec/generate_key_templates.py -et "Cicd"
+      # Zero Padding
+      - buildnum=$(printf "%05d" ${CODEBUILD_BUILD_NUMBER})
+      - python buildspec/generate_scope_templates.py
+      - python buildspec/generate_user_templates.py
+      - python buildspec/generate_key_templates.py
   post_build:
     commands:
-      - aws s3 sync generated-scope-templates-sdlc s3://${S3Bucket}/generated-scope-templates-sdlc/ --delete
-      - aws s3 sync generated-scope-templates-cicd s3://${S3Bucket}/generated-scope-templates-cicd/ --delete
-      - aws s3 sync generated-user-templates-sdlc s3://${S3Bucket}/generated-user-templates-sdlc/ --delete
-      - aws s3 sync generated-user-templates-cicd s3://${S3Bucket}/generated-user-templates-cicd/ --delete
-      - aws s3 sync generated-key-templates-sdlc s3://${S3Bucket}/generated-key-templates-sdlc/ --delete
-      - aws s3 sync generated-key-templates-cicd s3://${S3Bucket}/generated-key-templates-cicd/ --delete
+      - aws s3 sync output/scopes s3://${S3Bucket}/builds/scopes/${buildnum}/
+      - aws s3 sync output/users s3://${S3Bucket}/builds/users/${buildnum}/
+      - aws s3 sync output/keys s3://${S3Bucket}/builds/keys/${buildnum}/
 artifacts:
   files:
     - '**/*'

@@ -7,12 +7,13 @@ phases:
       - pip install boto3
   build:
     commands:
+      # Zero Padding
+      - buildnum=$(printf "%05d" ${CODEBUILD_BUILD_NUMBER})
       - echo Entered the build phase...
       - python buildspec/generate_pipeline_templates.py
   post_build:
     commands:
-      - aws s3 sync generated-pipeline-templates s3://${S3Bucket}/generated-pipeline-templates/ --delete
-      - aws s3 sync templates s3://${S3Bucket}/templates/ --delete
+      - aws s3 sync output/pipelines s3://${S3Bucket}/builds/pipelines/${buildnum}/
 artifacts:
   files:
     - '**/*'

@@ -32,7 +32,9 @@
                 "iam:GetRolePolicy",
                 "iam:DeleteRole",
                 "iam:DetachRolePolicy",
-                "iam:DeleteRolePolicy"
+                "iam:DeleteRolePolicy",
+                "iam:TagRole",
+                "iam:UntagRole"
             ],
             "Resource": [
                 {

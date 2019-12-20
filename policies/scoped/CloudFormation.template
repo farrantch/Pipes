@@ -1,0 +1,30 @@
+{
+    "DeployStatements": [],
+    "ServiceStatements": [],
+    "UserStatements": [
+        {
+            "Sid": "ScopedCloudFormation",
+            "Effect": "Allow",
+            "Action": [
+                "cloudformation:DeleteStack",
+                "cloudformation:DeleteChangeSet",
+                "cloudformation:ContinueUpdateRollback"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:cloudformation:*:${AWS::AccountId}:${Environment}-${Scope}-*"
+                }
+            ]
+        },
+        {
+            "Sid": "ScopedCloudFormationWildcard",
+            "Effect": "Allow",
+            "Action": [
+                "cloudformation:Describe*",
+                "cloudformation:Get*",
+                "cloudformation:List*"
+            ],
+            "Resource": "*"
+        }
+    ]
+}

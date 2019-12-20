@@ -63,25 +63,6 @@
             ]
         },
         {
-            "Sid": "ScopedLambdaEventSourceMapping",
-            "Effect": "Allow",
-            "Action": [
-                "lambda:*"
-            ],
-            "Resource": {
-                "Fn::Sub": "arn:aws:lambda:*:${AWS::AccountId}:event-source-mapping:*"
-            },
-            "Condition": {
-                "StringLike": {
-                    "lambda:FunctionArn": [
-                        {
-                            "Fn::Sub": "arn:aws:lambda:*:${AWS::AccountId}:function:${Environment}-${Scope}-*"
-                        }
-                    ]
-                }
-            }
-        },
-        {
             "Sid": "ScopedLambdaResourceWildcard",
             "Effect": "Allow",
             "Action": [

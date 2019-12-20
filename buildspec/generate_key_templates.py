@@ -27,8 +27,8 @@ def get_cicd_stack_outputs():
             )['Stacks'][0]['Outputs']
     return child_stack_outputs
 
-def generate_child_template(template, kmskey, value, environment_type):
-        if environment_type in value:
+def generate_child_template(template, kmskey, value, environment):
+        if environment['Type'] in value and value[environment['Type']] == True:
             template['Resources']['KmsKey' + kmskey] = {
                 "Type" : "AWS::KMS::Key",
                 "Properties" : {
@@ -75,7 +75,7 @@ def generate_child_template(template, kmskey, value, environment_type):
             }
         return template
 
-def generate_key_templates(environment_type):
+def generate_key_templates(environment):
     # Open Files
     kmskeys = read_file(FILE_CONFIG_KEYS)
     key_parent = read_file('templates/' + FILE_TEMPLATE_KEYS_PARENT)
@@ -105,7 +105,7 @@ def generate_key_templates(environment_type):
                     }
                 ],
                 "TemplateURL" : {
-                    "Fn::Sub": "https://s3.amazonaws.com/${S3BucketName}/generated-key-templates-" + environment_type.lower() + "/Keys-Child-" + kmskey + ".template"
+                    "Fn::Sub": "https://s3.amazonaws.com/${S3BucketName}/builds/keys/" + BUILD_NUM + "/" + environment['Name'] + "/Keys-Child-" + kmskey + ".template"
                 }
             }
         }
@@ -113,25 +113,20 @@ def generate_key_templates(environment_type):
         # Open child template to insert KMS Keys
         key_child = read_file('templates/' + FILE_TEMPLATE_KEYS_CHILD)
             
-        key_child = generate_child_template(key_child, kmskey, value, environment_type)
+        key_child = generate_child_template(key_child, kmskey, value, environment)
 
         # Save child file
-        write_file('generated-key-templates-' + environment_type.lower() + '/' + FILE_TEMPLATE_KEYS_CHILD + '-' + kmskey, key_child)
+        write_file(OUTPUT_FOLDER + '/keys/' + environment['Name'] + '/' + FILE_TEMPLATE_KEYS_CHILD + '-' + kmskey, key_child)
 
     # Save parent file
-    write_file('generated-key-templates-' + environment_type.lower() + '/' + FILE_TEMPLATE_KEYS_PARENT, key_parent)
+    write_file(OUTPUT_FOLDER + '/keys/' + environment['Name'] + '/' + FILE_TEMPLATE_KEYS_PARENT, key_parent)
 
 def main():
-    # Parse arguments
-    parser = ArgumentParser()
-    parser.add_argument("-et", "--environment_type", help="Choose environment type. Ex - 'Sdlc' or 'Cicd'")
-    args = parser.parse_args()
-
-    # Get outputs from cicd child stacks
-    #child_stack_outputs = get_cicd_stack_outputs()
-
-    # Generate scope templates with CICD child stack outputs
-    generate_key_templates(args.environment_type)
+    # Loop through workload environments
+    environments = read_file(FILE_CONFIG_ENVIRONMENTS)
+    for env in environments['WorkloadAccounts']:
+        # Generate key templates
+        generate_key_templates(env)
 
 if __name__ == "__main__":
     main()

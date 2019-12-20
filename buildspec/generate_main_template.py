@@ -100,21 +100,22 @@ s3_bucket_statement = {
     ]
 }
 
-for env in environments['SdlcAccounts']:
-    env_lower = env.lower()
+for env in environments['WorkloadAccounts']:
+    name = env['Name']
+    name_lower = name.lower()
     base_statement.append(
         {
-            "Fn::Sub": "arn:aws:iam::${" + env + "Account}:role/" + env_lower + "-${AWS::StackName}-CloudFormationRole"
+            "Fn::Sub": "arn:aws:iam::${" + name + "Account}:role/" + name_lower + "-${AWS::StackName}-CloudFormationRole"
         }
     )
     base_statement.append(
         {
-            "Fn::Sub": "arn:aws:iam::${" + env + "Account}:role/" + env_lower + "-${AWS::StackName}-CodePipelineRole"
+            "Fn::Sub": "arn:aws:iam::${" + name + "Account}:role/" + name_lower + "-${AWS::StackName}-CodePipelineRole"
         }
     )
     base_statement.append(
         {
-            "Fn::Sub": "arn:aws:iam::${" + env + "Account}:role/" + env_lower + "-${AWS::StackName}-CodeBuildRole"
+            "Fn::Sub": "arn:aws:iam::${" + name + "Account}:role/" + name_lower + "-${AWS::StackName}-CodeBuildRole"
         }
     )
 
@@ -131,103 +132,113 @@ main['Resources']['IamPolicyBaseline']['Properties']['PolicyDocument']['Statemen
 main['Resources']['KmsKey']['Properties']['KeyPolicy']['Statement'].append(kms_key_statement)
 main['Resources']['S3BucketPolicy']['Properties']['PolicyDocument']['Statement'].append(s3_bucket_statement)
 
-# Add CICD Keys Stack if cicd environment keys specified
-if any('Cicd' in value and value['Cicd'] == True for (key, value) in kmskeys.items()):
-    main['Resources']['CodePipeline']['Properties']['Stages'][3]['Actions'].append(
-        {
-            "ActionTypeId": {
-                "Category": "Deploy",
-                "Owner": "AWS",
-                "Provider": "CloudFormation",
-                "Version": "1"
-            },
-            "Configuration": {
-                "ActionMode": "CREATE_UPDATE",
-                "Capabilities": "CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND",
-                "RoleArn": {
-                    "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${AWS::StackName}-CloudFormationRole"
-                },
-                "StackName": {
-                    "Fn::Sub": "cicd-${AWS::StackName}-keys"
-                },
-                "TemplatePath": "EnvironmentTemplates::generated-key-templates-cicd/Keys-Parent.template",
-                "TemplateConfiguration": "SourceOutput::cfvars/Cicd.template",
-                "ParameterOverrides": {
-                    "Fn::Sub": "{ \"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"MainPipeline\" : \"${AWS::StackName}\"}"  
-                }
-            },
-            "Name": "DeployCicdKeys",
-            "InputArtifacts": [
-                {
-                    "Name": "SourceOutput"
-                },
-                {
-                    "Name": "EnvironmentTemplates"
-                }
-            ],
-            "RunOrder": 2,
-            "RoleArn": {
-                "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${AWS::StackName}-CodePipelineRole"
-            }
-        }
-    )
+# # Add CICD Keys Stack if cicd environment keys specified
+# if any('Cicd' in value and value['Cicd'] == True for (key, value) in kmskeys.items()):
+#     main['Resources']['CodePipeline']['Properties']['Stages'][3]['Actions'].append(
+#         {
+#             "ActionTypeId": {
+#                 "Category": "Deploy",
+#                 "Owner": "AWS",
+#                 "Provider": "CloudFormation",
+#                 "Version": "1"
+#             },
+#             "Configuration": {
+#                 "ActionMode": "CREATE_UPDATE",
+#                 "Capabilities": "CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND",
+#                 "RoleArn": {
+#                     "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${AWS::StackName}-CloudFormationRole"
+#                 },
+#                 "StackName": {
+#                     "Fn::Sub": "cicd-${AWS::StackName}-keys"
+#                 },
+#                 "TemplatePath": "EnvironmentTemplates::generated-key-templates-cicd/Keys-Parent.template",
+#                 "TemplateConfiguration": "SourceOutput::cfvars/Cicd.template",
+#                 "ParameterOverrides": {
+#                     "Fn::Sub": "{ \"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"MainPipeline\" : \"${AWS::StackName}\"}"  
+#                 }
+#             },
+#             "Name": "DeployCicdKeys",
+#             "InputArtifacts": [
+#                 {
+#                     "Name": "SourceOutput"
+#                 },
+#                 {
+#                     "Name": "EnvironmentTemplates"
+#                 }
+#             ],
+#             "RunOrder": 2,
+#             "RoleArn": {
+#                 "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${AWS::StackName}-CodePipelineRole"
+#             }
+#         }
+#     )
 
-# Add CICD Users stack
-if users:
-    main['Resources']['CodePipeline']['Properties']['Stages'][3]['Actions'].append(
-        {
-            "ActionTypeId": {
-                "Category": "Deploy",
-                "Owner": "AWS",
-                "Provider": "CloudFormation",
-                "Version": "1"
-            },
-            "Configuration": {
-                "ActionMode": "CREATE_UPDATE",
-                "Capabilities": "CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND",
-                "RoleArn": {
-                    "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${AWS::StackName}-CloudFormationRole"
-                },
-                "StackName": {
-                    "Fn::Sub": "cicd-${AWS::StackName}-users"
-                },
-                "TemplatePath": "EnvironmentTemplates::generated-user-templates-cicd/Users-Parent.template",
-                "TemplateConfiguration": "SourceOutput::cfvars/Cicd.template",
-                "ParameterOverrides": {
-                    "Fn::Sub": "{ \"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"MainPipeline\" : \"${AWS::StackName}\"}"  
-                }
-            },
-            "Name": "DeployCicdUsers",
-            "InputArtifacts": [
-                {
-                    "Name": "SourceOutput"
-                },
-                {
-                    "Name": "EnvironmentTemplates"
-                }
-            ],
-            "RunOrder": 3,
-            "RoleArn": {
-                "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${AWS::StackName}-CodePipelineRole"
-            }
-        }
-    )
+# # Add CICD Users stack
+# if users:
+#     main['Resources']['CodePipeline']['Properties']['Stages'][3]['Actions'].append(
+#         {
+#             "ActionTypeId": {
+#                 "Category": "Deploy",
+#                 "Owner": "AWS",
+#                 "Provider": "CloudFormation",
+#                 "Version": "1"
+#             },
+#             "Configuration": {
+#                 "ActionMode": "CREATE_UPDATE",
+#                 "Capabilities": "CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND",
+#                 "RoleArn": {
+#                     "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${AWS::StackName}-CloudFormationRole"
+#                 },
+#                 "StackName": {
+#                     "Fn::Sub": "cicd-${AWS::StackName}-users"
+#                 },
+#                 "TemplatePath": "EnvironmentTemplates::generated-user-templates-cicd/Users-Parent.template",
+#                 "TemplateConfiguration": "SourceOutput::cfvars/Cicd.template",
+#                 "ParameterOverrides": {
+#                     "Fn::Sub": "{ \"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"MainPipeline\" : \"${AWS::StackName}\"}"  
+#                 }
+#             },
+#             "Name": "DeployCicdUsers",
+#             "InputArtifacts": [
+#                 {
+#                     "Name": "SourceOutput"
+#                 },
+#                 {
+#                     "Name": "EnvironmentTemplates"
+#                 }
+#             ],
+#             "RunOrder": 3,
+#             "RoleArn": {
+#                 "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cicd-${AWS::StackName}-CodePipelineRole"
+#             }
+#         }
+#     )
 
 
-run_order = 4
+run_order = 2
 # Loop through environments
-for key, value in environments['SdlcAccounts'].items():
-    env = key
-    env_lower = env.lower()
+for env in environments['WorkloadAccounts']:
+    name = env['Name']
+    name_lower = env['Name'].lower()
+
+    # If cicd or dev step, don't add stage
+    if name.lower() != 'cicd' and name.lower() != 'dev':
+        stage = {
+            "Name": name,
+            "Actions": []
+        }
+        main['Resources']['CodePipeline']['Properties']['Stages'].insert(-1, stage)
+        # Reset run_order to 1 for stage
+        run_order = 1
     
     # Add SDLC account to main parameters
-    main['Parameters'][env + 'Account'] = {
+    main['Parameters'][name + 'Account'] = {
         "Type": "Number",
-        "Default": value['AccountId']
+        "Default": env['AccountId']
     }
 
-    # Add SDLC Keys Stack if cicd environment keys specified
-    if any('Sdlc' in value and value['Sdlc'] == True for (key, value) in kmskeys.items()):
+    # Add Keys Stack if environment keys specified
+    if any(env['Type'] in v and v[env['Type']] == True for (k, v) in kmskeys.items()):
         main['Resources']['CodePipeline']['Properties']['Stages'][-2]['Actions'].append(
             {
                 "ActionTypeId": {
@@ -240,18 +251,18 @@ for key, value in environments['SdlcAccounts'].items():
                     "ActionMode": "CREATE_UPDATE",
                     "Capabilities": "CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND",
                     "RoleArn": {
-                        "Fn::Sub": "arn:aws:iam::${" + env + "Account}:role/" + env_lower + "-${AWS::StackName}-CloudFormationRole"
+                        "Fn::Sub": "arn:aws:iam::${" + name + "Account}:role/" + name_lower + "-${AWS::StackName}-CloudFormationRole"
                     },
                     "StackName": {
-                        "Fn::Sub": env_lower + "-${AWS::StackName}-keys"
+                        "Fn::Sub": name_lower + "-${AWS::StackName}-keys"
                     },
-                    "TemplatePath": "EnvironmentTemplates::generated-key-templates-sdlc/Keys-Parent.template",
-                    "TemplateConfiguration": "SourceOutput::cfvars/" + env + ".template",
+                    "TemplatePath": "EnvironmentTemplates::output/keys/" + name + "/Keys-Parent.template",
+                    "TemplateConfiguration": "SourceOutput::cfvars/" + name + ".template",
                     "ParameterOverrides": {
                         "Fn::Sub": "{ \"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"MainPipeline\" : \"${AWS::StackName}\"}"
                     }
                 },
-                "Name": "Deploy" + env + "Keys",
+                "Name": "Deploy" + name + "Keys",
                 "InputArtifacts": [
                     {
                         "Name": "SourceOutput"
@@ -262,7 +273,7 @@ for key, value in environments['SdlcAccounts'].items():
                 ],
                 "RunOrder": run_order,
                 "RoleArn": {
-                    "Fn::Sub": "arn:aws:iam::${" + env + "Account}:role/" + env_lower + "-${AWS::StackName}-CodePipelineRole"
+                    "Fn::Sub": "arn:aws:iam::${" + name + "Account}:role/" + name_lower + "-${AWS::StackName}-CodePipelineRole"
                 }
             }
         )
@@ -281,18 +292,18 @@ for key, value in environments['SdlcAccounts'].items():
                 "ActionMode": "CREATE_UPDATE",
                 "Capabilities": "CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND",
                 "RoleArn": {
-                    "Fn::Sub": "arn:aws:iam::${" + env + "Account}:role/" + env_lower + "-${AWS::StackName}-CloudFormationRole"
+                    "Fn::Sub": "arn:aws:iam::${" + name + "Account}:role/" + name_lower + "-${AWS::StackName}-CloudFormationRole"
                 },
                 "StackName": {
-                    "Fn::Sub": env_lower + "-${AWS::StackName}-scopes"
+                    "Fn::Sub": name_lower + "-${AWS::StackName}-scopes"
                 },
-                "TemplatePath": "EnvironmentTemplates::generated-scope-templates-sdlc/Scopes-Parent.template",
-                "TemplateConfiguration": "SourceOutput::cfvars/" + env + ".template",
+                "TemplatePath": "EnvironmentTemplates::output/scopes/" + name + "/Scopes-Parent.template",
+                "TemplateConfiguration": "SourceOutput::cfvars/" + name + ".template",
                 "ParameterOverrides": {
                     "Fn::Sub": "{ \"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"CicdAccount\" : \"${AWS::AccountId}\", \"MainPipeline\" : \"${AWS::StackName}\"}"
                 }
             },
-            "Name": "Deploy" + env + "Scopes",
+            "Name": "Deploy" + name + "Scopes",
             "InputArtifacts": [
                 {
                     "Name": "SourceOutput"
@@ -303,7 +314,7 @@ for key, value in environments['SdlcAccounts'].items():
             ],
             "RunOrder": run_order,
             "RoleArn": {
-                "Fn::Sub": "arn:aws:iam::${" + env + "Account}:role/" + env_lower + "-${AWS::StackName}-CodePipelineRole"
+                "Fn::Sub": "arn:aws:iam::${" + name + "Account}:role/" + name_lower + "-${AWS::StackName}-CodePipelineRole"
             }
         }
     )
@@ -320,18 +331,18 @@ for key, value in environments['SdlcAccounts'].items():
                     "ActionMode": "CREATE_UPDATE",
                     "Capabilities": "CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND",
                     "RoleArn": {
-                        "Fn::Sub": "arn:aws:iam::${" + env + "Account}:role/" + env_lower + "-${AWS::StackName}-CloudFormationRole"
+                        "Fn::Sub": "arn:aws:iam::${" + name + "Account}:role/" + name_lower + "-${AWS::StackName}-CloudFormationRole"
                     },
                     "StackName": {
-                        "Fn::Sub": env_lower + "-${AWS::StackName}-users"
+                        "Fn::Sub": name_lower + "-${AWS::StackName}-users"
                     },
-                    "TemplatePath": "EnvironmentTemplates::generated-user-templates-sdlc/Users-Parent.template",
-                    "TemplateConfiguration": "SourceOutput::cfvars/" + env + ".template",
+                    "TemplatePath": "EnvironmentTemplates::output/users/" + name + "/Users-Parent.template",
+                    "TemplateConfiguration": "SourceOutput::cfvars/" + name + ".template",
                     "ParameterOverrides": {
                         "Fn::Sub": "{ \"S3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"MainPipeline\" : \"${AWS::StackName}\"}"
                     }
                 },
-                "Name": "Deploy" + env + "Users",
+                "Name": "Deploy" + name + "Users",
                 "InputArtifacts": [
                     {
                         "Name": "SourceOutput"
@@ -342,14 +353,11 @@ for key, value in environments['SdlcAccounts'].items():
                 ],
                 "RunOrder": run_order,
                 "RoleArn": {
-                    "Fn::Sub": "arn:aws:iam::${" + env + "Account}:role/" + env_lower + "-${AWS::StackName}-CodePipelineRole"
+                    "Fn::Sub": "arn:aws:iam::${" + name + "Account}:role/" + name_lower + "-${AWS::StackName}-CodePipelineRole"
                 }
             }
         )
-    # If first run through, skip manual approval dev step
-    if run_order == 4 or run_order == 5:
-        run_order = run_order + 1
-    run_order = run_order + 1
+    run_order += 1
         
 # Save files
-write_file('generated-main-template/' + FILE_TEMPLATE_MAIN, main)
+write_file(OUTPUT_FOLDER + '/main/' + FILE_TEMPLATE_MAIN, main)

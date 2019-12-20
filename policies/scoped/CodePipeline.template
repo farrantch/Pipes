@@ -1,0 +1,28 @@
+{
+    "UserStatements": [
+        {
+            "Sid": "ScopedCodePipeline",
+            "Effect": "Allow",
+            "Action": [
+                "codepipeline:StartPipelineExecution",
+                "codepipeline:RetryStageExecution",
+                "codepipeline:PutApprovalResult"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:codepipeline:*:${AWS::AccountId}:${Environment}-${Scope}-*"
+                }
+            ]
+        },
+        {
+            "Sid": "ScopedCodePipelineWildcard",
+            "Effect": "Allow",
+            "Action": [
+                "codepipeline:Describe*",
+                "codepipeline:Get*",
+                "codepipeline:List*"
+            ],
+            "Resource": "*"
+        }
+    ]
+}

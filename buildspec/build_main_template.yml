@@ -7,11 +7,15 @@ phases:
       - pip install boto3
   build:
     commands:
+      # Zero Padding
+      - buildnum=$(printf "%05d" ${CODEBUILD_BUILD_NUMBER})
       - echo Entered the build phase...
-      - mkdir -p generated-main-template
       - python buildspec/generate_main_template.py
+  post_build:
+    commands:
+      - aws s3 sync output/main s3://${S3Bucket}/builds/main/${buildnum}/
 artifacts:
   files:
     - '**/*'
-  base-directory: 'generated-main-template'
+  base-directory: 'output/main'
   discard-paths: yes

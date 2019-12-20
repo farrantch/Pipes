@@ -1,5 +1,9 @@
 {
     "Parameters": {
         "Environment": "prod"
+    },
+    "Tags": {
+        "Scope": "main",
+        "Environment": "prod"
     }
 }

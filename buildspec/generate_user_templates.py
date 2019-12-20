@@ -10,8 +10,8 @@ from collections import OrderedDict
 from botocore.exceptions import ClientError
 from argparse import ArgumentParser
 
-def insert_childstack_into_parentstack(template_users_parent, user, environment_type):
-    environment_type_lower = environment_type.lower()
+def insert_childstack_into_parentstack(template_users_parent, user, environment):
+    environment_lower = environment.lower()
     template_users_parent['Resources'][user] = {
         "Type" : "AWS::CloudFormation::Stack",
         "Properties": {
@@ -33,7 +33,7 @@ def insert_childstack_into_parentstack(template_users_parent, user, environment_
                 }
             ],
             "TemplateURL" : {
-                "Fn::Sub": "https://s3.amazonaws.com/${S3BucketName}/generated-user-templates-" + environment_type_lower + "/" + FILE_TEMPLATE_USERS_CHILD + "-" + user + ".template"
+                "Fn::Sub": "https://s3.amazonaws.com/${S3BucketName}/builds/users/" + BUILD_NUM + "/" + environment + "/" + FILE_TEMPLATE_USERS_CHILD + "-" + user + ".template"
             }
         }
     }
@@ -92,7 +92,8 @@ def insert_user_managed_policies(template_user, user_statements):
         iteration += 1
     return template_user
 
-def insert_user_into_userstack(template_user, user, user_value, user_statements):
+def insert_user_into_userstack(template_user, user, user_value, user_statements, environment):
+    groups = read_file(FILE_CONFIG_GROUPS)
     sso_account_id = read_file(FILE_CONFIG_ENVIRONMENTS)['SsoAccount']['AccountId']
     # Only include inline policies if they have statements
     inline_policies = []
@@ -100,6 +101,7 @@ def insert_user_into_userstack(template_user, user, user_value, user_statements)
         for user_inline_policy in user_value['PoliciesInline']:
             if len(user_inline_policy['PolicyDocument']['Statement']) > 0:
                 inline_policies.append(user_inline_policy)
+
     # Add Tags to User Role
     tags = [
         {
@@ -109,6 +111,7 @@ def insert_user_into_userstack(template_user, user, user_value, user_statements)
             }
         }
     ]
+
     scopes = get_user_scopes(user_value)
     for scope in scopes:
         tags.append(
@@ -142,67 +145,93 @@ def insert_user_into_userstack(template_user, user, user_value, user_statements)
                 "RoleName" : {
                     "Fn::Sub": "${Environment}-" + user
                 },
+                "ManagedPolicyArns": [],
                 "Tags": tags
             }
         }
     template_user = insert_user_managed_policies(template_user, user_statements)
+    
+    # Add ManagedPolicies
+    if 'ManagedPolicyArns' in user_value:
+        if environment in user_value['ManagedPolicyArns']:
+            for managedpolicy in user_value['ManagedPolicyArns'][environment]:
+                template_user['Resources']['IamRole']['Properties']['ManagedPolicyArns'].append(managedpolicy)
+    if 'Groups' in user_value:
+        for group in user_value['Groups']:
+            if 'ManagedPolicyArns' in groups[group]:
+                if environment in groups[group]['ManagedPolicyArns']:
+                    for managedpolicy in groups[group]['ManagedPolicyArns'][environment]:
+                        template_user['Resources']['IamRole']['Properties']['ManagedPolicyArns'].append(managedpolicy)
+    # Remove ManagedPolicyArn duplicates
+    template_user['Resources']['IamRole']['Properties']['ManagedPolicyArns'] = list(set(template_user['Resources']['IamRole']['Properties']['ManagedPolicyArns']))
     return template_user
 
-def add_policy_statements_to_user_policy(policies, user_statements, environment_type, scope=None):
-    #scopes = read_file(FILE_CONFIG_SCOPES)
-    # First, add scoped/* if exists
-    if environment_type in policies:
-        if 'scoped/*' in policies[environment_type]:
+def add_policy_statements_to_user_policy(policies, user_statements, environment, scope=None):
+    # If environment doesn't exist, set to default
+    if environment not in policies:
+        environment = 'Default'
+    if environment in policies:
+        # First, add scoped/* if exists
+        if 'scoped/*' in policies[environment]:
             for filename in os.listdir('policies/scoped'):
                 temp = read_file('policies/scoped/' + filename.split('.')[0])
                 # If scope provided, find & replace within policies
                 scope_replaced = json.loads(json.dumps(temp).replace('${Scope}', scope)) if scope else json.loads(json.dumps(temp))
-                scope_lower_replaced = json.loads(json.dumps(scope_replaced).replace('${ScopeLower}', scope.lower())) if scope else json.loads(json.dumps(scope_replaced))
-                if 'UserStatements' in scope_lower_replaced:
-                    for statement in scope_lower_replaced['UserStatements']:
+                if 'UserStatements' in scope_replaced:
+                    for statement in scope_replaced['UserStatements']:
                         user_statements.append(statement)
         # Add rest of policies
-        for policy in policies[environment_type]:
+        for policy in policies[environment]:
             if policy != 'scoped/*':
                 # Don't re-add resource-scope policies if already added via wildcard
                 if not policy.startswith('scoped/') or 'scoped/*' not in policies:
-                    temp = read_file('policies/' + policy)
+                    # Parse everything before ':' to get file name
+                    policyname_split = policy.split(':')
+                    temp = read_file('policies/' + policyname_split[0])
+                    # If contains alternative scope name, replace scope within file
+                    if len(policyname_split) > 1:
+                        scope = policyname_split[1]
                     # If scope provided, find & replace within policies
                     scope_replaced = json.loads(json.dumps(temp).replace('${Scope}', scope)) if scope else json.loads(json.dumps(temp))
-                    scope_lower_replaced = json.loads(json.dumps(scope_replaced).replace('${ScopeLower}', scope.lower())) if scope else json.loads(json.dumps(scope_replaced))
-                    if 'UserStatements' in scope_lower_replaced:
-                        for statement in scope_lower_replaced['UserStatements']:
+                    if 'UserStatements' in scope_replaced:
+                        for statement in scope_replaced['UserStatements']:
                             if 'PolicyArn' in statement:
                                 user_statements.extend(get_policy_statements(statement['PolicyArn']))
                             else:
                                 user_statements.append(statement)
 
-def add_scope_statements_to_user_policy(scope, user_statements, environment_type):
+def add_scope_statements_to_user_policy(scope, user_statements, environment):
     # Read Scopes Files
     scopes = read_file(FILE_CONFIG_SCOPES)
     # Add policies from scopes file
-    add_policy_statements_to_user_policy(scopes[scope]['Policies'], user_statements, environment_type, scope)
+    if 'Policies' in scopes[scope]:
+        add_policy_statements_to_user_policy(scopes[scope]['Policies'], user_statements, environment, scope)
 
-def generate_user_statements(user, user_value, environment_type):
+def generate_user_statements(user, user_value, environment):
     groups = read_file(FILE_CONFIG_GROUPS)
     # Loop through scopes attached to user
     user_statements = []
     # Add User Scopes
     if 'Scopes' in user_value:
         for scope in user_value['Scopes']:
-            add_scope_statements_to_user_policy(scope, user_statements, environment_type)
+            add_scope_statements_to_user_policy(scope, user_statements, environment)
     # Add Policies
     if 'Policies' in user_value:
-        add_policy_statements_to_user_policy(user_value['Policies'], user_statements, environment_type)
+        add_policy_statements_to_user_policy(user_value['Policies'], user_statements, environment)
     # Add Group Scopes
     if 'Groups' in user_value:
         for group in user_value['Groups']:
             if 'Scopes' in groups[group]:
                 for group_scope in groups[group]['Scopes']:
-                    add_scope_statements_to_user_policy(group_scope, user_statements, environment_type)
+                    #if 'Policies' in group_scope:
+                    add_scope_statements_to_user_policy(group_scope, user_statements, environment)
             if 'Policies' in groups[group]:
-                #if environment_type in groups[group]['Policies']:
-                add_policy_statements_to_user_policy(groups[group]['Policies'], user_statements, environment_type)
+                #if environment in groups[group]['Policies']:
+                add_policy_statements_to_user_policy(groups[group]['Policies'], user_statements, environment)
+            # if 'ManagedPolicies' in groups[group]:
+            #     if environment in groups[group]['ManagedPolicies']:
+            #         for policymanaged in groups[group]['ManagedPolicies']:
+            #             user_statements.append(policymanaged)
 
     if 'Statements' in user_value:
         for statement in user_value['Statements']:
@@ -211,40 +240,36 @@ def generate_user_statements(user, user_value, environment_type):
     user_statements_minimized = consolidate_statements(user_statements)
     return user_statements_minimized
 
-def generate_user_template(user, user_value, environment_type, output_location):
+def generate_user_template(user, user_value, environment):
     template_user_child = read_file('templates/' + FILE_TEMPLATE_USERS_CHILD)
-
-    user_statements = generate_user_statements(user, user_value, environment_type)
-    template_user_child = insert_user_into_userstack(template_user_child, user, user_value, user_statements)
+    # Generate User Policy
+    user_statements = generate_user_statements(user, user_value, environment)
+    template_user_child = insert_user_into_userstack(template_user_child, user, user_value, user_statements, environment)
 
     # Output User Child file
-    write_file(output_location + FILE_TEMPLATE_USERS_CHILD + '-' + user, template_user_child)
+    write_file(OUTPUT_FOLDER + '/users/' + environment + '/' + FILE_TEMPLATE_USERS_CHILD + '-' + user, template_user_child)
 
-def generate_user_templates(environment_type):
+def generate_user_templates(environment):
     # Open files
     users = read_file(FILE_CONFIG_USERS)
     template_users_parent = read_file('templates/' + FILE_TEMPLATE_USERS_PARENT)
-    # Set output location 
-    output_location = 'generated-user-templates-' + environment_type.lower() + '/'
     # Loop through users
     for user, user_value in users.items():
         # Insert Users child stack into Users parent stack
-        insert_childstack_into_parentstack(template_users_parent, user, environment_type)
+        insert_childstack_into_parentstack(template_users_parent, user, environment['Name'])
         # Generate user template
-        generate_user_template(user, user_value, environment_type, output_location)
+        generate_user_template(user, user_value, environment['Name'])
         
     # Save file
-    write_file(output_location + FILE_TEMPLATE_USERS_PARENT, template_users_parent)
+    write_file(OUTPUT_FOLDER + '/users/' + environment['Name'] + '/' + FILE_TEMPLATE_USERS_PARENT, template_users_parent)
     return
 
 def main():
-    # Parse arguments
-    parser = ArgumentParser()
-    parser.add_argument("-et", "--environment_type", help="Choose environment type. Ex - 'Sdlc' or 'Cicd'")
-    args = parser.parse_args()
-
-    # Generate users template
-    generate_user_templates(args.environment_type)
+    # Loop through workload environments
+    environments = read_file(FILE_CONFIG_ENVIRONMENTS)
+    for env in environments['WorkloadAccounts']:
+        # Generate users template
+        generate_user_templates(env)
 
 if __name__ == "__main__":
     main()

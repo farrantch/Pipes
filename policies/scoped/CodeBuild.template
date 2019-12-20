@@ -34,7 +34,9 @@
             "Sid": "ScopedCodeBuild",
             "Effect": "Allow",
             "Action": [
-                "codebuild:*"
+                "codebuild:Get*",
+                "codebuild:List*",
+                "codebuild:Describe*"
             ],
             "Resource": [
                 {
@@ -48,6 +50,8 @@
             "Sid": "ScopedCodeBuild",
             "Effect": "Allow",
             "Action": [
+                "codebuild:StopBuild",
+                "codebuild:BatchGetBuilds",
                 "codebuild:Get*",
                 "codebuild:List*",
                 "codebuild:Describe*"

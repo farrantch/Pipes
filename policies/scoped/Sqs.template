@@ -33,7 +33,13 @@
             "Effect": "Allow",
             "Action": [
                 "sqs:Get*",
-                "sqs:List*"
+                "sqs:List*",
+                "sqs:Describe*",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueUrl",
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:PurgeQueue"
             ],
             "Resource": [
                 {

@@ -7,11 +7,12 @@ class Builder():
         self.context = context
         self.scope = context['Scope']
         self.subscope = context['Parameters']['Name']
+        self.environment = context['Environment'] if 'Environment' in context else {}
         self.environments = context['Environments']
         self.source_repo = context['Parameters']['SourceRepo']
 
         # Get parameters w/ defaults
-        self.include_cf_vars = context['Parameters'].get('IncludeCfVars', False)
+        self.include_cf_vars = context['Parameters'].get('IncludeCfVars', True)
         self.manual_approval_postdev = context['Parameters'].get('ManualApprovalPostDev', True)
         self.manual_approval_preprod = context['Parameters'].get('ManualApprovalPreProd', False)
         self.cicd_codebuild = context['Parameters'].get('CicdCodeBuild', False)
@@ -96,7 +97,7 @@ class GitHubBuilder(Builder):
                 "Fn::Sub":"arn:aws:iam::${AWS::AccountId}:role/cicd-${MainPipeline}-scopes-" + self.scope + "-CodePipelineRole"
             }
         }
-        self.parent.actions.extend([self.action])
+        self.parent.actions.extend(self.action)
         return self.parent
 
 class SourceStageBuilder(Builder):
@@ -140,13 +141,13 @@ class CicdCloudFormationBuilder(Builder):
                 "ActionMode":"REPLACE_ON_FAILURE",
                 "Capabilities":"CAPABILITY_IAM,CAPABILITY_AUTO_EXPAND",
                 "RoleArn":{
-                    "Fn::Sub":"arn:aws:iam::${AWS::AccountId}:role/cicd-${MainPipeline}-scopes-" + self.scope + "-CloudFormationRole"
+                    "Fn::Sub":"arn:aws:iam::" + self.environment['AccountId'] + ":role/" + self.environment['Name'].lower() + "-${MainPipeline}-scopes-" + self.scope + "-CloudFormationRole"
                 },
                 "StackName":{
-                    "Fn::Sub": "cicd-" + self.scope + "-" + self.subscope
+                    "Fn::Sub": self.environment['Name'].lower() + "-" + self.scope + "-" + self.subscope
                 },
                 "TemplatePath": "SourceOutput::CloudFormation-CICD.template",
-                "TemplateConfiguration": "SourceOutput::cfvars/Cicd.template" if self.include_cf_vars else { "Ref": "AWS::NoValue" },
+                "TemplateConfiguration": "SourceOutput::cfvars/" + self.environment['Name'] + ".template" if self.include_cf_vars else { "Ref": "AWS::NoValue" },
                 "ParameterOverrides": {
                     "Fn::Join": [
                         "",
@@ -168,7 +169,7 @@ class CicdCloudFormationBuilder(Builder):
                                 ]
                             },
                             {
-                                "Fn::Sub": "\"Environment\": \"cicd\","
+                                "Fn::Sub": "\"Environment\": \"" + self.environment['Name'].lower() + "\","
                             },
                             {
                                 "Fn::Sub": "\"MainPipeline\": \"${MainPipeline}\","
@@ -192,17 +193,16 @@ class CicdCloudFormationBuilder(Builder):
             ],
             "RunOrder": 1,
             "RoleArn": {
-                "Fn::Sub":"arn:aws:iam::${AWS::AccountId}:role/cicd-${MainPipeline}-scopes-" + self.scope + "-CodePipelineRole"
+                "Fn::Sub":"arn:aws:iam::" + self.environment['AccountId'] + ":role/" + self.environment['Name'].lower() + "-${MainPipeline}-scopes-" + self.scope + "-CodePipelineRole"
             }
         }
-        self.parent.actions.extend([self.action])
+        self.parent.actions.append(self.action)
         return self.parent
 
 class CicdCodeBuildBuilder(Builder):
 
     def __init__(self, parent, context):
         super().__init__(parent, context)
-        self.action = {}
 
     def Build(self):
         if not self.cicd_codebuild:
@@ -216,7 +216,7 @@ class CicdCodeBuildBuilder(Builder):
             },
             "Configuration": {
                 "ProjectName": {
-                    "Fn::Sub": "cicd-" + self.scope + "-" + self.subscope + "-CodeBuild"
+                    "Fn::Sub": self.environment['Name'].lower() + "-" + self.scope + "-" + self.subscope + "-CodeBuild"
                 }
             },
             "Name": "RunCodeBuild",
@@ -232,10 +232,10 @@ class CicdCodeBuildBuilder(Builder):
                 }
             ],
             "RoleArn": {
-                "Fn::Sub":"arn:aws:iam::${AWS::AccountId}:role/cicd-${MainPipeline}-scopes-" + self.scope + "-CodePipelineRole"
+                "Fn::Sub":"arn:aws:iam::" + self.environment['AccountId'] + ":role/" + self.environment['Name'].lower() + "-${MainPipeline}-scopes-" + self.scope + "-CodePipelineRole"
             }
         }
-        self.parent.actions.extend([self.action])
+        self.parent.actions.append(self.action)
         return self.parent
 
 class CicdStageBuilder(Builder):
@@ -243,7 +243,6 @@ class CicdStageBuilder(Builder):
     def __init__(self, parent, context):
         super().__init__(parent, context)
         self.actions = []
-        self.stage = {}
 
     def CicdCloudFormation(self):
         return CicdCloudFormationBuilder(self, self.context)
@@ -252,227 +251,208 @@ class CicdStageBuilder(Builder):
         return CicdCodeBuildBuilder(self, self.context)
 
     def Build(self):
+        # If not CICD environment, return parent
+        if self.context['Environment']['Type'] != 'CICD':
+            return self.parent
+        # If CodeBuild or CloudFormation not specified, return parent
         if not self.cicd_codebuild and not self.cicd_cloudformation:
             return self.parent
-        self.stage = {
-            "Name": "Cicd",
-            "Actions": self.actions
-        }
-        self.parent.stages.extend([self.stage])
+        # Else
+        self.parent.actions.extend(self.actions)
         return self.parent
 
-
-    # Foo(['dev','prod'])
-    #     self.env = aflkasjf
-
-    # Build()
-    #     for env in self.env:
-    #         self.parent.foolist
-    #     return self.parent
-
-class ManualApprovalPostDev(Builder):
-
+class SdlcCloudFormationBuilder(Builder):
     def __init__(self, parent, context):
         super().__init__(parent, context)
-        self.action = {}
-    
+
     def Build(self):
-        if not self.manual_approval_postdev:
+        if not self.sdlc_cloudformation:
             return self.parent
-        else:
-            self.action = {
-                "Name":"ManualApprovalPostDev",
+        self.parent.actions.append(
+            {
                 "ActionTypeId":{
-                    "Category":"Approval",
+                    "Category":"Deploy",
                     "Owner":"AWS",
-                    "Version":"1",
-                    "Provider":"Manual"
+                    "Provider":"CloudFormation",
+                    "Version":"1"
                 },
-                "RunOrder": 9
-            }
-            self.parent.stages[0]['Actions'].append(self.action)
-            return self.parent
-
-class ManualApprovalPreProd(Builder):
-
-    def __init__(self, parent, context):
-        super().__init__(parent, context)
-        self.action = {}
-    
-    def Build(self):
-        if not self.manual_approval_preprod:
-            return self.parent
-        else:
-            stage_number = (len(self.environments.items())) - 2
-            self.action = {
-                "Name":"ManualApprovalPreProd",
-                "ActionTypeId":{
-                    "Category":"Approval",
-                    "Owner":"AWS",
-                    "Version":"1",
-                    "Provider":"Manual"
-                },
-                "RunOrder": 9
-            }
-            self.parent.stages[stage_number]['Actions'].append(self.action)
-            return self.parent
-
-class EnvironmentsBuilder(Builder):
-    def __init__(self, parent, context):
-        super().__init__(parent, context)
-        
-    def Build(self):
-        for env, env_value in self.environments.items():
-            actions = []
-            env_lower = env.lower()
-            if self.sdlc_cloudformation:
-                actions.append(
-                    {
-                        "ActionTypeId":{
-                            "Category":"Deploy",
-                            "Owner":"AWS",
-                            "Provider":"CloudFormation",
-                            "Version":"1"
-                        },
-                        "Configuration":{
-                            "ActionMode":"REPLACE_ON_FAILURE",
-                            "Capabilities":"CAPABILITY_IAM,CAPABILITY_AUTO_EXPAND",
-                            "RoleArn":{
-                                "Fn::Sub":"arn:aws:iam::" + env_value['AccountId'] + ":role/"+ env_lower + "-${MainPipeline}-scopes-" + self.scope + "-CloudFormationRole"
-                            },
-                            "StackName":  env_lower + "-" + self.scope + "-" + self.subscope if not self.sdlc_stack_name else self.sdlc_stack_name.replace('${Environment}', env_lower),
-                            "TemplatePath": "BuildOutput::CloudFormation-SDLC.template" if self.cicd_codebuild else "SourceOutput::CloudFormation-SDLC.template",
-                            "TemplateConfiguration": ( "BuildOutput::cfvars/" + env + ".template" if self.cicd_codebuild else "SourceOutput::cfvars/" + env + ".template" ) if self.include_cf_vars else { "Ref": "AWS::NoValue" },
-                            "ParameterOverrides":{
-                                "Fn::Join": [
-                                    "",
-                                    [
-                                        "{",
-                                        "\"PipelineS3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"BuildOutput\", \"BucketName\"]}, \"PipelineS3ObjectKey\" : { \"Fn::GetArtifactAtt\" : [\"BuildOutput\", \"ObjectKey\"]}," if self.cicd_codebuild else
-                                            "\"PipelineS3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"PipelineS3ObjectKey\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"ObjectKey\"]},",
+                "Configuration":{
+                    "ActionMode":"REPLACE_ON_FAILURE",
+                    "Capabilities":"CAPABILITY_IAM,CAPABILITY_AUTO_EXPAND",
+                    "RoleArn":{
+                        "Fn::Sub":"arn:aws:iam::" + self.environment['AccountId'] + ":role/"+ self.environment['Name'].lower() + "-${MainPipeline}-scopes-" + self.scope + "-CloudFormationRole"
+                    },
+                    "StackName":  self.environment['Name'].lower() + "-" + self.scope + "-" + self.subscope if not self.sdlc_stack_name else self.sdlc_stack_name.replace('${Environment}', self.environment['Name'].lower()),
+                    "TemplatePath": "BuildOutput::CloudFormation-SDLC.template" if self.cicd_codebuild else "SourceOutput::CloudFormation-SDLC.template",
+                    "TemplateConfiguration": ( "BuildOutput::cfvars/" + self.environment['Name'] + ".template" if self.cicd_codebuild else "SourceOutput::cfvars/" + self.environment['Name'] + ".template" ) if self.include_cf_vars else { "Ref": "AWS::NoValue" },
+                    "ParameterOverrides":{
+                        "Fn::Join": [
+                            "",
+                            [
+                                "{",
+                                "\"PipelineS3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"BuildOutput\", \"BucketName\"]}, \"PipelineS3ObjectKey\" : { \"Fn::GetArtifactAtt\" : [\"BuildOutput\", \"ObjectKey\"]}," if self.cicd_codebuild else
+                                    "\"PipelineS3BucketName\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"BucketName\"]}, \"PipelineS3ObjectKey\" : { \"Fn::GetArtifactAtt\" : [\"SourceOutput\", \"ObjectKey\"]},",
+                                {
+                                    "Fn::Sub": [
+                                        "\"PipelineKmsKeyArn\": \"${KmsKeyArn}\",",
                                         {
-                                            "Fn::Sub": [
-                                                "\"PipelineKmsKeyArn\": \"${KmsKeyArn}\",",
-                                                {
-                                                    "KmsKeyArn": {
-                                                        "Fn::GetAtt": [
-                                                            "KmsKey",
-                                                            "Arn"
-                                                        ]
-                                                    }
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "Fn::Sub": "\"Environment\": \"" + env_lower + "\","
-                                        },
-                                        {
-                                            "Fn::Sub": "\"MainPipeline\": \"${MainPipeline}\","
-                                        },
-                                        {
-                                            "Fn::Sub": "\"Scope\": \"" + self.scope + "\","
-                                        },
-                                        {
-                                            "Fn::Sub": "\"SubScope\": \"" + self.subscope + "\""
-                                        },
-                                        "}"
+                                            "KmsKeyArn": {
+                                                "Fn::GetAtt": [
+                                                    "KmsKey",
+                                                    "Arn"
+                                                ]
+                                            }
+                                        }
                                     ]
-                                ]
-                            }
-                        },
-                        "Name": "DeployCloudFormation" ,
-                        "InputArtifacts": [
-                            {
-                                "Name": "SourceOutput"
-                            },
-                            { "Name": "BuildOutput" } if self.cicd_codebuild else { "Ref": "AWS::NoValue" }
-                        ],
-                        "RunOrder": 1,
-                        "RoleArn": {
-                            "Fn::Sub":"arn:aws:iam::" + env_value['AccountId'] + ":role/" + env_lower + "-${MainPipeline}-scopes-" + self.scope + "-CodePipelineRole"
-                        }
+                                },
+                                {
+                                    "Fn::Sub": "\"Environment\": \"" + self.environment['Name'].lower() + "\","
+                                },
+                                {
+                                    "Fn::Sub": "\"MainPipeline\": \"${MainPipeline}\","
+                                },
+                                {
+                                    "Fn::Sub": "\"Scope\": \"" + self.scope + "\","
+                                },
+                                {
+                                    "Fn::Sub": "\"SubScope\": \"" + self.subscope + "\""
+                                },
+                                "}"
+                            ]
+                        ]
                     }
-                )
-            if self.sdlc_ecs:
-                actions.append(
+                },
+                "Name": "DeployCloudFormation" ,
+                "InputArtifacts": [
                     {
-                        "ActionTypeId": {
-                            "Category": "Deploy",
-                            "Owner": "AWS",
-                            "Provider": "ECS",
-                            "Version": "1"
-                        },
-                        "Configuration": {
-                            "ClusterName": self.sdlc_ecs_cluster_name,
-                            "ServiceName": env_lower + '-' + self.scope + '-' + self.subscope,
-                            "FileName": "imagedefinitions.json"
-                        },
-                        "Name": "DeployEcs",
-                        "InputArtifacts": [
-                            { "Name": "BuildOutput" } if self.cicd_codebuild else { "Name": "SourceOutput" }
-                        ],
-                        "RunOrder": 2,
-                        "RoleArn": {
-                            "Fn::Sub":"arn:aws:iam::" + env_value['AccountId'] + ":role/" + env_lower + "-${MainPipeline}-scopes-" + self.scope + "-CodePipelineRole"
-                        }
-                    }
-                )
-            if self.sdlc_codebuild:
-                actions.append(
+                        "Name": "SourceOutput"
+                    },
+                    { "Name": "BuildOutput" } if self.cicd_codebuild else { "Ref": "AWS::NoValue" }
+                ],
+                "RunOrder": 1,
+                "RoleArn": {
+                    "Fn::Sub":"arn:aws:iam::" + self.environment['AccountId'] + ":role/" + self.environment['Name'].lower() + "-${MainPipeline}-scopes-" + self.scope + "-CodePipelineRole"
+                }
+            }
+        )
+        return self.parent
+
+class SdlcCodeBuildBuilder(Builder):
+    def __init__(self, parent, context):
+        super().__init__(parent, context)
+
+    def Build(self):
+        if not self.sdlc_codebuild:
+            return self.parent
+        self.parent.actions.append(
+            {
+                "ActionTypeId": {
+                    "Category": "Build",
+                    "Owner": "AWS",
+                    "Provider": "CodeBuild",
+                    "Version": "1"
+                },
+                "Configuration": {
+                    "ProjectName": {
+                        "Fn::Sub": self.environment['Name'].lower() + "-" + self.scope + "-" + self.subscope + "-CodeBuild"
+                    },
+                    "PrimarySource": "BuildOutput" if self.cicd_codebuild else "SourceOutput"
+                },
+                "Name": "RunCodeBuild",
+                "InputArtifacts": [
                     {
-                        "ActionTypeId": {
-                            "Category": "Build",
-                            "Owner": "AWS",
-                            "Provider": "CodeBuild",
-                            "Version": "1"
-                        },
-                        "Configuration": {
-                            "ProjectName": {
-                                "Fn::Sub": env_lower + "-" + self.scope + "-" + self.subscope + "-CodeBuild"
-                            },
-                            "PrimarySource": "BuildOutput" if self.cicd_codebuild else "SourceOutput"
-                        },
-                        "Name": "RunCodeBuild",
-                        "InputArtifacts": [
-                            {
-                                "Name": "SourceOutput"
-                            },
-                            { "Name": "BuildOutput" } if self.cicd_codebuild else { "Ref": "AWS::NoValue" }
-                        ],
-                        "RunOrder": 3,
-                        "RoleArn": {
-                            "Fn::Sub":"arn:aws:iam::" + env_value['AccountId'] + ":role/" + env_lower + "-${MainPipeline}-scopes-" + self.scope + "-CodePipelineRole"
-                        }
-                    }
-                )            
-            self.parent.stages.extend(
-                [
-                    {
-                        "Name": env,
-                        "Actions": actions
-                    }
-                ]
-            )
+                        "Name": "SourceOutput"
+                    },
+                    { "Name": "BuildOutput" } if self.cicd_codebuild else { "Ref": "AWS::NoValue" }
+                ],
+                "RunOrder": 3,
+                "RoleArn": {
+                    "Fn::Sub":"arn:aws:iam::" + self.environment['AccountId'] + ":role/" + self.environment['Name'].lower() + "-${MainPipeline}-scopes-" + self.scope + "-CodePipelineRole"
+                }
+            }
+        )
+        return self.parent
+
+class SdlcEcsBuilder(Builder):
+    def __init__(self, parent, context):
+        super().__init__(parent, context)
+
+    def Build(self):
+        if not self.sdlc_ecs:
+            return self.parent
+        self.parent.actions.append(
+            {
+                "ActionTypeId": {
+                    "Category": "Deploy",
+                    "Owner": "AWS",
+                    "Provider": "ECS",
+                    "Version": "1"
+                },
+                "Configuration": {
+                    "ClusterName": self.sdlc_ecs_cluster_name,
+                    "ServiceName": self.environment['Name'].lower() + '-' + self.scope + '-' + self.subscope,
+                    "FileName": "imagedefinitions.json"
+                },
+                "Name": "DeployEcs",
+                "InputArtifacts": [
+                    { "Name": "BuildOutput" } if self.cicd_codebuild else { "Name": "SourceOutput" }
+                ],
+                "RunOrder": 2,
+                "RoleArn": {
+                    "Fn::Sub":"arn:aws:iam::" + self.environment['AccountId'] + ":role/" + self.environment['Name'].lower() + "-${MainPipeline}-scopes-" + self.scope + "-CodePipelineRole"
+                }
+            }
+        )
         return self.parent
 
 class SdlcStageBuilder(Builder):
-
     def __init__(self, parent, context):
         super().__init__(parent, context)
-        self.stages = []
+        self.actions = []
 
-    def Environments(self):
-        return EnvironmentsBuilder(self, self.context)
+    def SdlcCloudFormation(self):
+        return SdlcCloudFormationBuilder(self, self.context)
 
-    def ManualApprovalPostDev(self):
-        return ManualApprovalPostDev(self, self.context)
+    def SdlcEcs(self):
+        return SdlcEcsBuilder(self, self.context)
 
-    def ManualApprovalPreProd(self):
-        return ManualApprovalPreProd(self, self.context)
+    def SdlcCodeBuild(self):
+        return SdlcCodeBuildBuilder(self, self.context)
 
     def Build(self):
-        self.parent.stages.extend(self.stages)
+        # If not SDLC environment, return parent
+        if self.context['Environment']['Type'] != 'SDLC':
+            return self.parent
+        # If CodeBuild or CloudFormation not specified, return parent
+        if not self.sdlc_codebuild and not self.sdlc_cloudformation:
+            return self.parent
+        self.stage = {
+            "Name": self.context['Environment']['Name'],
+            "Actions": self.actions
+        }
+        self.parent.actions.extend(self.actions)
         return self.parent
+
+class ManualApproval(Builder):
+    def __init__(self, parent, context):
+        super().__init__(parent, context)
+
+    def Build(self):
+        if not self.manual_approval_postdev or self.environment['Name'].lower() != 'dev':
+            return self.parent
+        else:
+            self.action = {
+                "Name":"ManualApproval",
+                "ActionTypeId":{
+                    "Category":"Approval",
+                    "Owner":"AWS",
+                    "Version":"1",
+                    "Provider":"Manual"
+                },
+                "RunOrder": 9
+            }
+            self.parent.actions.append(self.action)
+            return self.parent
 
 class StagesBuilder(Builder):
 
@@ -483,12 +463,11 @@ class StagesBuilder(Builder):
     def Source(self):
         return SourceStageBuilder(self, self.context)
 
-    def Cicd(self):
-        return CicdStageBuilder(self, self.context)
+    def Environments(self, envs):
+        for env in envs:
+            self.stages.append(env)
+        return self
 
-    def Sdlc(self):
-        return SdlcStageBuilder(self, self.context)
-    
     def Build(self):
         self.parent.stages.extend(self.stages)
         return self.parent
@@ -530,7 +509,8 @@ class PropertiesBuilder(Builder):
         }
         return self.parent
 
-class Pipeline:
+# Pipeline Builder
+class PipelineBuilder:
 
     def __init__(self, scope, environments, parameters):
         self.context = {
@@ -542,12 +522,42 @@ class Pipeline:
 
     def Properties(self):
         return PropertiesBuilder(self, self.context)
-    
+
     def Build(self):
         return {
             "Type": "AWS::CodePipeline::Pipeline",
             "Condition": "NotInitialCreation",
             "Properties": self.properties
+        }
+
+# Environment Builder
+class EnvironmentBuilder:
+    # def __init__(self, parent, context, env):
+    #     super().__init__(parent, context)
+    #     self.environment = env
+
+    def __init__(self, scope, environments, parameters, environment):
+        self.context = {
+            "Environments": environments,
+            "Environment": environment,
+            "Parameters": parameters,
+            "Scope": scope
+        }
+        self.actions = []
+
+    def Cicd(self):
+        return CicdStageBuilder(self, self.context)
+
+    def Sdlc(self):
+        return SdlcStageBuilder(self, self.context)
+
+    def ManualApproval(self):
+        return ManualApproval(self, self.context)
+
+    def Build(self):
+        return {
+            "Actions": self.actions,
+            "Name": self.context['Environment']['Name']
         }
 
 # parameters = {

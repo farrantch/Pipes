@@ -183,7 +183,7 @@ def insert_childstack_into_parentstack(template_scope_parent, scope, all_envs_cr
                 }
             ],
             "TemplateURL" : {
-                "Fn::Sub": "https://s3.amazonaws.com/${S3BucketName}/generated-pipeline-templates/" + FILE_TEMPLATE_PIPELINES_CHILD + "-" + scope + ".template"
+                "Fn::Sub": "https://s3.amazonaws.com/${S3BucketName}/builds/pipelines/" + BUILD_NUM + "/" + FILE_TEMPLATE_PIPELINES_CHILD + "-" + scope + ".template"
             }
         }
     }
@@ -212,23 +212,24 @@ def generate_base_statement(environments, purpose):
         )
 
     # Loop Through SDLC Environments
-    for env, env_value in environments.items():
-        env_lower = env.lower()
+    for env in environments:
+        name = env['Name']
+        name_lower = name.lower()
         if purpose == "Pipeline" or purpose == "All":
             base_statement.append(
                 {
-                    "Fn::Sub": "arn:aws:iam::" + env_value['AccountId'] + ":role/" + env_lower + "-${MainPipeline}-scopes-${Scope}-CodePipelineRole"
+                    "Fn::Sub": "arn:aws:iam::" + env['AccountId'] + ":role/" + name_lower + "-${MainPipeline}-scopes-${Scope}-CodePipelineRole"
                 }
             )
         if purpose == "Deploy" or purpose == "All":
             base_statement.append(
                 {
-                    "Fn::Sub": "arn:aws:iam::" + env_value['AccountId'] + ":role/" + env_lower + "-${MainPipeline}-scopes-${Scope}-CloudFormationRole"
+                    "Fn::Sub": "arn:aws:iam::" + env['AccountId'] + ":role/" + name_lower + "-${MainPipeline}-scopes-${Scope}-CloudFormationRole"
                 }
             )
             base_statement.append(
                 {
-                    "Fn::Sub": "arn:aws:iam::" + env_value['AccountId'] + ":role/" + env_lower + "-${MainPipeline}-scopes-${Scope}-CodeBuildRole"
+                    "Fn::Sub": "arn:aws:iam::" + env['AccountId'] + ":role/" + name_lower + "-${MainPipeline}-scopes-${Scope}-CodeBuildRole"
                 }
             )
     return base_statement
@@ -262,10 +263,34 @@ def generate_scoped_pipelines_template(environments, scope, scope_value):
     # Loop through pipelines
     if 'Pipelines' in scope_value:
         for pipeline in scope_value['Pipelines']:
-            # Insert PipelineStack into ChildStack
-            #template_scope_child = insert_pipeline_into_childstack(environments, template_scope_child, pipeline, scope)
+            # Loop through environments and Use Environment Builder
+            envs = []
+            for env in environments:
+                stage = (pipeline_builder
+                    .EnvironmentBuilder(scope, environments, pipeline, env)
+                        .Cicd()
+                            .CicdCloudFormation()
+                            .Build()
+                            .CicdCodeBuild()
+                            .Build()
+                        .Build()
+                        .Sdlc()
+                            .SdlcCloudFormation()
+                            .Build()
+                            .SdlcEcs()
+                            .Build()
+                            .SdlcCodeBuild()
+                            .Build()
+                        .Build()
+                        .ManualApproval()
+                        .Build()
+                    .Build()
+                )
+                if len(stage['Actions']) > 0:
+                    envs.append(stage)
+            # Use Pipeline Builder with output of enviroment builder
             template_scope_child['Resources']['CodePipeline' + pipeline['Name']] = (pipeline_builder
-                .Pipeline(scope, environments, pipeline)
+                .PipelineBuilder(scope, environments, pipeline)
                     .Properties()
                         .Stages()
                             .Source()
@@ -274,23 +299,11 @@ def generate_scoped_pipelines_template(environments, scope, scope_value):
                                 .GitHub()
                                 .Build()
                             .Build()
-                            .Cicd()
-                                .CicdCloudFormation()
-                                .Build()
-                                .CicdCodeBuild()
-                                .Build()
-                            .Build()
-                            .Sdlc()
-                                .Environments()
-                                .Build()
-                                .ManualApprovalPostDev()
-                                .Build()
-                                .ManualApprovalPreProd()
-                                .Build()
-                            .Build()
+                            .Environments(envs)
                         .Build()
                     .Build()
-                .Build())
+                .Build()
+            )
             # # Add PipelineStack Parameter Overrides
             # if 'Parameters' in pipeline:
             #     for po, po_value in pipeline['Parameters'].items():
@@ -298,7 +311,7 @@ def generate_scoped_pipelines_template(environments, scope, scope_value):
             #         if po == 'SdlcCodeBuild' or po == 'SdlcCloudFormation' or po == 'CicdCodeBuild' or po == 'CicdCodeBuildImage' or po == 'IncludeCicdCfvars' or po =='IncludeSdlcCfvars' or po == 'SourceRepo':
             #             template_scope_child['Resources'][pipeline['Name']]['Properties']['Parameters'][po] = po_value
     # Save individual scoped child file
-    write_file('generated-pipeline-templates/' + FILE_TEMPLATE_PIPELINES_CHILD + '-' + scope, template_scope_child)
+    write_file(OUTPUT_FOLDER + '/pipelines/' + FILE_TEMPLATE_PIPELINES_CHILD + '-' + scope, template_scope_child)
     return
 
 def generate_scoped_templates(environments):
@@ -319,11 +332,11 @@ def generate_scoped_templates(environments):
         # Generate scoped pipelines template
         generate_scoped_pipelines_template(environments, scope, scope_value)
     # Save parent file
-    write_file('generated-pipeline-templates/' + FILE_TEMPLATE_PIPELINES_PARENT, template_scope_parent)
+    write_file(OUTPUT_FOLDER + '/pipelines/' + FILE_TEMPLATE_PIPELINES_PARENT, template_scope_parent)
 
 def main():
     # Open Environments File
-    environments = read_file(FILE_CONFIG_ENVIRONMENTS)['SdlcAccounts']
+    environments = read_file(FILE_CONFIG_ENVIRONMENTS)['WorkloadAccounts']
 
     # Update cross account policy statements with environments
     update_statements_with_crossaccount_permissions(environments)

@@ -22,8 +22,11 @@ FILE_TEMPLATE_KEYS_PARENT = 'Keys-Parent'
 FILE_TEMPLATE_KEYS_CHILD = 'Keys-Child'
 MAINSCOPESTACK = 'cicd-main-scopes'
 MAIN_PIPELINE_STACK = 'cicd-main-pipelines'
+OUTPUT_FOLDER = 'output'
+BUILD_NUM = os.environ['buildnum']
 ENVIRONMENT = os.environ['Environment']
-#ENVIRONMENT = os.environ['dev']
+#BUILD_NUM = '1'
+#ENVIRONMENT = 'cicd'
 
 # Get IAM AWS Managed policy statements
 def get_policy_statements(policy_arn):
@@ -69,56 +72,63 @@ def num_characters(o):
     return len(string_o)
 
 # Add policy statements from config files
-def add_policy_statements(template, scope, scope_value, environment_type):
+def add_policy_statements(template, scope, scope_value, environment):
     # Only add policies if exists
-    if 'Policies' in scope_value and environment_type in scope_value['Policies']:
-        # Add scoped/* if exists
-        if 'scoped/*' in scope_value['Policies'][environment_type]:
-            for filename in os.listdir('policies/scoped'):
-                with open('policies/scoped/' + filename) as f:
-                    d = json.load(f)
-                if 'PipelineStatements' in d:
-                    for s in d['PipelineStatements']:
-                        template['Resources']['IamPolicyPipeline']['Properties']['PolicyDocument']['Statement'].append(s)
-                if 'ServiceStatements' in d:
-                    for s in d['ServiceStatements']:
-                        template['Resources']['IamPolicyService']['Properties']['PolicyDocument']['Statement'].append(s)
-                if 'DeployStatements' in d:
-                    for s in d['DeployStatements']:
-                        template['Resources']['IamPolicyDeploy']['Properties']['PolicyDocument']['Statement'].append(s)
-        # Add rest of policies
-        for ps in scope_value['Policies'][environment_type]:
-            # Add scoped policy if isn't scoped/*
-            if ps != 'scoped/*':
-                # Don't re-add resource-scope policies if already added via wildcard
-                if not ps.startswith('scoped/') or 'scoped/*' not in scope_value['Policies'][environment_type]:
-                    with open('policies/' + str(ps) + '.template') as json_file:
-                        data = json.load(json_file)
-                    if 'PipelineStatements' in data:
-                        for statement in data['PipelineStatements']:
-                            # AWS Policies
-                            if 'PolicyArn' in statement:
-                                template['Resources']['IamPolicyPipeline']['Properties']['PolicyDocument']['Statement'].extend(get_policy_statements(statement['PolicyArn']))
-                            # Inline Policies
-                            else:
-                                template['Resources']['IamPolicyPipeline']['Properties']['PolicyDocument']['Statement'].append(statement)
-                    if 'ServiceStatements' in data:
-                        for statement in data['ServiceStatements']:
-                            # AWS Policies
-                            if 'PolicyArn' in statement:
-                                template['Resources']['IamPolicyService']['Properties']['PolicyDocument']['Statement'].extend(get_policy_statements(statement['PolicyArn']))
-                            # Inline Policies
-                            else:
-                                template['Resources']['IamPolicyService']['Properties']['PolicyDocument']['Statement'].append(statement)
-                    if 'DeployStatements' in data:
-                        for statement in data['DeployStatements']:
-                            if 'PolicyArn' in statement:
-                                template['Resources']['IamPolicyDeploy']['Properties']['PolicyDocument']['Statement'].extend(get_policy_statements(statement['PolicyArn']))
-                            else:
-                                template['Resources']['IamPolicyDeploy']['Properties']['PolicyDocument']['Statement'].append(statement)
-    
-    scope_lower_replaced = json.loads(json.dumps(template).replace('${ScopeLower}', scope.lower())) if scope else json.loads(json.dumps(template))
-    return scope_lower_replaced
+    if 'Policies' in scope_value:
+        # If environment doesn't exist, set to default
+        if environment not in scope_value['Policies']:
+            environment = 'Default'
+        if environment in scope_value['Policies']:
+            # Add scoped/* if exists
+            if 'scoped/*' in scope_value['Policies'][environment]:
+                for filename in os.listdir('policies/scoped'):
+                    with open('policies/scoped/' + filename) as f:
+                        d = json.load(f)
+                    if 'PipelineStatements' in d:
+                        for s in d['PipelineStatements']:
+                            template['Resources']['IamPolicyPipeline']['Properties']['PolicyDocument']['Statement'].append(s)
+                    if 'ServiceStatements' in d:
+                        for s in d['ServiceStatements']:
+                            template['Resources']['IamPolicyService']['Properties']['PolicyDocument']['Statement'].append(s)
+                    if 'DeployStatements' in d:
+                        for s in d['DeployStatements']:
+                            template['Resources']['IamPolicyDeploy']['Properties']['PolicyDocument']['Statement'].append(s)
+            # Add rest of policies
+            for ps in scope_value['Policies'][environment]:
+                # Add scoped policy if isn't scoped/*
+                if ps != 'scoped/*':
+                    # Don't re-add resource-scope policies if already added via wildcard
+                    if not ps.startswith('scoped/') or 'scoped/*' not in scope_value['Policies'][environment]:
+                        # Parse everything before ':' to get file name
+                        policyname_split = ps.split(':')
+                        with open('policies/' + str(policyname_split[0]) + '.template') as json_file:
+                            data = json.load(json_file)
+                        # If contains alternative scope name, replace scope within file
+                        if len(policyname_split) > 1:
+                            data = json.loads(json.dumps(data).replace('${Scope}', policyname_split[1]))
+                        if 'PipelineStatements' in data:
+                            for statement in data['PipelineStatements']:
+                                # AWS Policies
+                                if 'PolicyArn' in statement:
+                                    template['Resources']['IamPolicyPipeline']['Properties']['PolicyDocument']['Statement'].extend(get_policy_statements(statement['PolicyArn']))
+                                # Inline Policies
+                                else:
+                                    template['Resources']['IamPolicyPipeline']['Properties']['PolicyDocument']['Statement'].append(statement)
+                        if 'ServiceStatements' in data:
+                            for statement in data['ServiceStatements']:
+                                # AWS Policies
+                                if 'PolicyArn' in statement:
+                                    template['Resources']['IamPolicyService']['Properties']['PolicyDocument']['Statement'].extend(get_policy_statements(statement['PolicyArn']))
+                                # Inline Policies
+                                else:
+                                    template['Resources']['IamPolicyService']['Properties']['PolicyDocument']['Statement'].append(statement)
+                        if 'DeployStatements' in data:
+                            for statement in data['DeployStatements']:
+                                if 'PolicyArn' in statement:
+                                    template['Resources']['IamPolicyDeploy']['Properties']['PolicyDocument']['Statement'].extend(get_policy_statements(statement['PolicyArn']))
+                                else:
+                                    template['Resources']['IamPolicyDeploy']['Properties']['PolicyDocument']['Statement'].append(statement)
+    return template
 
 # Check if a policy's actions contains a specific service
 def action_contains_service(service, action):

@@ -1,5 +1,9 @@
 {
     "Parameters": {
         "Environment": "cicd"
+    },
+    "Tags": {
+        "Scope": "main",
+        "Environment": "cicd"
     }
 }

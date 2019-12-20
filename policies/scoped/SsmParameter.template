@@ -40,7 +40,6 @@
                     ]
                 }
             }
-
         }
     ],
     "ServiceStatements": [
@@ -48,7 +47,9 @@
             "Sid": "ResourceScopedSsmParameter",
             "Effect": "Allow",
             "Action": [
-                "ssm:*"
+                "ssm:Get*",
+                "ssm:List*",
+                "ssm:Describe*"
             ],
             "Resource": [
                 {
@@ -63,7 +64,9 @@
             "Sid": "ResourceScopedSsmParameterTag",
             "Effect": "Allow",
             "Action": [
-                "ssm:*"
+                "ssm:Get*",
+                "ssm:List*",
+                "ssm:Describe*"
             ],
             "Resource": [
                 {
@@ -91,7 +94,10 @@
             "Sid": "ResourceScopedSsmParameter",
             "Effect": "Allow",
             "Action": [
-                "ssm:*"
+                "ssm:Get*",
+                "ssm:List*",
+                "ssm:Describe*",
+                "ssm:PutParameter"
             ],
             "Resource": [
                 {
@@ -106,7 +112,10 @@
             "Sid": "ResourceScopedSsmParameterTag",
             "Effect": "Allow",
             "Action": [
-                "ssm:*"
+                "ssm:Get*",
+                "ssm:List*",
+                "ssm:Describe*",
+                "ssm:PutParameter"
             ],
             "Resource": [
                 {
