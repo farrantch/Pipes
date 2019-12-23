@@ -1,38 +1,14 @@
 {
     "DeployStatements": [
         {
-            "Sid": "ScopedS3",
+            "Sid": "ScopedS3Public",
             "Effect": "Allow",
-            "Action": [
-                "s3:DeleteBucket*",
-                "s3:PutEncryptionConfiguration",
-                "s3:PutInventoryConfiguration",
-                "s3:PutLifecycleConfiguration",
-                "s3:PutMetricsConfiguration",
-                "s3:PutBucket*"
-            ],
+            "Action": "*",
             "Resource": [
                 {
                     "Fn::Sub": "arn:aws:s3:::${Environment}-${Scope}-*"
                 }
             ]
-        },
-        {
-            "Sid": "ScopedS3Private",
-            "Effect": "Allow",
-            "Action": [
-                "s3:*"
-            ],
-            "Resource": [
-                {
-                    "Fn::Sub": "arn:aws:s3:::${Environment}-${Scope}-*"
-                }
-            ],
-            "Condition": {
-                "StringEquals": {
-                    "s3:x-amz-acl": ["private"]
-                }
-            }
         }
     ],
     "ServiceStatements": [
@@ -46,6 +22,7 @@
                 "s3:Describe*",
                 "s3:Get*",
                 "s3:List*",
+                "s3:PutObject",
                 "s3:PutObjectAcl",
                 "s3:PutObjectLegalHold",
                 "s3:PutObjectRetention",
@@ -61,23 +38,6 @@
                     "Fn::Sub": "arn:aws:s3:::${Environment}-${Scope}-*"
                 }
             ]
-        },
-        {
-            "Sid": "ScopedS3Encrypt",
-            "Effect": "Allow",
-            "Action": [
-                "s3:PutObject"
-            ],
-            "Resource": [
-                {
-                    "Fn::Sub": "arn:aws:s3:::${Environment}-${Scope}-*"
-                }
-            ],
-            "Condition": {
-                "StringEquals": {
-                    "s3:x-amz-server-side-encryption": ["AES256"]
-                }
-            }  
         }
     ],
     "UserStatements": [
@@ -91,6 +51,7 @@
                 "s3:Describe*",
                 "s3:Get*",
                 "s3:List*",
+                "s3:PutObject",
                 "s3:PutObjectAcl",
                 "s3:PutObjectLegalHold",
                 "s3:PutObjectRetention",
@@ -106,23 +67,6 @@
                     "Fn::Sub": "arn:aws:s3:::${Environment}-${Scope}-*"
                 }
             ]
-        },
-        {
-            "Sid": "ScopedS3Encrypt",
-            "Effect": "Allow",
-            "Action": [
-                "s3:PutObject"
-            ],
-            "Resource": [
-                {
-                    "Fn::Sub": "arn:aws:s3:::${Environment}-${Scope}-*"
-                }
-            ],
-            "Condition": {
-                "StringEquals": {
-                    "s3:x-amz-server-side-encryption": ["AES256"]
-                }
-            }  
         }
     ]
 }
