@@ -1,30 +1,35 @@
 {
     "DeployStatements": [
         {
-            "Sid": "ScopedEcr",
+            "Sid": "ScopedEcrRepository",
             "Effect": "Allow",
             "Action": [
-                "ecr:*"
+                "ecr:CreateRepository",
+                "ecr:DeleteRepository",
+                "ecr:SetRepositoryPolicy"
             ],
             "Resource": [
                 {
-                    "Fn::Sub": "arn:aws:ecr:*:${AWS::AccountId}:repository/${Scope}-*"
+                    "Fn::Sub": "arn:aws:ecr:*:${AWS::AccountId}:repository/${Environment}-${Scope}-*"
                 }
             ]
         },
         {
-            "Sid": "ScopedEcrWildcard",
+            "Sid": "ScopedEcrRepositoryWildcard",
             "Effect": "Allow",
             "Action": [
-                "ecr:CreateRepository"
+                "ecr:Describe*",
+                "ecr:Get*",
+                "ecr:List*"
             ],
-            "Resource": "*"
+            "Resource": ["*"]
         },
         {
-            "Sid": "ScopedEcrResourceTag",
+            "Sid": "ScopedEcrRepositoryTag",
             "Effect": "Allow",
             "Action": [
-                "ecr:*"
+                "ecr:CreateRepository",
+                "ecr:DeleteRepository"
             ],
             "Resource": [
                 {
@@ -45,57 +50,44 @@
                     ]
                 }
             }
-        },
-        {
-            "Sid": "ScopedEcrRequestTag",
-            "Effect": "Allow",
-            "Action": [
-                "ecr:*"
-            ],
-            "Resource": {
-                "Fn::Sub": "arn:aws:ecr:*:${AWS::AccountId}:repository/*"
-            },
-            "Condition": {
-                "StringEquals": {
-                    "aws:RequestTag/Scope": [
-                        {
-                            "Fn::Sub": "${Scope}"
-                        }
-                    ],
-                    "aws:RequestTag/Environment": [
-                        {
-                            "Fn::Sub": "${Environment}"
-                        }
-                    ]
-                }
-            }
         }
     ],
     "ServiceStatements": [
         {
-            "Sid": "ScopedEcr",
+            "Sid": "ScopedEcrRepository",
             "Effect": "Allow",
             "Action": [
                 "ecr:Batch*",
                 "ecr:CompleteLayerUpload",
-                "ecr:Describe*",
-                "ecr:Get*",
                 "ecr:InitiateLayerUpload",
-                "ecr:List*",
                 "ecr:PutImage*",
                 "ecr:UploadLayerPart"
             ],
             "Resource": [
                 {
-                    "Fn::Sub": "arn:aws:ecr:*:${AWS::AccountId}:repository/${Scope}-*"
+                    "Fn::Sub": "arn:aws:ecr:*:${AWS::AccountId}:repository/${Environment}-${Scope}-*"
                 }
             ]
         },
         {
-            "Sid": "ScopedEcrTag",
+            "Sid": "ScopedEcrRepositoryWildcard",
             "Effect": "Allow",
             "Action": [
-                "ecr:*"
+                "ecr:Describe*",
+                "ecr:Get*",
+                "ecr:List*"
+            ],
+            "Resource": ["*"]
+        },
+        {
+            "Sid": "ScopedEcrRepositoryTag",
+            "Effect": "Allow",
+            "Action": [
+                "ecr:Batch*",
+                "ecr:CompleteLayerUpload",
+                "ecr:InitiateLayerUpload",
+                "ecr:PutImage*",
+                "ecr:UploadLayerPart"
             ],
             "Resource": [
                 {
@@ -120,7 +112,7 @@
     ],
     "UserStatements": [
         {
-            "Sid": "ScopedEcr",
+            "Sid": "ScopedEcrRepository",
             "Effect": "Allow",
             "Action": [
                 "ecr:Get*",
@@ -129,12 +121,22 @@
             ],
             "Resource": [
                 {
-                    "Fn::Sub": "arn:aws:ecr:*:${AWS::AccountId}:repository/${Scope}-*"
+                    "Fn::Sub": "arn:aws:ecr:*:${AWS::AccountId}:repository/${Environment}-${Scope}-*"
                 }
             ]
         },
         {
-            "Sid": "ScopedEcrTag",
+            "Sid": "ScopedEcrRepositoryWildcard",
+            "Effect": "Allow",
+            "Action": [
+                "ecr:Describe*",
+                "ecr:Get*",
+                "ecr:List*"
+            ],
+            "Resource": ["*"]
+        },
+        {
+            "Sid": "ScopedEcrRepositoryTag",
             "Effect": "Allow",
             "Action": [
                 "ecr:Get*",

@@ -290,12 +290,16 @@
                             "Sid": "CrossAccountPipelinePermissions",
                             "Effect": "Allow",
                             "Action": [
+                                "s3:PutObject",
                                 "s3:GetObject",
                                 "s3:GetObjectVersion",
                                 "s3:GetBucketPolicy",
                                 "s3:ListBucket",
                                 "kms:DescribeKey",
-                                "kms:Decrypt"
+                                "kms:Encrypt",
+                                "kms:Decrypt",
+                                "kms:ReEncrypt",
+                                "kms:GenerateDataKey"
                             ],
                             "Resource": [
                                 {

@@ -1,0 +1,32 @@
+{
+    "DeployStatements": [
+        {
+            "Sid": "ManagedAcmCertificate",
+            "Effect": "Allow",
+            "Action": [
+                "acm:AddTagsToCertificate",
+                "acm:DeleteCertificate",
+                "acm:RemoveTagsFromCertificate",
+                "acm:RequestCertificate",
+                "acm:List*",
+                "acm:Get*",
+                "acm:Describe*"
+            ],
+            "Resource": "*"
+        }
+    ],
+    "ServiceStatements": [],
+    "UserStatements": [
+        {
+            "Sid": "ManagedAcmCertificate",
+            "Effect": "Allow",
+            "Action": [
+                "acm:ResendValidationEmail",
+                "acm:List*",
+                "acm:Get*",
+                "acm:Describe*"
+            ],
+            "Resource": "*"
+        }
+    ]
+}

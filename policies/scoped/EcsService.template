@@ -97,7 +97,8 @@
             "Action": [
                 "ecs:DescribeTaskDefinition",
                 "ecs:DescribeTasks",
-                "ecs:ListTasks"
+                "ecs:ListTasks",
+                "ecr:GetAuthorizationToken"
             ],
             "Resource": "*"
         }

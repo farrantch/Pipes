@@ -3,8 +3,16 @@ import sys
 import time
 import os
 from utils import *
+from botocore.config import Config
 
-client = boto3.client('cloudformation')
+# Max retry config
+config = Config(
+    retries = dict(
+        max_attempts = 10
+    )
+)
+
+client = boto3.client('cloudformation', config=config)
 
 # List main infra stack resources
 resource_summaries = client.list_stack_resources(

@@ -4,13 +4,24 @@
             "Sid": "ScopedEcsCluster",
             "Effect": "Allow",
             "Action": [
-                "ecs:*"
+                "ecs:DeleteCluster"
             ],
             "Resource": [
                 {
                     "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:cluster/${Environment}-${Scope}-*"
                 }
             ]
+        },
+        {
+            "Sid": "ScopedEcsClusterWildcard",
+            "Effect": "Allow",
+            "Action": [
+                "ecs:CreateCluster",
+                "ecs:Get*",
+                "ecs:Describe*",
+                "ecs:List*"
+            ],
+            "Resource": ["*"]
         }
     ],
     "ServiceStatements": [
@@ -25,22 +36,28 @@
                     "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:cluster/${Environment}-${Scope}-*"
                 }
             ]
-        }
-    ],
-    "UserStatements": [
+        },
         {
-            "Sid": "ScopedEcsCluster",
+            "Sid": "ScopedEcsClusterWildcard",
             "Effect": "Allow",
             "Action": [
                 "ecs:Get*",
                 "ecs:Describe*",
                 "ecs:List*"
             ],
-            "Resource": [
-                {
-                    "Fn::Sub": "arn:aws:ecs:*:${AWS::AccountId}:cluster/${Environment}-${Scope}-*"
-                }
-            ]
+            "Resource": ["*"]
+        }
+    ],
+    "UserStatements": [
+        {
+            "Sid": "ScopedEcsClusterWildcard",
+            "Effect": "Allow",
+            "Action": [
+                "ecs:Get*",
+                "ecs:Describe*",
+                "ecs:List*"
+            ],
+            "Resource": ["*"]
         }
     ]
 }

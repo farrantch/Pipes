@@ -224,6 +224,9 @@ def is_statements_mergable(statement1, statement2):
     if 'Condition' in statement1:
         if statement1['Condition'] != statement2['Condition']:
             return False
+    # Don't combine if statement size is greater than 5900
+    if num_characters(statement1) + num_characters(statement2) > 5900:
+        return False
     # Passed
     return True
 
@@ -295,7 +298,6 @@ def consolidate_statements(statements):
                                             base_sid_statement['Condition'][condition][statement_name].append({key: value})
         if base_sid_statement:
             statements_merged_sids.append(base_sid_statement)
-    #return statements_merged_sids
 
     # Perform final merge of SIDs
     for statement in statements_merged_sids:

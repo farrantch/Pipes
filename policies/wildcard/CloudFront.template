@@ -1,0 +1,32 @@
+{
+    "DeployStatements": [
+        {
+            "Sid": "WildcardCloudFront",
+            "Effect": "Allow",
+            "Action": [
+                "cloudfront:*"
+            ],
+            "Resource": "*"
+        }
+    ],
+    "ServiceStatements": [
+        {
+            "Sid": "WildcardCloudFront",
+            "Effect": "Allow",
+            "Action": [
+                "cloudfront:*"
+            ],
+            "Resource": "*"
+        }
+    ],
+    "UserStatements": [
+        {
+            "Sid": "WildcardCloudFront",
+            "Effect": "Allow",
+            "Action": [
+                "cloudfront:*"
+            ],
+            "Resource": "*"
+        }
+    ]
+}

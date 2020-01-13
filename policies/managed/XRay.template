@@ -1,0 +1,25 @@
+{
+    "DeployStatements": [
+        {
+            "Sid": "ManagedXRay",
+            "Effect": "Allow",
+            "Action": [
+                "xray:PutTraceSegments",
+                "xray:PutTelemetryRecords"
+            ],
+            "Resource": "*"
+        }
+    ],
+    "ServiceStatements": [
+        {
+            "Sid": "ManagedXRay",
+            "Effect": "Allow",
+            "Action": [
+                "xray:PutTraceSegments",
+                "xray:PutTelemetryRecords"
+            ],
+            "Resource": "*"
+        }
+    ],
+    "UserStatements": []
+}

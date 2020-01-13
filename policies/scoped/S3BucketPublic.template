@@ -1,0 +1,72 @@
+{
+    "DeployStatements": [
+        {
+            "Sid": "ScopedS3Public",
+            "Effect": "Allow",
+            "Action": "*",
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:s3:::${Environment}-${Scope}-*"
+                }
+            ]
+        }
+    ],
+    "ServiceStatements": [
+        {
+            "Sid": "ScopedS3",
+            "Effect": "Allow",
+            "Action": [
+                "s3:AbortMultipartUpload",
+                "s3:CreateJob",
+                "s3:DeleteObject*",
+                "s3:Describe*",
+                "s3:Get*",
+                "s3:List*",
+                "s3:PutObject",
+                "s3:PutObjectAcl",
+                "s3:PutObjectLegalHold",
+                "s3:PutObjectRetention",
+                "s3:PutObjectTagging",
+                "s3:PutObjectVersionAcl",
+                "s3:PutObjectVersionTagging",
+                "s3:RestoreObject",
+                "s3:UpdateJobPriority",
+                "s3:UpdateJobStatus"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:s3:::${Environment}-${Scope}-*"
+                }
+            ]
+        }
+    ],
+    "UserStatements": [
+        {
+            "Sid": "ScopedS3",
+            "Effect": "Allow",
+            "Action": [
+                "s3:AbortMultipartUpload",
+                "s3:CreateJob",
+                "s3:DeleteObject*",
+                "s3:Describe*",
+                "s3:Get*",
+                "s3:List*",
+                "s3:PutObject",
+                "s3:PutObjectAcl",
+                "s3:PutObjectLegalHold",
+                "s3:PutObjectRetention",
+                "s3:PutObjectTagging",
+                "s3:PutObjectVersionAcl",
+                "s3:PutObjectVersionTagging",
+                "s3:RestoreObject",
+                "s3:UpdateJobPriority",
+                "s3:UpdateJobStatus"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:s3:::${Environment}-${Scope}-*"
+                }
+            ]
+        }
+    ]
+}

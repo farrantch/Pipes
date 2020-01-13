@@ -1,0 +1,26 @@
+{
+    "DeployStatements": [
+        {
+            "Sid": "WildcardAcm",
+            "Effect": "Allow",
+            "Action": [
+                "acm:*"
+            ],
+            "Resource": "*"
+        }
+    ],
+    "ServiceStatements": [],
+    "UserStatements": [
+        {
+            "Sid": "WildcardAcm",
+            "Effect": "Allow",
+            "Action": [
+                "acm:ResendValidationEmail",
+                "acm:List*",
+                "acm:Get*",
+                "acm:Describe*"
+            ],
+            "Resource": "*"
+        }
+    ]
+}

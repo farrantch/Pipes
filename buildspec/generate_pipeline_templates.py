@@ -263,6 +263,37 @@ def generate_scoped_pipelines_template(environments, scope, scope_value):
     # Loop through pipelines
     if 'Pipelines' in scope_value:
         for pipeline in scope_value['Pipelines']:
+            # Add ECR Repo if specified
+            if 'CicdEcrRepo' in pipeline and pipeline['CicdEcrRepo'] == True:
+                template_scope_child['Resources']['EcrRepository' + pipeline['Name']] = {
+                    "Type": "AWS::ECR::Repository",
+                    "Condition": "NotInitialCreation",
+                    "Properties": {
+                        "RepositoryName": {
+                            "Fn::Sub": "${Environment}-${Scope}-" + pipeline['Name']
+                        },
+                        "RepositoryPolicyText": {
+                            "Version": "2008-10-17",
+                            "Statement": [{
+                                "Sid": "AllowPull",
+                                "Effect": "Allow",
+                                "Principal": {
+                                    "AWS": []
+                                },
+                                "Action": [
+                                    "ecr:GetDownloadUrlForLayer",
+                                    "ecr:BatchGetImage",
+                                    "ecr:BatchCheckLayerAvailability"
+                                ]
+                            }]
+                        }
+                    }
+                }
+                # Add environments to repo policy
+                for env in environments:
+                    template_scope_child['Resources']['EcrRepository' + pipeline['Name']]['Properties']['RepositoryPolicyText']['Statement'][0]['Principal']['AWS'].append(
+                         "arn:aws:iam::" + env['AccountId'] + ":root"
+                    )
             # Loop through environments and Use Environment Builder
             envs = []
             for env in environments:

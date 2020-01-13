@@ -1,0 +1,56 @@
+{
+    "DeployStatements": [
+        {
+            "Sid": "ScopedElbV2",
+            "Effect": "Allow",
+            "Action": [
+                "elasticloadbalancing:*"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:elasticloadbalancing:*:${AWS::AccountId}:loadbalancer/*/${Environment}-${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:elasticloadbalancing:*:${AWS::AccountId}:targetgroup/${Environment}-${Scope}-*"
+                },
+                {
+                    "Fn::Sub": "arn:aws:elasticloadbalancing:*:${AWS::AccountId}:listener/*/${Environment}-${Scope}-*"
+                }
+            ]
+        },
+        {
+            "Sid": "ScopedElbV2Wildcard",
+            "Effect": "Allow",
+            "Action": [
+                "elasticloadbalancing:Get*",
+                "elasticloadbalancing:Describe*",
+                "elasticloadbalancing:List*"
+            ],
+            "Resource": ["*"]
+        }
+    ],
+    "ServiceStatements": [
+        {
+            "Sid": "ScopedElbV2Wildcard",
+            "Effect": "Allow",
+            "Action": [
+                "elasticloadbalancing:Get*",
+                "elasticloadbalancing:Describe*",
+                "elasticloadbalancing:List*"
+            ],
+            "Resource": ["*"]
+        }
+    ],
+    "UserStatements": [
+        {
+            "Sid": "ScopedElbV2Wildcard",
+            "Effect": "Allow",
+            "Action": [
+                "elasticloadbalancing:Get*",
+                "elasticloadbalancing:Describe*",
+                "elasticloadbalancing:List*"
+            ],
+            "Resource": ["*"]
+        }
+    ]
+}

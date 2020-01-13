@@ -1,0 +1,28 @@
+{
+    "DeployStatements": [
+        {
+            "Sid": "ManagedRoute53Record",
+            "Effect": "Allow",
+            "Action": [
+                "route53:ChangeResourceRecordSets",
+                "route53:Get*",
+                "route53:List*",
+                "route53:Describe*"
+            ],
+            "Resource": "*"
+        }
+    ],
+    "ServiceStatements": [],
+    "UserStatements": [
+        {
+            "Sid": "ManagedRoute53Record",
+            "Effect": "Allow",
+            "Action": [
+                "route53:Get*",
+                "route53:List*",
+                "route53:Describe*"
+            ],
+            "Resource": "*"
+        }
+    ]
+}

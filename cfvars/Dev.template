@@ -1,5 +1,9 @@
 {
     "Parameters": {
         "Environment": "dev"
+    },
+    "Tags": {
+        "Scope": "main",
+        "Environment": "dev"
     }
 }

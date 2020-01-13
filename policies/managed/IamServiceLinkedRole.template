@@ -1,0 +1,19 @@
+{
+    "DeployStatements": [
+        {
+            "Sid": "ScopedIamServiceLinkedRole",
+            "Effect": "Allow",
+            "Action": [
+                "iam:CreateServiceLinkedRole",
+                "iam:DeleteServiceLinkedRole"
+            ],
+            "Resource": [
+                {
+                    "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/aws-service-role/*"
+                }
+            ]
+        }
+    ],
+    "ServiceStatements": [],
+    "UserStatements": []
+}
