@@ -1,7 +1,7 @@
 {
     "Parameters": {
         "AllEnvironmentsCreated": "True",
-        "SourceCodeCommitRepoName": "master",
+        "SourceCodeCommitRepoName": "main",
         "ManualApprovalPostDev": "True"
     }
 }

@@ -561,7 +561,7 @@
                                         "Fn::Sub": "${AWS::StackName}"
                                     },
                                     "TemplatePath": "MainTemplate::Main.template",
-                                    "TemplateConfiguration": "SourceOutput::cfvars/main.template"
+                                    "TemplateConfiguration": "SourceOutput::cfvars/Main.template"
                                 },
                                 "Name": "UpdateCloudFormation",
                                 "InputArtifacts": [
