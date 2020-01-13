@@ -1,2 +1,1 @@
-/generated*
-!/*.example.template
+/output/*
