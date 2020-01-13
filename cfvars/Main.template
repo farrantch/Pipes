@@ -4,5 +4,9 @@
         "SourceCodeCommitRepoName": "main",
         "ManualApprovalPostDev": "True",
         "Environment": "cicd"
+    },
+    "Tags": {
+        "Scope": "main",
+        "Environment": "cicd"
     }
 }
