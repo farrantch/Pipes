@@ -2,6 +2,7 @@
     "Parameters": {
         "AllEnvironmentsCreated": "True",
         "SourceCodeCommitRepoName": "main",
-        "ManualApprovalPostDev": "True"
+        "ManualApprovalPostDev": "True",
+        "Environment": "cicd"
     }
 }
